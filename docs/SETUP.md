@@ -2,42 +2,35 @@
 <!-- DYNAMIC FILE — update as setup steps change -->
 
 ## Prerequisites
-<!-- TODO: List required tools, runtimes, and accounts -->
-- Git
-- GitHub CLI (optional but recommended): `brew install gh`
+- Any modern web browser (Chrome recommended)
+- Git (only needed to clone the repo; no runtime dependencies)
 
 ## First-Time Setup
 ```bash
 # 1. Clone
-git clone https://github.com/shifulegend/YOUR_REPO_NAME.git
-cd YOUR_REPO_NAME
+git clone https://github.com/shifulegend/pixel-runner-game.git
+cd pixel-runner-game
 
-# 2. Copy env template
-cp .env.example .env
-# Fill in .env with real values — never commit it
-
-# 3. Install dependencies
-# TODO: npm ci | pip install -r requirements.txt | go mod download
-
-# 4. Run development server
-# TODO: npm run dev | python main.py | go run ./...
+# 2. Open the game directly — no build step, no install step
+open index.html    # macOS
+# or double-click index.html in your file explorer
+# or: python3 -m http.server 8000  then visit http://localhost:8000
 ```
+
+There is no `.env`, no package manager, and no server required — `index.html` is fully self-contained (HTML + CSS + JavaScript in one file).
 
 ## Available Commands
 | Command | Purpose |
 |---------|---------|
-| `TODO`  | Dev server |
-| `TODO`  | Lint |
-| `TODO`  | Typecheck |
-| `TODO`  | Test |
-| `TODO`  | Build |
+| N/A     | No build/dev/lint/test commands exist — open `index.html` directly |
+
+CI runs a Playwright smoke test on every push (see `.github/workflows/ci.yml`) to catch console errors and verify core gameplay logic, but there is nothing to run locally beyond opening the file.
 
 ## Environment Variables
-See `.env.example` for all required and optional variables.
+None. This project has no `.env` file or secrets — `.env.example` is inherited from the golden-template scaffold but unused here.
 
 ## AI Agent Setup
-On first session in a new repo from this template:
+On first session in this repo:
 1. Open Copilot / Claude Code / Antigravity
-2. Run the `start-session` prompt/skill/workflow
-3. Fill in `docs/ai/project-overview.md` TODOs
-4. The agent will update all memory files from there
+2. Read `docs/ai/project-overview.md` and `docs/ai/architecture.md` for full context
+3. All canonical rules live in `docs/ai/` — see `docs/ai/tool-sync-policy.md`
