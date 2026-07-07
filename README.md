@@ -26,7 +26,7 @@ Open `index.html` directly in any modern browser (Chrome recommended), or enable
 - **Jump control**: Tap/click or press Space to jump. A short tap gives a short hop; holding longer (up to ~320ms) gives a longer, higher jump.
 - **Enemies**: Small enemies (half the main character's height) approach from the right. Jump on top to squash them for **+100 score**; colliding into them sideways ends the run.
 - **Pits**: Gaps appear in the ground that must be jumped over — falling into one is an instant game over.
-- **Bushes**: Stationary bushes (varying heights, same footprint as the earlier pipe design) block the path. Getting stuck on one triggers the chasing spiked barrel, which ends the run the instant it touches the player.
+- **Bushes**: Stationary bushes of varying heights (40-60px) block the path. Getting stuck on one triggers the chasing spiked barrel, which ends the run the instant it touches the player.
 - **Spiked barrel chaser**: Visible at ~1/3 size on the far-left edge of the screen at all times, rolling continuously. It only surges forward and ends the game the moment its leading edge reaches the player while stuck.
 - **Score**: Starts at `00000` (top-right HUD, black text) and increases continuously over time, scaled to the current speed multiplier, plus a flat +100 bonus per enemy killed.
 - **Session high score**: Tracked alongside the live score for the duration of the browser tab session — it persists across every restart and only updates when the current run's score beats the previous best. Refreshing the page resets it (no local storage/backend).
