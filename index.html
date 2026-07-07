@@ -25,7 +25,7 @@
 
 <div id="startScreen">
   <h1>PIXEL RUNNER</h1>
-  <p>Tap / Click / Space = Jump<br>Short tap = short hop, Hold = long jump<br>Jump ON enemies to squash them (+100)<br>Avoid the pits, don't get stuck on pipes &mdash; the spiked barrel is coming!</p>
+  <p>Tap / Click / Space = Jump<br>Short tap = short hop, Hold = long jump<br>Jump ON enemies to squash them (+100)<br>Avoid the pits, don't get stuck in bushes &mdash; the spiked barrel is coming!</p>
   <button id="startBtn">START GAME</button>
 </div>
 
@@ -35,7 +35,7 @@
   <button id="restartBtn">RESTART</button>
 </div>
 
-<div id="credit">All art is drawn procedurally in code (no external image/sprite files used) &mdash; 100% original, zero IP/licensing risk.</div>
+
 
 <script>
 const canvas = document.getElementById('gameCanvas');
@@ -319,14 +319,72 @@ function drawEnemy(e){
 function drawPipe(p){
   const ph = p.h;
   const py = groundY - ph;
-  ctx.fillStyle = '#2f9e44';
-  ctx.fillRect(p.x, py, p.w, ph);
-  ctx.fillStyle='#237033';
-  ctx.fillRect(p.x, py, 5, ph);
-  ctx.fillStyle='#3ec95f';
-  ctx.fillRect(p.x-4, py-10, p.w+8, 12);
-  ctx.fillStyle='#237033';
-  ctx.fillRect(p.x-4, py-10, 5, 12);
+  const w = p.w;
+  ctx.save();
+  ctx.translate(p.x + w/2, py + ph);
+
+  // ground contact shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.beginPath();
+  ctx.ellipse(0, 2, w*0.6, 5, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // fill the same rectangular footprint as the old pipe with layered lumps
+  // base dark layer (fills bottom of footprint fully, corner to corner)
+  ctx.fillStyle = '#245c18';
+  ctx.beginPath();
+  ctx.moveTo(-w/2, 0);
+  ctx.quadraticCurveTo(-w/2, -ph*0.55, -w*0.15, -ph*0.7);
+  ctx.quadraticCurveTo(0, -ph*0.85, w*0.18, -ph*0.72);
+  ctx.quadraticCurveTo(w/2, -ph*0.55, w/2, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // mid-tone lumps for volume, still within footprint
+  ctx.fillStyle = '#347a22';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.24, -ph*0.42, w*0.3, ph*0.35, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(w*0.26, -ph*0.4, w*0.3, ph*0.36, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, -ph*0.62, w*0.32, ph*0.34, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // lighter highlight clumps near top
+  ctx.fillStyle = '#4f9c37';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.14, -ph*0.72, w*0.2, ph*0.2, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(w*0.16, -ph*0.7, w*0.19, ph*0.19, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, -ph*0.82, w*0.15, ph*0.14, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // sunlit tips
+  ctx.fillStyle = '#7fc453';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.08, -ph*0.86, w*0.09, ph*0.08, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(w*0.14, -ph*0.78, w*0.07, ph*0.06, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // shadow speckle texture for leafy depth
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  for(let i=0;i<6;i++){
+    const ang = (i/6)*Math.PI*2;
+    const rx = Math.cos(ang)*w*0.22;
+    const ry = -ph*0.48 + Math.sin(ang)*ph*0.2;
+    ctx.beginPath();
+    ctx.arc(rx, ry, 1.8, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.restore();
 }
 
 function drawBarrel(){
