@@ -1,77 +1,45 @@
-# Golden Template — shifulegend
+# Pixel Runner
 
-A cross-tool AI development template for starting any new repository with a documentation-first, modular, verification-first, security-first workflow.
+A browser-based endless runner game built with vanilla JavaScript and HTML5 Canvas — no external dependencies, no sprite sheets, no libraries. Every visual (character, enemies, barrel, pipes) is drawn procedurally in code, so the project carries zero IP/licensing risk.
 
-## What's Included
+## Play It
 
-### Shared Canonical Memory (`docs/ai/`)
-| File | Purpose |
+Open `index.html` directly in any modern browser (Chrome recommended), or enable GitHub Pages on this repo (Settings → Pages → Deploy from `main` branch) to play it live at a public URL.
+
+## Gameplay
+
+- **Auto-run**: The main character continuously runs to the right with an animated leg-swing.
+- **Jump control**: Tap/click or press Space to jump. A short tap gives a short hop; holding longer (up to ~320ms) gives a longer, higher jump.
+- **Enemies**: Small enemies (half the main character's height) approach from the right. Jump on top to squash them for **+100 score**; colliding into them sideways ends the run.
+- **Pits**: Gaps appear in the ground that must be jumped over — falling into one is an instant game over.
+- **Warp pipes**: Stationary pipes block the path. Getting stuck on one (failing to clear it) triggers the chasing spiked barrel, which kills the player if not freed in time.
+- **Spiked barrel chaser**: Visible at ~1/3 size on the far-left edge of the screen at all times, rolling continuously. It only surges forward and catches the player if they get stuck on a pipe.
+- **Score**: Starts at `00000` (top-right HUD) and increases continuously over time, scaled to the current speed multiplier, plus a flat +100 bonus per enemy killed.
+- **Difficulty scaling**: Game speed ramps smoothly from 1x to 2x over the first 5 minutes, then from 2x to 3x over the next 5 minutes, and holds at 3x indefinitely afterward. Score accrual rate scales proportionally with speed.
+
+## Tech Notes
+
+- Pure HTML/CSS/JavaScript, single self-contained file (`index.html`) — no build step, no npm install, no server required.
+- Rendering via HTML5 Canvas 2D API; all sprites (player, enemy, barrel, pipes) are procedurally drawn shapes, not image assets.
+- Physics: simple gravity + variable-height jump via hold-duration sampling.
+- Fully responsive — canvas resizes to the browser window on load and on resize events.
+
+## Attribution / IP Risk
+
+No third-party art, sprite sheets, or assets are used anywhere in this project. All visuals are generated at runtime via Canvas drawing calls written from scratch, eliminating any dependency on external licensing (e.g., CC0/CC-BY assets) and any associated attribution requirements.
+
+## Repository Structure
+
+This repo was bootstrapped from the [golden-template](https://github.com/shifulegend/golden-template) and follows its documentation-first, AI-agent-friendly conventions (see `docs/ai/` for project memory, `CLAUDE.md`/`AGENTS.md`/`gemini/GEMINI.md` for cross-tool AI instructions).
+
+| Path | Purpose |
 |------|---------|
-| `project-overview.md` | Project purpose, stack, architecture |
-| `engineering-rules.md` | Modularity, zero-hardcoding, verification rules |
-| `mistakes.md` | Central mistake log — read first every session |
-| `decision-log.md` | Timestamped decisions |
-| `change-trace.md` | Notable changes per sub-step |
-| `session-start-checklist.md` | Mandatory startup checklist |
-| `commit-log-guidance.md` | Commit message standards |
-| `tool-sync-policy.md` | How tool-specific files stay in sync |
-| `architecture.md` | System architecture, components, integrations |
-| `testing-strategy.md` | Test types, coverage targets, regression policy |
+| `index.html` | The complete game — open this file to play |
+| `docs/ai/` | Canonical project memory (overview, architecture, decisions, mistakes log) |
+| `docs/SETUP.md` | First-time setup guide |
+| `.github/` | Copilot instructions, CI workflow, Dependabot config |
+| `.claude/`, `.agents/`, `gemini/` | Cross-tool AI agent instructions (Claude Code, Antigravity, Copilot) |
 
-### GitHub Copilot (`.github/`)
-- `copilot-instructions.md` — repo-wide instructions
-- `instructions/*.instructions.md` — scoped instructions (core, docs, tests, config)
-- `prompts/*.prompt.md` — reusable prompts (start-session, plan, implement, review, debug, memory)
+## License
 
-### Claude Code (`CLAUDE.md` + `.claude/`)
-- `CLAUDE.md` — project memory entrypoint
-- `.claude/rules/` — modular scoped rules (core, docs, tests, config)
-- `.claude/skills/` — reusable skills (session-start, project-memory, review-verify, implement)
-
-### Google Antigravity (`gemini/` + `.agents/`)
-- `gemini/GEMINI.md` — global Antigravity rules
-- `AGENTS.md` — cross-tool portability layer
-- `.agents/rules/` — scoped rules (core, docs, tests, config)
-- `.agents/workflows/` — reusable workflows (start-session, review-verify, update-memory)
-
-### Security & Dependencies
-- `.github/workflows/ci.yml` — CI: lint, typecheck, test, build
-- `.github/dependabot.yml` — automated dependency updates
-- `CODEOWNERS` — auto-assign reviewers per path
-
-### Developer Experience
-- `LICENSE` — MIT
-- `.gitignore` — comprehensive multi-stack gitignore
-- `.env.example` — safe env template (never commit `.env`)
-- `CITATION.cff` — GitHub-native citation support
-- `docs/SETUP.md` — first-time setup guide
-- `docs/BRANCHES.md` — branch strategy and protection rules
-
-## How to Use
-
-### Create a New Repo from This Template
-1. Go to [github.com/shifulegend/golden-template](https://github.com/shifulegend/golden-template)
-2. Click **Use this template** → **Create a new repository**
-3. Fill in the new repo details and create
-
-### After Creating from Template
-1. `cp .env.example .env` and fill in real values
-2. Update `docs/ai/project-overview.md` — purpose, stack, architecture
-3. Update `docs/ai/architecture.md` — components, data flow, integrations
-4. Update `docs/SETUP.md` — actual commands for your stack
-5. Uncomment the right `dependabot.yml` ecosystem block
-6. Enable branch protection rules (Settings → Branches)
-7. Search for `TODO` markers and fill them in
-8. Run your first AI session using the `start-session` prompt/skill/workflow
-
-## Core Principles
-- **Extremely modular** — smallest sensible unit, explicit interfaces
-- **Zero hard-coding** — config files, env vars, schemas, or databases for all behavior
-- **Documentation-first** — docs updated proactively every session by AI agents
-- **Mistake-first sessions** — always read mistake log before coding
-- **Granular commits** — one small, reviewable sub-step per commit
-- **Security-first** — CODEOWNERS, Dependabot, CodeQL, secret scanning, .env.example
-- **Cross-tool portable** — Claude Code, GitHub Copilot, and Google Antigravity all supported
-
-## AI Agent Dynamic Update Rule
-All `docs/ai/` files and tool adapter files are **dynamic**. Any AI agent working in a repo created from this template must proactively update them every session — without waiting for explicit user prompts. See `docs/ai/tool-sync-policy.md`.
+MIT — see `LICENSE`.
