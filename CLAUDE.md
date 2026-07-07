@@ -1,6 +1,6 @@
 # Claude Code — Project Memory
 <!-- DYNAMIC FILE — updated automatically by Claude as durable lessons emerge -->
-<!-- Last updated: TIMESTAMP -->
+<!-- Last updated: 2026-07-07 20:47 IST -->
 
 ## Session Start (Mandatory)
 Before planning or coding in any session:
@@ -13,11 +13,11 @@ Before planning or coding in any session:
 
 ## Project Context
 <!-- Summarized from docs/ai/project-overview.md — keep in sync -->
-- **Purpose**: TODO
-- **Stack**: TODO
-- **Architecture**: TODO
-- **Key directories**: TODO
-- **Commands**: TODO (setup, dev, test, lint, typecheck, build, run)
+- **Purpose**: Pixel Runner — a single-file, browser-based endless runner game (procedurally drawn character, enemies, bushes, spiked barrel chaser)
+- **Stack**: Vanilla JavaScript (ES6+), HTML5 Canvas 2D API, no frameworks or build tools
+- **Architecture**: Single `index.html` with a `requestAnimationFrame` game loop; state machine (start/playing/over); canvas-scale-based 2x zoom
+- **Key directories**: `index.html` (the game), `docs/screenshots/` (gameplay images), `docs/ai/` (project memory)
+- **Commands**: No build/lint/test tooling — open `index.html` directly in a browser; CI runs a Playwright smoke test on push
 
 ## Core Rules
 - Smallest sensible modular unit per responsibility
