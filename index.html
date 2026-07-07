@@ -40,12 +40,15 @@
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight; groundY = logicalH()*GROUND_Y_RATIO;}
 resize();
 window.addEventListener('resize', resize);
 
 const GROUND_Y_RATIO = 0.78;
-let groundY = canvas.height*GROUND_Y_RATIO;
+const ZOOM = 2;
+function logicalW(){ return canvas.width/ZOOM; }
+function logicalH(){ return canvas.height/ZOOM; }
+let groundY = logicalH()*GROUND_Y_RATIO;
 
 let gameState = 'start'; // start, playing, over
 let startTime = 0, elapsed = 0;
@@ -56,18 +59,18 @@ let worldSpeed = BASE_SPEED;
 
 // ---------- Player ----------
 const player = {
-  x: 160, y: 0, w: 68, h: 92,
+  x: 120, y: 0, w: 34, h: 46,
   vy: 0, onGround: true,
   legPhase: 0,
   jumping:false,
   stuck:false,
   dead:false
 };
-const GRAVITY = 1.05;
+const GRAVITY = 0.85;
 let jumpHoldTime = 0;
 let jumpKeyDown = false;
-const MIN_JUMP_V = -13;
-const MAX_JUMP_V = -23;
+const MIN_JUMP_V = -9;
+const MAX_JUMP_V = -16.5;
 const MAX_HOLD_MS = 320;
 
 // ---------- Obstacles ----------
@@ -108,15 +111,15 @@ function spawnObstacle(){
   if(roll < 0.4){
     // enemy
     const size = player.h/2;
-    enemies.push({x: canvas.width+40, y: groundTop-size, w:size, h:size, alive:true, legPhase:0});
+    enemies.push({x: logicalW()+40, y: groundTop-size, w:size, h:size, alive:true, legPhase:0});
   } else if(roll < 0.7){
     // pit
     const pitWidth = 70 + Math.random()*50;
-    pits.push({x: canvas.width+40, w: pitWidth});
+    pits.push({x: logicalW()+40, w: pitWidth});
   } else {
     // pipe
     const ph = 40+Math.random()*20;
-    pipes.push({x: canvas.width+40, w:34, h:ph});
+    pipes.push({x: logicalW()+40, w:34, h:ph});
   }
 }
 
@@ -179,7 +182,7 @@ function update(dt){
     endGame();
     return;
   }
-  if(player.y > canvas.height + 100){
+  if(player.y > logicalH() + 100){
     endGame();
     return;
   }
@@ -212,7 +215,7 @@ function update(dt){
       if(player.vy > 0 && (py2 - ey1) < e.h*0.6){
         e.alive = false;
         score += 100;
-        player.vy = -13; // small bounce
+        player.vy = -9; // small bounce
       } else {
         endGame();
         return;
@@ -266,11 +269,11 @@ function endGame(){
 // ---------- Drawing ----------
 function drawBackground(){
   ctx.fillStyle = '#bfe6ff';
-  ctx.fillRect(0,0,canvas.width, groundY);
+  ctx.fillRect(0,0,logicalW(), groundY);
   // simple clouds
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   for(let i=0;i<4;i++){
-    const cx = ((i*260 + (groundScroll*0.2)) % (canvas.width+200)) - 100;
+    const cx = ((i*260 + (groundScroll*0.2)) % (logicalW()+200)) - 100;
     ctx.beginPath();
     ctx.ellipse(cx, 60+i*20%80, 40,18,0,0,Math.PI*2);
     ctx.ellipse(cx+30, 55+i*20%80, 26,14,0,0,Math.PI*2);
@@ -280,21 +283,21 @@ function drawBackground(){
 
 function drawGround(){
   ctx.fillStyle = '#6b4423';
-  ctx.fillRect(0, groundY, canvas.width, canvas.height-groundY);
+  ctx.fillRect(0, groundY, logicalW(), logicalH()-groundY);
   ctx.fillStyle = '#4a2f18';
   const tileW = 24;
   let off = ((groundScroll)%tileW+tileW)%tileW;
-  for(let x=-tileW; x<canvas.width+tileW; x+=tileW){
+  for(let x=-tileW; x<logicalW()+tileW; x+=tileW){
     ctx.fillRect(x+off, groundY, tileW-4, 6);
   }
   // draw pits (holes = background color)
   for(const p of pits){
     ctx.fillStyle = '#8ed1ff';
-    ctx.fillRect(p.x, groundY, p.w, canvas.height-groundY);
+    ctx.fillRect(p.x, groundY, p.w, logicalH()-groundY);
     // pit edge shadow
     ctx.fillStyle = '#2b1a0d';
-    ctx.fillRect(p.x, groundY, 4, canvas.height-groundY);
-    ctx.fillRect(p.x+p.w-4, groundY, 4, canvas.height-groundY);
+    ctx.fillRect(p.x, groundY, 4, logicalH()-groundY);
+    ctx.fillRect(p.x+p.w-4, groundY, 4, logicalH()-groundY);
   }
 }
 
@@ -358,33 +361,78 @@ function drawEnemy(e){
 function drawPipe(p){
   const ph = p.h;
   const py = groundY - ph;
+  const w = p.w;
   ctx.save();
-  ctx.translate(p.x + p.w/2, py + ph/2);
-  ctx.fillStyle = '#2d6a1f';
+  ctx.translate(p.x + w/2, py + ph);
+
+  // ground shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
   ctx.beginPath();
-  ctx.ellipse(0, ph*0.1, p.w*0.62, ph*0.55, 0, 0, Math.PI*2);
+  ctx.ellipse(0, 2, w*0.72, 6, 0, 0, Math.PI*2);
   ctx.fill();
-  ctx.fillStyle = '#3f8f2b';
+
+  // base mound (dark green)
+  ctx.fillStyle = '#234d16';
   ctx.beginPath();
-  ctx.ellipse(-p.w*0.22, -ph*0.05, p.w*0.4, ph*0.4, 0, 0, Math.PI*2);
+  ctx.ellipse(0, -ph*0.28, w*0.62, ph*0.42, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // mid clusters (medium green) - layered lumps for a natural bush silhouette
+  ctx.fillStyle = '#2f6b1f';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.28, -ph*0.5, w*0.36, ph*0.38, 0, 0, Math.PI*2);
   ctx.fill();
   ctx.beginPath();
-  ctx.ellipse(p.w*0.24, -ph*0.02, p.w*0.42, ph*0.42, 0, 0, Math.PI*2);
+  ctx.ellipse(w*0.3, -ph*0.48, w*0.38, ph*0.4, 0, 0, Math.PI*2);
   ctx.fill();
-  ctx.fillStyle = '#57ad3c';
   ctx.beginPath();
-  ctx.ellipse(0, -ph*0.22, p.w*0.34, ph*0.3, 0, 0, Math.PI*2);
+  ctx.ellipse(0, -ph*0.62, w*0.4, ph*0.42, 0, 0, Math.PI*2);
   ctx.fill();
-  ctx.fillStyle = 'rgba(0,0,0,0.15)';
-  for(let i=0;i<5;i++){
+
+  // top highlight clusters (lighter green)
+  ctx.fillStyle = '#4c9a35';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.18, -ph*0.75, w*0.26, ph*0.28, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(w*0.2, -ph*0.72, w*0.24, ph*0.26, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, -ph*0.85, w*0.2, ph*0.2, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // sunlit tips (pale yellow-green)
+  ctx.fillStyle = '#79c94f';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.1, -ph*0.9, w*0.12, ph*0.1, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(w*0.22, -ph*0.8, w*0.1, ph*0.08, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // internal shadow texture speckles
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  for(let i=0;i<7;i++){
+    const ang = (i/7)*Math.PI*2;
+    const rx = Math.cos(ang)*w*0.28;
+    const ry = -ph*0.5 + Math.sin(ang)*ph*0.22;
     ctx.beginPath();
-    ctx.arc((i-2)*p.w*0.15, ph*0.15, 3, 0, Math.PI*2);
+    ctx.arc(rx, ry, 2.2, 0, Math.PI*2);
     ctx.fill();
   }
+
+  // thin branches/twigs peeking at base
+  ctx.strokeStyle = '#1a3a10';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(-w*0.4, -ph*0.15);
+  ctx.lineTo(-w*0.5, -ph*0.02);
+  ctx.moveTo(w*0.42, -ph*0.12);
+  ctx.lineTo(w*0.52, 0);
+  ctx.stroke();
+
   ctx.restore();
 }
-
-// Spiked barrel chasing at far-left edge (1/3 visible)
 function drawBarrel(){
   const size = 90;
   const baseX = -size*0.66; // only ~1/3 visible normally
@@ -425,7 +473,7 @@ function drawBarrel(){
   // warning glow if catching up
   if(barrelCatchUp>0.05){
     ctx.fillStyle = `rgba(255,0,0,${Math.min(0.35,barrelCatchUp*0.4)})`;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillRect(0,0,logicalW(),logicalH());
   }
 }
 
@@ -439,12 +487,15 @@ function loop(){
     update(1/60);
   }
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.scale(ZOOM, ZOOM);
   drawBackground();
   drawGround();
   for(const p of pipes) drawPipe(p);
   for(const e of enemies) if(e.alive) drawEnemy(e);
   drawBarrel();
   drawPlayer();
+  ctx.restore();
   if(gameState==='playing') drawHUD();
   requestAnimationFrame(loop);
 }
@@ -494,7 +545,7 @@ document.getElementById('restartBtn').addEventListener('click', ()=>{
   gameState='playing';
 });
 
-groundY = canvas.height*GROUND_Y_RATIO;
+groundY = logicalH()*GROUND_Y_RATIO;
 player.y = groundY - player.h;
 requestAnimationFrame(loop);
 </script>
