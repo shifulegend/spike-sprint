@@ -1,26 +1,35 @@
 # Project Overview
-<!-- Last updated: TIMESTAMP -->
+<!-- Last updated: 2026-07-07 19:07 IST -->
 <!-- DYNAMIC FILE — updated automatically by AI agents every session as applicable -->
 
 ## Purpose
-<!-- TODO: Describe what this project does and for whom -->
+A single-file, browser-based endless runner game ("Pixel Runner") for casual play. The main character auto-runs right, jumps over/on enemies, avoids pits, and must clear stationary pipes before a chasing spiked barrel catches up. Built with zero external art assets to eliminate IP/licensing risk.
 
 ## Stack & Key Dependencies
-<!-- TODO: List language, frameworks, runtime, key libraries -->
+- Vanilla JavaScript (ES6+), no frameworks or build tools
+- HTML5 Canvas 2D API for all rendering
+- No npm dependencies — single self-contained `index.html` file
+- No backend; runs entirely client-side in the browser
 
 ## Architecture Overview
-<!-- TODO: High-level architecture: components, data flow, integration boundaries -->
+- Single `<canvas>` element rendered via a `requestAnimationFrame` game loop
+- Game state machine: `start` → `playing` → `over`
+- Physics: gravity-based jump with variable height via hold-duration sampling (short tap vs. long hold)
+- Obstacle spawner randomly generates enemies, pits, and pipes at scaling intervals
+- Difficulty scaling: speed multiplier ramps 1x→2x (0–5 min), 2x→3x (5–10 min), holds at 3x after 10 min; score accrual rate scales with speed
+- All visuals (player, enemy, barrel, pipe) are procedurally drawn shapes — no image/sprite assets
 
 ## Important Directories
 | Directory | Purpose |
 |-----------|---------|
-| `src/`    | <!-- TODO --> |
+| `index.html` | The entire game (HTML + CSS + JS in one file) |
 | `docs/`   | Documentation and AI memory |
-| `tests/`  | <!-- TODO --> |
-| `config/` | <!-- TODO --> |
+| `.github/`, `.claude/`, `.agents/`, `gemini/` | Cross-tool AI instructions inherited from golden-template |
 
 ## Domain Terminology
-<!-- TODO: Define key terms used in this project -->
+- **Barrel chaser**: spiked barrel visible at ~1/3 size on far-left edge; surges toward player only if stuck on a pipe
+- **Stuck state**: player collides with a pipe and cannot proceed until jumping away
+- **Speed multiplier**: global scalar applied to world scroll speed and score accrual rate
 
 ## Major Integration Boundaries
-<!-- TODO: External systems, APIs, databases, services this project depends on -->
+None — fully self-contained client-side game with no external APIs, databases, or services.
