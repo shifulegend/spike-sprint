@@ -1,6 +1,6 @@
 # AGENTS.md — Cross-Tool Portability Layer
 <!-- DYNAMIC FILE — mirror of gemini/GEMINI.md for cross-tool compatibility -->
-<!-- Last updated: TIMESTAMP -->
+<!-- Last updated: 2026-07-07 20:47 IST -->
 <!-- Canonical source: docs/ai/ — if conflict exists, shared docs win -->
 
 ## Session Start (Mandatory — All Tools)
