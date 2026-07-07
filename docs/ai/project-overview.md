@@ -1,5 +1,5 @@
 # Project Overview
-<!-- Last updated: 2026-07-07 19:07 IST -->
+<!-- Last updated: 2026-07-07 20:25 IST -->
 <!-- DYNAMIC FILE — updated automatically by AI agents every session as applicable -->
 
 ## Purpose
@@ -27,9 +27,10 @@ A single-file, browser-based endless runner game ("Pixel Runner") for casual pla
 | `.github/`, `.claude/`, `.agents/`, `gemini/` | Cross-tool AI instructions inherited from golden-template |
 
 ## Domain Terminology
-- **Barrel chaser**: spiked barrel visible at ~1/3 size on far-left edge; surges toward player only if stuck on a pipe
-- **Stuck state**: player collides with a pipe and cannot proceed until jumping away
+- **Barrel chaser**: spiked barrel visible at ~1/3 size on far-left edge; surges toward player only if stuck on a bush; game ends the instant its leading edge touches the player (not on full crossing)
+- **Stuck state**: player collides with a bush and cannot proceed until jumping away
 - **Speed multiplier**: global scalar applied to world scroll speed and score accrual rate
+- **Session high score**: highest score reached across all restarts within the current page load; not persisted after refresh (no localStorage/backend)
 
 ## Major Integration Boundaries
 None — fully self-contained client-side game with no external APIs, databases, or services.
