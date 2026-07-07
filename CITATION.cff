@@ -1,0 +1,19 @@
+# CITATION.cff
+# Allows GitHub to generate APA/BibTeX citations for this project.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files
+
+cff-version: 1.2.0
+message: "If you use this template, please cite it as below."
+type: software
+title: "golden-template"
+abstract: "Cross-tool AI development golden template for GitHub Copilot, Claude Code, and Google Antigravity."
+authors:
+  - family-names: ""
+    given-names: "shifulegend"
+    alias: "shifulegend"
+    website: "https://github.com/shifulegend"
+version: "1.0.0"
+date-released: "2026-06-27"
+url: "https://github.com/shifulegend/golden-template"
+repository-code: "https://github.com/shifulegend/golden-template"
+license: MIT

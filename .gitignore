@@ -1,0 +1,87 @@
+# ──────────────────────────────────────────────────────────
+# .gitignore — Golden Template defaults
+# Extend this file per project stack.
+# NEVER commit secrets, credentials, local config, or build artifacts.
+# ──────────────────────────────────────────────────────────
+
+# Secrets & credentials (MUST be here — no exceptions)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*_secret*
+*credentials*
+secrets/
+.secrets/
+
+# OS & editor cruft
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.cursor/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnpm-debug.log*
+dist/
+build/
+.next/
+.nuxt/
+.turbo/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Go
+/vendor/
+*.exe
+*.test
+
+# Rust
+/target/
+
+# Java / Kotlin
+target/
+*.class
+*.jar
+.gradle/
+
+# Generic build outputs
+out/
+output/
+tmp/
+temp/
+*.log
+*.tmp
+coverage/
+.coverage
+lcov.info
+
+# Lock files — commit these, do NOT ignore them
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+# Pipfile.lock
+# go.sum

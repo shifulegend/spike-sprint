@@ -1,0 +1,11 @@
+# CODEOWNERS
+# Auto-request @shifulegend for review on all changes.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+*                             @shifulegend
+docs/ai/**                    @shifulegend
+.github/copilot-instructions.md  @shifulegend
+CLAUDE.md                     @shifulegend
+AGENTS.md                     @shifulegend
+gemini/GEMINI.md              @shifulegend
+.github/workflows/**          @shifulegend

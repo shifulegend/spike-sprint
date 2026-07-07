@@ -1,0 +1,54 @@
+# CI workflow — lint, typecheck, test, build
+# Customize the steps for your stack. Stubs are marked with TODO.
+# Best practice: pin actions to full SHAs for supply-chain security.
+# Docs: https://docs.github.com/en/actions
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+# Least-privilege permissions — expand only what you need
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Lint · Typecheck · Test · Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Setup ──────────────────────────────────────────────────────────────
+      # TODO: Replace with your stack's setup step
+      # Examples:
+      #   Node:   uses: actions/setup-node@v4  with: { node-version: '20', cache: 'npm' }
+      #   Python: uses: actions/setup-python@v5  with: { python-version: '3.12' }
+      #   Go:     uses: actions/setup-go@v5  with: { go-version: '1.22' }
+      - name: Setup (TODO — replace for your stack)
+        run: echo "Add your runtime setup here"
+
+      # ── Install dependencies ───────────────────────────────────────────────
+      - name: Install dependencies
+        run: echo "TODO: npm ci | pip install -r requirements.txt | go mod download"
+
+      # ── Lint ───────────────────────────────────────────────────────────────
+      - name: Lint
+        run: echo "TODO: npm run lint | ruff check . | golangci-lint run"
+
+      # ── Typecheck ──────────────────────────────────────────────────────────
+      - name: Typecheck
+        run: echo "TODO: npm run typecheck | mypy . | go vet ./..."
+
+      # ── Test ───────────────────────────────────────────────────────────────
+      - name: Test
+        run: echo "TODO: npm test | pytest | go test ./..."
+
+      # ── Build ──────────────────────────────────────────────────────────────
+      - name: Build
+        run: echo "TODO: npm run build | python -m build | go build ./..."
