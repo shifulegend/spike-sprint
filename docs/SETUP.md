@@ -8,8 +8,8 @@
 ## First-Time Setup
 ```bash
 # 1. Clone
-git clone https://github.com/shifulegend/pixel-runner-game.git
-cd pixel-runner-game
+git clone https://github.com/shifulegend/spike-sprint.git
+cd spike-sprint
 
 # 2. Open the game directly — no build step, no install step
 open index.html    # macOS
