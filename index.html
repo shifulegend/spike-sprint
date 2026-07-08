@@ -231,12 +231,16 @@ function update(dt){
   }
   barrelRoll -= worldSpeed*1.3;
 
-  // Check actual barrel-vs-player touch (barrel's leading edge reaches player)
+  // Check actual barrel-vs-player touch: rightmost pixel of a spike touches leftmost pixel of the player
   const barrelSize = 90;
+  const spikeLength = 14;
+  const spikeTipRadius = barrelSize/2 + spikeLength; // max reach of any spike tip from barrel center
   const barrelBaseX = -barrelSize*0.66;
   const barrelX = barrelBaseX + barrelCatchUp * (player.x - barrelBaseX + barrelSize*0.5);
-  const barrelLeadingEdge = barrelX + barrelSize/2; // rightmost point of the rolling barrel circle
-  if(player.stuck && barrelLeadingEdge >= player.x){
+  const barrelCenterX = barrelX + barrelSize/2;
+  const barrelSpikeRightEdge = barrelCenterX + spikeTipRadius; // rightmost pixel any spike can reach
+  const playerLeftEdge = player.x; // leftmost pixel of the player
+  if(player.stuck && barrelSpikeRightEdge >= playerLeftEdge){
     endGame();
     return;
   }
