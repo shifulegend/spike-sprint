@@ -1,4 +1,4 @@
-# CI workflow — Playwright smoke test for Pixel Runner (static HTML/CSS/JS game)
+# CI workflow — Playwright smoke test for Spike Sprint (static HTML/CSS/JS game)
 # This project has no build step, no package manager, and no server —
 # a single self-contained index.html file. CI verifies the game loads
 # without console errors and core gameplay logic (score, jump, collisions,
