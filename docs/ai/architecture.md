@@ -3,7 +3,7 @@
 <!-- Last updated: 2026-07-07 20:47 IST -->
 
 ## System Overview
-Pixel Runner is a single self-contained `index.html` file with inline CSS and JavaScript. There is no server, database, or external API — the entire game runs client-side in the browser via the HTML5 Canvas 2D API and a `requestAnimationFrame` loop.
+Spike Sprint is a single self-contained `index.html` file with inline CSS and JavaScript. There is no server, database, or external API — the entire game runs client-side in the browser via the HTML5 Canvas 2D API and a `requestAnimationFrame` loop.
 
 ## Components
 | Component | Responsibility | Technology |
