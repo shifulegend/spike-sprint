@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pixel Runner</title>
+<title>Spike Sprint</title>
 <style>
   html,body{margin:0;padding:0;background:#0b0f2e;overflow:hidden;height:100%;font-family:'Courier New',monospace;}
   #gameCanvas{display:block;background:linear-gradient(#8ed1ff,#c9ecff);touch-action:none;}
@@ -14,6 +14,11 @@
     background:rgba(0,0,0,0.55);color:#fff;text-align:center;font-family:'Courier New',monospace;}
   #gameOverScreen{display:none;}
   h1{font-size:32px;margin:0 0 10px;text-shadow:2px 2px #000;}
+  #brandTitle{font-size:56px;font-weight:900;letter-spacing:4px;color:#ffcc00;
+    text-shadow:4px 4px 0 #8c2c2c, 6px 6px 0 rgba(0,0,0,0.6);margin:0 0 6px;
+    font-family:'Courier New',monospace;}
+  #brandTagline{font-size:15px;font-style:italic;color:#e8e8e8cc;letter-spacing:1px;margin:0 0 22px;}
+  #startHint{font-size:14px;color:#fff;margin:0 0 4px;}
   button{margin-top:16px;padding:10px 26px;font-size:18px;background:#ffcc00;border:3px solid #664400;
     border-radius:6px;cursor:pointer;font-weight:bold;}
   #credit{position:absolute;bottom:6px;left:8px;color:#ffffffaa;font-size:11px;font-family:sans-serif;}
@@ -26,8 +31,9 @@
 <div id="speedTag">SPEED x1.0</div>
 
 <div id="startScreen">
-  <h1>PIXEL RUNNER</h1>
-  <p>Tap / Click / Space = Jump<br>Short tap = short hop, Hold = long jump<br>Jump ON enemies to squash them (+100)<br>Avoid the pits, don't get stuck in bushes &mdash; the spiked barrel is coming!</p>
+  <div id="brandTitle">SPIKE SPRINT</div>
+  <div id="brandTagline">A poorly coded pixel runner</div>
+  <p id="startHint">Tap / Click / Space = Jump</p>
   <button id="startBtn">START GAME</button>
 </div>
 
