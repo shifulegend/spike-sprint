@@ -6,7 +6,7 @@ A browser-based endless runner game built with vanilla JavaScript and HTML5 Canv
 
 ## Origin Story
 
-Built on a flight with zero wifi, a dying phone, and two in-flight movies I'd already seen twice. Spite is a great motivator — a few hours of turbulence later, this game existed. It runs 100% offline (naturally), so next time you're stuck somewhere with no signal, you can be productively bored too.
+Built on a flight with zero wifi, phone at 80%, and no in-flight entertainment system to save me. Spite is a great motivator — a few days later, this game existed. It runs 100% offline (naturally), so next time you're stuck somewhere with no signal, you can be productively bored too.
 
 ## Play It
 
