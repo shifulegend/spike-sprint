@@ -13,7 +13,7 @@ Before planning or coding in any session:
 
 ## Project Context
 <!-- Summarized from docs/ai/project-overview.md — keep in sync -->
-- **Purpose**: Pixel Runner — a single-file, browser-based endless runner game (procedurally drawn character, enemies, bushes, spiked barrel chaser)
+- **Purpose**: Spike Sprint — a single-file, browser-based endless runner game (procedurally drawn character, enemies, bushes, spiked barrel chaser)
 - **Stack**: Vanilla JavaScript (ES6+), HTML5 Canvas 2D API, no frameworks or build tools
 - **Architecture**: Single `index.html` with a `requestAnimationFrame` game loop; state machine (start/playing/over); canvas-scale-based 2x zoom
 - **Key directories**: `index.html` (the game), `docs/screenshots/` (gameplay images), `docs/ai/` (project memory)
