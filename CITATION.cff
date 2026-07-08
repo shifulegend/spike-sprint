@@ -6,7 +6,7 @@ cff-version: 1.2.0
 message: "If you use or reference this project, please cite it as below."
 type: software
 title: "spike-sprint"
-abstract: "A browser-based endless runner game built with vanilla JavaScript and HTML5 Canvas. Features a procedurally-drawn running character, jump mechanics, enemies, pits, bushes, and a chasing spiked barrel, with zero external assets."
+abstract: "A poorly coded pixel runner. A browser-based endless runner game built with vanilla JavaScript and HTML5 Canvas. Features a procedurally-drawn running character, jump mechanics, enemies, pits, bushes, and a chasing spiked barrel, with zero external assets."
 authors:
   - family-names: ""
     given-names: "shifulegend"
