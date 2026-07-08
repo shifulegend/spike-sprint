@@ -8,6 +8,12 @@ A browser-based endless runner game built with vanilla JavaScript and HTML5 Canv
 
 Open `index.html` directly in any modern browser (Chrome recommended), or enable GitHub Pages on this repo (Settings → Pages → Deploy from `main` branch) to play it live at a public URL.
 
+### iPhone / iPad Shortcut
+
+Download the [Spike Sprint iOS Shortcut](https://raw.githubusercontent.com/shifulegend/spike-sprint/main/shortcuts/Spike-Sprint.shortcut) to launch the game directly in Safari with one tap — no browser navigation or server required. The Shortcut works by embedding the game's HTML as a base64-encoded `data:text/html` URL and opening it locally.
+
+> **Note**: This Shortcut bundles a snapshot of the game's code at the time it was created. It does **not** auto-update when `index.html` changes in this repo — re-download the Shortcut after major game updates to get the latest version.
+
 ## Screenshots
 
 | Branded Start Screen | Gameplay |
@@ -55,6 +61,7 @@ This repo was bootstrapped from the [golden-template](https://github.com/shifule
 |------|---------|
 | `index.html` | The complete game — open this file to play |
 | `docs/screenshots/` | Gameplay screenshots referenced in this README |
+| `shortcuts/` | Downloadable iOS Shortcut to launch the game locally in Safari |
 | `docs/ai/` | Canonical project memory (overview, architecture, decisions, mistakes log) |
 | `docs/SETUP.md` | First-time setup guide |
 | `.github/` | Copilot instructions, CI workflow, Dependabot config |
