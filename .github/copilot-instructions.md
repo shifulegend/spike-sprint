@@ -1,6 +1,6 @@
 # GitHub Copilot — Repository Instructions
 <!-- DYNAMIC FILE — updated automatically by Copilot as durable lessons emerge -->
-<!-- Last updated: TIMESTAMP -->
+<!-- Last updated: 2026-07-08 02:50 IST -->
 
 ## Session Start (Mandatory)
 Before planning or coding in any session:
@@ -13,10 +13,10 @@ Before planning or coding in any session:
 
 ## Project Context
 <!-- Summarized from docs/ai/project-overview.md — keep in sync -->
-- **Purpose**: TODO
-- **Stack**: TODO
-- **Architecture**: TODO
-- **Key directories**: TODO
+- **Purpose**: Pixel Runner — a single-file, browser-based endless runner game (procedurally drawn character, enemies, bushes, spiked barrel chaser)
+- **Stack**: Vanilla JavaScript (ES6+), HTML5 Canvas 2D API, no frameworks or build tools
+- **Architecture**: Single `index.html` with a `requestAnimationFrame` game loop; state machine (start/playing/over); canvas-scale-based 2x zoom
+- **Key directories**: `index.html` (the game), `docs/screenshots/` (gameplay images), `docs/ai/` (project memory)
 
 ## Core Rules (from docs/ai/engineering-rules.md)
 - Develop to the smallest sensible modular unit
