@@ -1,4 +1,6 @@
-# Pixel Runner
+# Spike Sprint
+
+*A poorly coded pixel runner*
 
 A browser-based endless runner game built with vanilla JavaScript and HTML5 Canvas — no external dependencies or libraries. All visuals (character, enemies, barrel, bushes) are original artwork drawn procedurally in code.
 
@@ -8,9 +10,9 @@ Open `index.html` directly in any modern browser (Chrome recommended), or enable
 
 ## Screenshots
 
-| Start Screen | Gameplay |
+| Branded Start Screen | Gameplay |
 |---|---|
-| ![Start screen](docs/screenshots/01_start_screen.png) | ![Gameplay running](docs/screenshots/02_gameplay_running.png) |
+| ![Branded start screen](docs/screenshots/00_branded_start_screen.png) | ![Gameplay running](docs/screenshots/02_gameplay_running.png) |
 
 | Bush & Enemy | Jumping |
 |---|---|
@@ -30,8 +32,8 @@ Open `index.html` directly in any modern browser (Chrome recommended), or enable
 - **Jump control**: Tap/click or press Space to jump. A short tap gives a short hop; holding longer (up to ~320ms) gives a longer, higher jump.
 - **Enemies**: Small enemies (half the main character's height) approach from the right. Jump on top to squash them for **+100 score**; colliding into them sideways ends the run.
 - **Pits**: Gaps appear in the ground that must be jumped over — falling into one is an instant game over.
-- **Bushes**: Stationary bushes of varying heights (40-60px) block the path. Getting stuck on one triggers the chasing spiked barrel, which ends the run the instant it touches the player.
-- **Spiked barrel chaser**: Visible at ~1/3 size on the far-left edge of the screen at all times, rolling continuously. It only surges forward and ends the game the moment its leading edge reaches the player while stuck.
+- **Bushes**: Stationary bushes (varying heights, same footprint as the earlier pipe design) block the path. Getting stuck on one triggers the chasing spiked barrel, which ends the run the instant its spike tip touches the player's leftmost pixel.
+- **Spiked barrel chaser**: Visible at ~1/3 size on the far-left edge of the screen at all times, rolling continuously. It only surges forward and ends the game the moment a spike tip's rightmost pixel reaches the player's leftmost pixel while stuck.
 - **Score**: Starts at `00000` (top-right HUD, black text) and increases continuously over time, scaled to the current speed multiplier, plus a flat +100 bonus per enemy killed.
 - **Session high score**: Tracked alongside the live score for the duration of the browser tab session — it persists across every restart and only updates when the current run's score beats the previous best. Refreshing the page resets it (no local storage/backend).
 - **Difficulty scaling**: Game speed ramps smoothly from 1x to 2x over the first 5 minutes, then from 2x to 3x over the next 5 minutes, and holds at 3x indefinitely afterward. Score accrual rate scales proportionally with speed.
