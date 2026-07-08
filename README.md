@@ -20,6 +20,10 @@ Open `index.html` directly in any modern browser (Chrome recommended), or enable
 |---|---|
 | ![Barrel chase](docs/screenshots/05_barrel_chase.png) | ![Game over high score](docs/screenshots/06_game_over_highscore.png) |
 
+| Spike Nearing Contact | Exact Spike-Touch Game Over |
+|---|---|
+| ![Barrel spike near touch](docs/screenshots/07_barrel_near_touch.png) | ![Barrel spike touch game over](docs/screenshots/08_barrel_touch_gameover.png) |
+
 ## Gameplay
 
 - **Auto-run**: The main character continuously runs to the right with an animated leg-swing, rendered at a closer, larger camera view for better visibility.
