@@ -81,27 +81,30 @@
 <script>
 // ── Web Audio ────────────────────────────────────────────────────────────────
 //
-// RCA — Why Safari / iOS was silent:
+// Cross-browser Web Audio strategy:
 //
-// 1. iOS Safari has an internal "unlocked" flag per tab. Audio only works
-//    after at least one AudioContext.resume() has *resolved successfully*
-//    synchronously inside a direct user gesture.  Calling resume() alone is
-//    not enough — iOS ignores it if the flag was never flipped.
+// Chrome/Edge  — AudioContext starts suspended until a user gesture;
+//               resume() inside any click/keydown/pointerdown is enough.
+//               Hard limit: 6 AudioContext instances per tab (throws DOMException).
+//               DO NOT create new AudioContext() on every gesture — only once.
 //
-// 2. The dummy-unlock pattern is the established fix: create a throwaway
-//    AudioContext, call resume() + close() synchronously at the very top of
-//    the gesture handler.  That flips the flag for every future AudioContext
-//    in the same tab.
+// Firefox      — Same autoplay policy as Chrome. resume() in gesture works.
 //
-// 3. iOS re-suspends the context when the tab goes to background.
-//    A visibilitychange listener re-resumes it on return.
+// Safari macOS — Same as Chrome. resume() in gesture works.
 //
-// 4. Hardware ringer switch: iOS mutes Web Audio entirely when silent/vibrate.
-//    That's user-side — no code fix.
+// Safari iOS   — Strictest. Has an internal per-tab "unlocked" flag.
+//               Calling resume() on a suspended ctx is silently ignored until
+//               the flag is flipped. Flag flips only when a dummy throwaway
+//               AudioContext is created + resumed inside a gesture.
+//               Fix: run the dummy-unlock ONCE per page load, then never again.
+//               Also re-suspends on background — need visibilitychange resume.
+//
+// Hardware ringer (iOS): if silent/vibrate, Web Audio is muted. No code fix.
 //
 const AC = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let soundEnabled = true;
+let _audioUnlocked = false; // iOS dummy-unlock done flag — run at most once
 
 function getAudioCtx(){
   if(!audioCtx) audioCtx = new AC();
@@ -109,21 +112,30 @@ function getAudioCtx(){
   return audioCtx;
 }
 
-// Dummy-unlock: create a throwaway context and resume it synchronously.
-// iOS flips its internal "audio allowed" flag on first successful resume.
-// Must be the FIRST thing called in every user-gesture handler.
+// Called at the top of every user-gesture handler (click, keydown, pointerdown).
+// On first call: runs the iOS dummy-unlock pattern (one throwaway AudioContext)
+// and creates the real context. On all subsequent calls: just resumes if needed.
+// Guarded by _audioUnlocked so we never exceed Chrome's 6-context/tab limit.
 function primeAudio(){
-  // Dummy throwaway — flips iOS unlock flag
-  try {
-    const dummy = new AC();
-    dummy.resume().finally(() => dummy.close());
-  } catch(e){}
-  // Now resume (or create) the real context
-  if(!audioCtx) audioCtx = new AC();
-  audioCtx.resume();
+  if(!_audioUnlocked){
+    _audioUnlocked = true;
+    // iOS dummy-unlock: create + resume a throwaway ctx synchronously.
+    // This flips iOS's internal "tab audio allowed" flag for all future ctxs.
+    // We close it immediately so it counts against the Chrome limit only once.
+    try {
+      const dummy = new AC();
+      const p = dummy.resume();
+      if(p && typeof p.finally === 'function') p.finally(() => dummy.close());
+      else dummy.close();
+    } catch(e){}
+    // Create the real context right after, while still inside the gesture
+    if(!audioCtx) audioCtx = new AC();
+  }
+  // Always resume if suspended (handles Chrome + Firefox + Safari macOS too)
+  if(audioCtx && audioCtx.state !== 'running') audioCtx.resume();
 }
 
-// Re-resume when tab comes back from background (iOS re-suspends on hide)
+// Re-resume on tab return (iOS re-suspends context when tab goes to background)
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible' && audioCtx && audioCtx.state !== 'running'){
     audioCtx.resume();
