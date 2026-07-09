@@ -23,6 +23,22 @@
   button{margin-top:16px;padding:10px 26px;font-size:18px;background:#ffcc00;border:3px solid #664400;
     border-radius:6px;cursor:pointer;font-weight:bold;}
   #credit{position:absolute;bottom:6px;left:8px;color:#ffffffaa;font-size:11px;font-family:sans-serif;}
+  #soundToggle{
+    position:absolute;top:10px;left:12px;
+    width:42px;height:42px;
+    background:#1a1f4a;
+    border:3px solid #ffcc00;
+    border-radius:4px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    z-index:10;
+    box-shadow:3px 3px 0 #664400;
+    transition:background 0.1s;
+    padding:0;
+    outline:none;
+  }
+  #soundToggle:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #664400;}
+  #soundToggle svg{width:22px;height:22px;display:block;}
 </style>
 </head>
 <body>
@@ -31,6 +47,21 @@
 <div id="hud">00000</div>
 <div id="highScoreTag">HIGH SCORE: 00000</div>
 <div id="speedTag">SPEED x1.0</div>
+
+<button id="soundToggle" title="Toggle Sound" aria-label="Toggle Sound">
+  <svg id="iconSoundOn" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="8" width="6" height="8" rx="1" fill="#ffcc00"/>
+    <polygon points="8,8 15,3 15,21 8,16" fill="#ffcc00"/>
+    <path d="M17.5 7.5 C19.5 9 20.5 11 20.5 12 C20.5 13 19.5 15 17.5 16.5" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M17.5 10 C18.5 10.8 19 11.4 19 12 C19 12.6 18.5 13.2 17.5 14" stroke="#ffcc00" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  </svg>
+  <svg id="iconSoundOff" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <rect x="2" y="8" width="6" height="8" rx="1" fill="#888"/>
+    <polygon points="8,8 15,3 15,21 8,16" fill="#888"/>
+    <line x1="17" y1="8" x2="22" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22" y1="8" x2="17" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+</button>
 
 <div id="startScreen">
   <div id="brandTitle">SPIKE SPRINT</div>
@@ -48,6 +79,101 @@
 
 
 <script>
+// ── Web Audio ────────────────────────────────────────────────────────────────
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playTone(opts){
+  if(!soundEnabled) return;
+  try {
+    const ac = getAudioCtx();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.type = opts.type || 'square';
+    const now = ac.currentTime;
+    osc.frequency.setValueAtTime(opts.freqStart || 220, now);
+    if(opts.freqEnd !== undefined)
+      osc.frequency.linearRampToValueAtTime(opts.freqEnd, now + (opts.duration || 0.15));
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(opts.volume || 0.25, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + (opts.duration || 0.15));
+    osc.start(now);
+    osc.stop(now + (opts.duration || 0.15) + 0.02);
+  } catch(e){}
+}
+
+function playNoise(duration, volume){
+  if(!soundEnabled) return;
+  try {
+    const ac = getAudioCtx();
+    const bufferSize = Math.ceil(ac.sampleRate * duration);
+    const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1);
+    const src = ac.createBufferSource();
+    src.buffer = buffer;
+    const gain = ac.createGain();
+    const filter = ac.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 300;
+    const now = ac.currentTime;
+    gain.gain.setValueAtTime(volume || 0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+    src.start(now);
+    src.stop(now + duration + 0.02);
+  } catch(e){}
+}
+
+function sfxJump(){
+  playTone({type:'square', freqStart:180, freqEnd:420, duration:0.13, volume:0.18});
+}
+
+function sfxLand(){
+  playTone({type:'square', freqStart:90, freqEnd:60, duration:0.08, volume:0.12});
+  playNoise(0.06, 0.06);
+}
+
+function sfxSquash(){
+  playTone({type:'square', freqStart:440, freqEnd:180, duration:0.1, volume:0.22});
+  setTimeout(()=>playTone({type:'square', freqStart:320, freqEnd:120, duration:0.09, volume:0.18}), 80);
+}
+
+function sfxGameOver(){
+  const notes = [330, 262, 196, 147];
+  notes.forEach((f,i)=>{
+    setTimeout(()=>playTone({type:'square', freqStart:f, freqEnd:f*0.85, duration:0.18, volume:0.22}), i*130);
+  });
+}
+
+function sfxBarrelWarn(){
+  playTone({type:'sawtooth', freqStart:80, freqEnd:55, duration:0.2, volume:0.18});
+}
+
+const soundToggleBtn = document.getElementById('soundToggle');
+const iconOn  = document.getElementById('iconSoundOn');
+const iconOff = document.getElementById('iconSoundOff');
+soundToggleBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  soundEnabled = !soundEnabled;
+  iconOn.style.display  = soundEnabled ? '' : 'none';
+  iconOff.style.display = soundEnabled ? 'none' : '';
+  soundToggleBtn.style.borderColor = soundEnabled ? '#ffcc00' : '#555';
+});
+soundToggleBtn.addEventListener('pointerdown', e=>e.stopPropagation());
+soundToggleBtn.addEventListener('pointerup',   e=>e.stopPropagation());
+// ────────────────────────────────────────────────────────────────────────────
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const GROUND_Y_RATIO = 0.78;
@@ -166,6 +292,8 @@ function update(dt){
   }
 
   if(!overPit && player.y + player.h >= groundY){
+    // landing sound: fire when transitioning from air to ground
+    if(!player.onGround) sfxLand();
     player.y = groundY - player.h;
     player.vy = 0;
     player.onGround = true;
@@ -206,6 +334,7 @@ function update(dt){
     if(overlapX && overlapY){
       if(player.vy > 0 && (py2 - ey1) < e.h*0.6){
         e.alive = false;
+        sfxSquash();
         score += 100;
         if(score > sessionHighScore) sessionHighScore = score;
         player.vy = -9;
@@ -232,8 +361,10 @@ function update(dt){
   }
 
   if(player.stuck){
+    const prevCatchUp = barrelCatchUp;
     barrelCatchUp += dt/1.1;
     if(barrelCatchUp > 1) barrelCatchUp = 1;
+    if(prevCatchUp <= 0.05 && barrelCatchUp > 0.05) sfxBarrelWarn();
   } else {
     barrelCatchUp = Math.max(0, barrelCatchUp - dt*2);
   }
@@ -256,6 +387,7 @@ function update(dt){
 
 function endGame(){
   gameState = 'over';
+  sfxGameOver();
   document.getElementById('finalScore').textContent = 'Score: ' + String(Math.floor(score)).padStart(5,'0') + '  |  High Score: ' + String(Math.floor(sessionHighScore)).padStart(5,'0');
   document.getElementById('gameOverScreen').style.display='flex';
 }
@@ -478,6 +610,7 @@ function loop(){
 function startJump(){
   if(gameState!=='playing') return;
   if(player.onGround || player.stuck){
+    sfxJump();
     jumpKeyDown = true;
     jumpHoldTime = 0;
     player.jumping = true;
