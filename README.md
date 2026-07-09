@@ -14,7 +14,7 @@ Open `index.html` directly in any modern browser (Chrome recommended), or enable
 
 ### iPhone / iPad Shortcut
 
-Download the [Spike Sprint iOS Shortcut](https://raw.githubusercontent.com/shifulegend/spike-sprint/main/shortcuts/Spike-Sprint.shortcut) to launch the game directly in Safari with one tap — no browser navigation or server required. The Shortcut works by embedding the game's HTML as a base64-encoded `data:text/html` URL and opening it locally.
+Download the [Spike Sprint iOS Shortcut](https://www.dropbox.com/scl/fi/ay5k8aoxx6byq1a324fz3/Spike-Sprint.shortcut?rlkey=do2kgs8y3ci2d9n4k2w5r2vhi&st=bgvvfc15&dl=0) to launch the game directly in Safari with one tap — no browser navigation or server required. The Shortcut works by embedding the game's HTML as a base64-encoded `data:text/html` URL and opening it locally.
 
 > **Note**: This Shortcut bundles a snapshot of the game's code at the time it was created. It does **not** auto-update when `index.html` changes in this repo — re-download the Shortcut after major game updates to get the latest version.
 
