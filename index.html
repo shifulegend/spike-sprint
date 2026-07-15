@@ -261,6 +261,22 @@ soundToggleBtn.addEventListener('pointerdown', e=>e.stopPropagation());
 soundToggleBtn.addEventListener('pointerup',   e=>e.stopPropagation());
 // ────────────────────────────────────────────────────────────────────────────
 
+// ── Play-count analytics ──────────────────────────────────────────────────
+// Silent, anonymous beacon so we can see how many times the game gets played.
+// No account/signup required, no cookies, no UI — just a best-effort GET on
+// each play-start. Fails silently (ad blockers, offline) since it must never
+// affect gameplay. Current value: https://api.countapi.xyz/get/{NAMESPACE}/{KEY}
+const ANALYTICS_ENABLED = true;
+const ANALYTICS_NAMESPACE = 'shifulegend-spike-sprint';
+const ANALYTICS_KEY = 'plays';
+function trackPlay(){
+  if(!ANALYTICS_ENABLED) return;
+  try{
+    fetch(`https://api.countapi.xyz/hit/${ANALYTICS_NAMESPACE}/${ANALYTICS_KEY}`, { mode:'cors' }).catch(()=>{});
+  }catch(e){}
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const GROUND_Y_RATIO = 0.78;
@@ -734,12 +750,14 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   document.getElementById('startScreen').style.display='none';
   resetGame();
   gameState='playing';
+  trackPlay();
 });
 document.getElementById('restartBtn').addEventListener('click', ()=>{
   primeAudio();
   document.getElementById('gameOverScreen').style.display='none';
   resetGame();
   gameState='playing';
+  trackPlay();
 });
 
 groundY = logicalH()*GROUND_Y_RATIO;

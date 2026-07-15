@@ -1,5 +1,5 @@
 # Project Overview
-<!-- Last updated: 2026-07-07 20:25 IST -->
+<!-- Last updated: 2026-07-15 23:32 IST -->
 <!-- DYNAMIC FILE — updated automatically by AI agents every session as applicable -->
 
 ## Purpose
@@ -33,4 +33,4 @@ A single-file, browser-based endless runner game ("Spike Sprint") for casual pla
 - **Session high score**: highest score reached across all restarts within the current page load; not persisted after refresh (no localStorage/backend)
 
 ## Major Integration Boundaries
-None — fully self-contained client-side game with no external APIs, databases, or services.
+- `api.countapi.xyz` — anonymous, no-signup play-count beacon fired on each game start/restart (`trackPlay()` in `index.html`). No account, no dashboard, no PII. Best-effort only: wrapped in try/catch and never blocks gameplay. Current count: `GET https://api.countapi.xyz/get/shifulegend-spike-sprint/plays`.

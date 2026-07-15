@@ -41,12 +41,27 @@ jobs:
           import asyncio, sys
           from playwright.async_api import async_playwright
 
+          # Play-start fires a best-effort analytics beacon to api.countapi.xyz (see
+          # index.html trackPlay()). Chromium logs a "Failed to load resource" console
+          # error for that request whenever the third-party host is unreachable, even
+          # though the game's own JS always catches it — so that specific, external,
+          # non-code-related noise is excluded here. Any other console/page error still
+          # fails the test.
+          ANALYTICS_HOST = "api.countapi.xyz"
+
           async def run_test():
               errors = []
+              def on_console(msg):
+                  if msg.type != "error":
+                      return
+                  location_url = (msg.location or {}).get("url", "")
+                  if ANALYTICS_HOST in location_url:
+                      return
+                  errors.append(msg.text)
               async with async_playwright() as p:
                   browser = await p.chromium.launch()
                   page = await browser.new_page(viewport={"width": 1280, "height": 720})
-                  page.on("console", lambda msg: errors.append(msg.text) if msg.type == "error" else None)
+                  page.on("console", on_console)
                   page.on("pageerror", lambda exc: errors.append(str(exc)))
 
                   await page.goto("file://" + __file__.replace("smoke_test.py", "index.html"))
