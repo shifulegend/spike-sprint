@@ -18,6 +18,12 @@ Download the [Spike Sprint iOS Shortcut](https://raw.githubusercontent.com/shifu
 
 > **Note**: This Shortcut bundles a snapshot of the game's code at the time it was created. It does **not** auto-update when `index.html` changes in this repo — re-download the Shortcut after major game updates to get the latest version.
 
+
+
+> If you like my work or if it helped you, buy me a coffee or A100😉
+> 
+> [![Sponsor Nitika](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red)](https://github.com/sponsors/shifulegend)
+
 ## Gameplay Demo
 
 ![Spike Sprint gameplay demo](docs/screenshots/spike_sprint_demo.gif)
