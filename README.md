@@ -68,6 +68,10 @@ Download the [Spike Sprint iOS Shortcut](https://raw.githubusercontent.com/shifu
 
 ---
 
+> If you like my work or if it helped you, buy me a coffee or A100😉
+> 
+> [![Sponsor Nitika](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red)](https://github.com/sponsors/shifulegend)
+
 ## Gameplay
 
 | Control | Action |
