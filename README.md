@@ -1,32 +1,106 @@
-# Spike Sprint
+# 🎮 Spike Sprint
 
-*A poorly coded pixel runner*
+> *A poorly coded pixel runner*
 
-A browser-based endless runner game built with vanilla JavaScript and HTML5 Canvas — no external dependencies or libraries. All visuals (character, enemies, barrel, bushes) are original artwork drawn procedurally in code.
+[![CI](https://github.com/shifulegend/spike-sprint/actions/workflows/ci.yml/badge.svg)](https://github.com/shifulegend/spike-sprint/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/shifulegend/spike-sprint/releases/tag/v1.0.0)
+[![GitHub Stars](https://img.shields.io/github/stars/shifulegend/spike-sprint?style=social)](https://github.com/shifulegend/spike-sprint/stargazers)
 
-## Origin Story
+**A browser-based endless runner built with vanilla JavaScript and HTML5 Canvas — no dependencies, no install, no build step.**
 
-I was on a flight — no wifi, phone at 80%, and no in-flight entertainment system to save me. After landing, I said no more. A few days later, this game existed. It runs 100% offline (naturally), so next time you're stuck somewhere with no signal, you can be productively bored too.
+<div align="center">
+
+### 🕹️ [Play Now → shifulegend.github.io/spike-sprint](https://shifulegend.github.io/spike-sprint/)
+
+![Spike Sprint gameplay demo](docs/screenshots/spike_sprint_demo.gif)
+
+</div>
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Play It](#play-it)
+- [Gameplay](#gameplay)
+- [Screenshots](#screenshots)
+- [Tech Notes](#tech-notes)
+- [Repository Structure](#repository-structure)
+- [Origin Story](#origin-story)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Features
+
+- ⚡ **Zero setup** — open `index.html` and play. No npm, no server, no build step
+- 🎯 **Variable-height jump** — tap for a hop, hold for a full jump (up to ~320ms)
+- 👾 **Enemies** — squash them for +100 score or dodge sideways
+- 🕳️ **Pits** — gaps in the ground you must jump over
+- 🌿 **Bushes** — get stuck and the barrel comes for you
+- 🛢️ **Spiked barrel chaser** — always lurking, ends the run on precise spike-tip contact
+- 📈 **Difficulty scaling** — speed ramps from 1× → 2× → 3× over 10 minutes
+- 🏆 **Session high score** — persists across restarts within the tab
+- 📱 **Fully responsive** — works on desktop and mobile
+- 🔊 **Web Audio sounds** with mute toggle
+
+---
 
 ## Play It
 
-Open `index.html` directly in any modern browser (Chrome recommended), or enable GitHub Pages on this repo (Settings → Pages → Deploy from `main` branch) to play it live at a public URL.
+### 🌐 Browser (Instant)
+👉 **[shifulegend.github.io/spike-sprint](https://shifulegend.github.io/spike-sprint/)** — no install required
 
-### iPhone / iPad Shortcut
+### 💻 Local
+```bash
+git clone https://github.com/shifulegend/spike-sprint.git
+cd spike-sprint
+open index.html   # macOS
+# or just drag index.html into any browser
+```
 
-Download the [Spike Sprint iOS Shortcut](https://raw.githubusercontent.com/shifulegend/spike-sprint/main/shortcuts/Spike-Sprint.shortcut) to launch the game directly in Safari with one tap — no browser navigation or server required. The Shortcut works by embedding the game's HTML as a base64-encoded `data:text/html` URL and opening it locally.
+### 📱 iPhone / iPad Shortcut
+Download the [Spike Sprint iOS Shortcut](https://raw.githubusercontent.com/shifulegend/spike-sprint/main/shortcuts/Spike-Sprint.shortcut) to launch the game in Safari with one tap — no server or browser navigation needed. It embeds the game as a base64 `data:text/html` URL and opens it locally.
 
-> **Note**: This Shortcut bundles a snapshot of the game's code at the time it was created. It does **not** auto-update when `index.html` changes in this repo — re-download the Shortcut after major game updates to get the latest version.
+> **Note:** The Shortcut bundles a snapshot of the game at download time. Re-download after major updates to get the latest version.
 
-
+---
 
 > If you like my work or if it helped you, buy me a coffee or A100😉
 > 
 > [![Sponsor Nitika](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red)](https://github.com/sponsors/shifulegend)
 
-## Gameplay Demo
+## Gameplay
 
-![Spike Sprint gameplay demo](docs/screenshots/spike_sprint_demo.gif)
+| Control | Action |
+|---|---|
+| `Space` / Tap / Click | Jump |
+| Hold longer | Higher jump (max ~320ms) |
+
+### Obstacles & Scoring
+
+| Element | What it does |
+|---|---|
+| 👾 Enemy | Jump on top → **+100 score**. Sideways collision → game over |
+| 🕳️ Pit | Fall in → instant game over |
+| 🌿 Bush | Getting stuck triggers the barrel chaser |
+| 🛢️ Spiked barrel | Surges when you're stuck. Game over when spike tip touches your left edge |
+
+### Difficulty
+
+Game speed scales automatically:
+
+```
+0–5 min   →   1× speed
+5–10 min  →   2× speed  
+10+ min   →   3× speed (max)
+```
+
+Score accrues proportionally to speed — the longer you survive, the faster the points.
+
+---
 
 ## Screenshots
 
@@ -46,41 +120,53 @@ Download the [Spike Sprint iOS Shortcut](https://raw.githubusercontent.com/shifu
 |---|---|
 | ![Barrel spike near touch](docs/screenshots/07_barrel_near_touch.png) | ![Barrel spike touch game over](docs/screenshots/08_barrel_touch_gameover.png) |
 
-## Gameplay
-
-- **Auto-run**: The main character continuously runs to the right with an animated leg-swing, rendered at a closer, larger camera view for better visibility.
-- **Jump control**: Tap/click or press Space to jump. A short tap gives a short hop; holding longer (up to ~320ms) gives a longer, higher jump.
-- **Enemies**: Small enemies (half the main character's height) approach from the right. Jump on top to squash them for **+100 score**; colliding into them sideways ends the run.
-- **Pits**: Gaps appear in the ground that must be jumped over — falling into one is an instant game over.
-- **Bushes**: Stationary bushes (varying heights, same footprint as the earlier pipe design) block the path. Getting stuck on one triggers the chasing spiked barrel, which ends the run the instant its spike tip touches the player's leftmost pixel.
-- **Spiked barrel chaser**: Visible at ~1/3 size on the far-left edge of the screen at all times, rolling continuously. It only surges forward and ends the game the moment a spike tip's rightmost pixel reaches the player's leftmost pixel while stuck.
-- **Score**: Starts at `00000` (top-right HUD, black text) and increases continuously over time, scaled to the current speed multiplier, plus a flat +100 bonus per enemy killed.
-- **Session high score**: Tracked alongside the live score for the duration of the browser tab session — it persists across every restart and only updates when the current run's score beats the previous best. Refreshing the page resets it (no local storage/backend).
-- **Difficulty scaling**: Game speed ramps smoothly from 1x to 2x over the first 5 minutes, then from 2x to 3x over the next 5 minutes, and holds at 3x indefinitely afterward. Score accrual rate scales proportionally with speed.
+---
 
 ## Tech Notes
 
-- Pure HTML/CSS/JavaScript, single self-contained file (`index.html`) — no build step, no npm install, no server required.
-- Rendering via HTML5 Canvas 2D API; all sprites (player, enemy, barrel, bush) are original, procedurally drawn shapes — not licensed third-party assets.
-- Physics: simple gravity + variable-height jump via hold-duration sampling.
-- Entire game world (not just the character) is rendered at 2x zoom via a canvas scale transform for a closer, more immersive view.
-- Fully responsive — canvas resizes to the browser window on load and on resize events.
-- Verified with automated Playwright browser tests (no console errors, correct collision timing, high score persistence) before every release.
+- **Single file** — the entire game is `index.html`. Pure HTML/CSS/JavaScript, zero external dependencies
+- **HTML5 Canvas 2D API** — all sprites (player, enemy, barrel, bush) are procedurally drawn shapes, no external assets
+- **Physics** — simple gravity + variable-height jump via hold-duration sampling
+- **2× world zoom** — canvas scale transform gives a closer, more immersive view
+- **Responsive** — canvas resizes to the browser window on load and resize
+- **Web Audio API** — synthesized sound effects, cross-browser (Safari dummy-unlock pattern included)
+- **Playwright CI** — automated smoke tests check for console errors, collision timing, and high score persistence before every release
+
+---
 
 ## Repository Structure
 
-This repo was bootstrapped from the [golden-template](https://github.com/shifulegend/golden-template) and follows its documentation-first, AI-agent-friendly conventions (see `docs/ai/` for project memory, `CLAUDE.md`/`AGENTS.md`/`gemini/GEMINI.md` for cross-tool AI instructions).
-
 | Path | Purpose |
 |------|---------|
-| `index.html` | The complete game — open this file to play |
+| `index.html` | The complete game — open this to play |
 | `docs/screenshots/` | Gameplay screenshots referenced in this README |
-| `shortcuts/` | Downloadable iOS Shortcut to launch the game locally in Safari |
-| `docs/ai/` | Canonical project memory (overview, architecture, decisions, mistakes log) |
-| `docs/SETUP.md` | First-time setup guide |
-| `.github/` | Copilot instructions, CI workflow, Dependabot config |
-| `.claude/`, `.agents/`, `gemini/` | Cross-tool AI agent instructions (Claude Code, Antigravity, Copilot) |
+| `shortcuts/` | iOS Shortcut to launch the game locally in Safari |
+| `docs/ai/` | Project memory (architecture, decisions, mistakes log) |
+| `docs/SETUP.md` | First-time contributor setup guide |
+| `.github/` | CI workflow, Copilot instructions, Dependabot config |
+| `.claude/`, `.agents/`, `gemini/` | Cross-tool AI agent instructions |
+
+> This repo was bootstrapped from [golden-template](https://github.com/shifulegend/golden-template) and follows its documentation-first, AI-agent-friendly conventions.
+
+---
+
+## Origin Story
+
+I was on a flight — no wifi, phone at 80%, and no in-flight entertainment system to save me. After landing, I said no more. A few days later, this game existed. It runs 100% offline (naturally), so next time you're stuck somewhere with no signal, you can be productively bored too.
+
+---
+
+## Contributing
+
+Contributions are welcome! Whether it's a bug report, a new game mechanic, or a visual improvement.
+
+- 📖 Read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
+- 🐛 [Report a bug](https://github.com/shifulegend/spike-sprint/issues/new?template=bug_report.md)
+- 💡 [Suggest a feature](https://github.com/shifulegend/spike-sprint/issues/new?template=feature_request.md)
+- 📋 See [CHANGELOG.md](CHANGELOG.md) for what's changed
+
+---
 
 ## License
 
-MIT — see `LICENSE`. All game assets are original works created for this project.
+MIT — see [LICENSE](LICENSE). All game assets are original works created for this project.

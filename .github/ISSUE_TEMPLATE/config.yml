@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🎮 Play the Game
+    url: https://shifulegend.github.io/spike-sprint/
+    about: Try the live version before reporting a bug!
+  - name: 💬 Ask a Question
+    url: https://github.com/shifulegend/spike-sprint/issues/new
+    about: Open a blank issue if none of the templates fit.
