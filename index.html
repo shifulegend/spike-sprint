@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Spike Sprint</title>
 <style>
   html,body{margin:0;padding:0;background:#0b0f2e;overflow:hidden;height:100%;font-family:'Courier New',monospace;}
@@ -60,7 +61,6 @@
     transition:background 0.1s;
     padding:0;
     margin-top:0;
-    outline:none;
     color:#ffcc00;
     font-size:20px;
     font-weight:bold;
@@ -108,7 +108,6 @@
     justify-content:center;
     gap:4px;
     cursor:pointer;
-    outline:none;
     transition:transform 0.08s, border-color 0.15s, opacity 0.15s;
     --cd-pct: 100%;
   }
@@ -149,7 +148,7 @@
     height:42px;padding:0 12px;margin-top:0;
     background:#1a1f4a;border:3px solid #ff6b6b;border-radius:4px;
     color:#ff9999;font-size:13px;font-weight:bold;letter-spacing:0.6px;
-    cursor:pointer;z-index:20;box-shadow:3px 3px 0 #4d1414;outline:none;
+    cursor:pointer;z-index:20;box-shadow:3px 3px 0 #4d1414;
     align-items:center;justify-content:center;gap:4px;
   }
   #exitBtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #4d1414;}
@@ -198,7 +197,7 @@
   .name-input{
     width:96px;padding:5px 8px;font-family:'Courier New',monospace;font-size:15px;font-weight:bold;
     letter-spacing:2px;text-transform:uppercase;text-align:center;
-    background:#101538;color:#ffcc00;border:2px solid #ffcc00;border-radius:4px;outline:none;
+    background:#101538;color:#ffcc00;border:2px solid #ffcc00;border-radius:4px;
   }
   .name-input:focus{border-color:#fff;box-shadow:0 0 0 2px rgba(255,204,0,0.35);}
   .name-rand-btn{
@@ -208,6 +207,25 @@
     box-shadow:2px 2px 0 #664400;
   }
   .name-rand-btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #664400;}
+  button{touch-action:manipulation;}
+  button:focus-visible,input:focus-visible{outline:2px solid #ffcc00;outline-offset:2px;}
+  #hud{top:calc(10px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));}
+  #highScoreTag{top:calc(44px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));}
+  #speedTag{top:calc(64px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));}
+  #timeTag{top:calc(82px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));}
+  #soundToggle{top:calc(10px + env(safe-area-inset-top));left:calc(12px + env(safe-area-inset-left));}
+  #storyToggle{top:calc(10px + env(safe-area-inset-top));left:calc(64px + env(safe-area-inset-left));}
+  #exitBtn{top:calc(10px + env(safe-area-inset-top));left:calc(64px + env(safe-area-inset-left));}
+  #heroControls{bottom:calc(14px + env(safe-area-inset-bottom));}
+  @media (max-width: 520px){
+    #brandTitle{font-size:38px;letter-spacing:2px;}
+    #hud{font-size:22px;}
+    #highScoreTag{font-size:13px;top:calc(38px + env(safe-area-inset-top));}
+    #speedTag{font-size:12px;top:calc(55px + env(safe-area-inset-top));}
+    #timeTag{font-size:12px;top:calc(71px + env(safe-area-inset-top));}
+    .mode-buttons{flex-direction:column;width:100%;max-width:340px;}
+    .modal-box{width:92vw;max-height:85vh;overflow-y:auto;}
+  }
 </style>
 </head>
 <body>
@@ -235,7 +253,7 @@
 <button id="exitBtn" title="Exit Run" aria-label="Exit Run">&#10005; EXIT</button>
 
 <div id="heroControls" aria-label="Hero Obstacle Controls">
-  <button id="spawnPitBtn" class="hero-spawn-btn" title="Spawn Pit (Key 1)" aria-label="Spawn Pit">
+  <button id="spawnPitBtn" class="hero-spawn-btn" title="Spawn Pit (Key 1)" aria-label="Spawn Pit" aria-disabled="false">
     <span class="hero-cd-fill"></span>
     <span class="hero-spawn-key">1</span>
     <svg viewBox="0 0 40 32" xmlns="http://www.w3.org/2000/svg">
@@ -250,7 +268,7 @@
     </svg>
     <span class="hero-spawn-label">PIT</span>
   </button>
-  <button id="spawnBushBtn" class="hero-spawn-btn" title="Spawn Bush (Key 2)" aria-label="Spawn Bush">
+  <button id="spawnBushBtn" class="hero-spawn-btn" title="Spawn Bush (Key 2)" aria-label="Spawn Bush" aria-disabled="false">
     <span class="hero-cd-fill"></span>
     <span class="hero-spawn-key">2</span>
     <svg viewBox="0 0 40 32" xmlns="http://www.w3.org/2000/svg">
@@ -265,7 +283,7 @@
     </svg>
     <span class="hero-spawn-label">BUSH</span>
   </button>
-  <button id="spawnHeroBtn" class="hero-spawn-btn" title="Spawn Purple Hero (Key 3)" aria-label="Spawn Purple Hero">
+  <button id="spawnHeroBtn" class="hero-spawn-btn" title="Spawn Purple Hero (Key 3)" aria-label="Spawn Purple Hero" aria-disabled="false">
     <span class="hero-cd-fill"></span>
     <span class="hero-spawn-key">3</span>
     <svg viewBox="0 0 40 32" xmlns="http://www.w3.org/2000/svg">
@@ -281,7 +299,7 @@
 
 <div id="startScreen">
   <button id="storyToggle" title="Village Story" aria-label="Village Story">?</button>
-  <div id="loreCard" role="dialog" aria-label="Village Story">
+  <div id="loreCard" role="dialog" aria-modal="true" aria-label="Village Story">
     <h2>THE VILLAGE BREACH</h2>
     <ul>
       <li><strong>The Trespasser:</strong> A rogue Villain broke into the village and is sprinting through the main road.</li>
@@ -339,7 +357,7 @@
   </div>
 </div>
 
-<div id="exitModal" class="overlay-modal" role="dialog" aria-label="Exit Run Confirmation">
+<div id="exitModal" class="overlay-modal" role="dialog" aria-modal="true" aria-label="Exit Run Confirmation">
   <div class="modal-box" style="max-width:360px;">
     <h2>EXIT THIS RUN?</h2>
     <p class="modal-warn">Leaving now will end your current run and it will <strong>not</strong> be scored or saved to the leaderboard.</p>
@@ -350,7 +368,7 @@
   </div>
 </div>
 
-<div id="scoresModal" class="overlay-modal" role="dialog" aria-label="Top 10 Leaderboard">
+<div id="scoresModal" class="overlay-modal" role="dialog" aria-modal="true" aria-label="Top 10 Leaderboard">
   <div class="modal-box">
     <h2>TOP 10 LEADERBOARD</h2>
     <div class="score-tabs" role="tablist">
@@ -580,11 +598,18 @@ const loreCard = document.getElementById('loreCard');
 const loreCloseBtn = document.getElementById('loreCloseBtn');
 storyToggleBtn.addEventListener('click', e=>{
   e.stopPropagation();
-  loreCard.style.display = loreCard.style.display === 'block' ? 'none' : 'block';
+  if(loreCard.style.display === 'block'){
+    loreCard.style.display = 'none';
+    restoreModalFocus(storyToggleBtn);
+  } else {
+    loreCard.style.display = 'block';
+    focusFirstInModal(loreCard, storyToggleBtn);
+  }
 });
 loreCloseBtn.addEventListener('click', e=>{
   e.stopPropagation();
   loreCard.style.display = 'none';
+  restoreModalFocus(storyToggleBtn);
 });
 [storyToggleBtn, loreCard, loreCloseBtn].forEach(el=>{
   el.addEventListener('pointerdown', e=>e.stopPropagation());
@@ -850,6 +875,7 @@ function updateHeroCooldownUI(justReady){
   const cooling = heroCooldownRemaining > 0;
   for(const btn of heroSpawnBtns){
     btn.style.setProperty('--cd-pct', pct.toFixed(1) + '%');
+    btn.setAttribute('aria-disabled', cooling ? 'true' : 'false');
     if(cooling){
       btn.classList.add('cooling');
       btn.classList.remove('ready-flash');
@@ -1328,7 +1354,9 @@ function renderScoresModal(){
 function openScoresModal(defaultBucket){
   if(defaultBucket && SCORE_BUCKETS.includes(defaultBucket)) activeScoreBucket = defaultBucket;
   renderScoresModal();
-  document.getElementById('scoresModal').style.display = 'flex';
+  const modal = document.getElementById('scoresModal');
+  modal.style.display = 'flex';
+  focusFirstInModal(modal, document.activeElement);
 }
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -1612,7 +1640,99 @@ function endJump(){
   activePointerId = null;
 }
 
+let _lastFocusedEl = null;
+
+function getActiveModal(){
+  const sm = document.getElementById('scoresModal');
+  if(sm && sm.style.display === 'flex') return sm;
+  const em = document.getElementById('exitModal');
+  if(em && em.style.display === 'flex') return em;
+  if(loreCard && loreCard.style.display === 'block') return loreCard;
+  return null;
+}
+
+function getModalFocusables(modal){
+  if(!modal || typeof modal.querySelectorAll !== 'function') return [];
+  return Array.from(modal.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])'))
+    .filter(el => !el.disabled && (!el.style || el.style.display !== 'none'));
+}
+
+function focusFirstInModal(modal, opener){
+  _lastFocusedEl = opener || document.activeElement || null;
+  const items = getModalFocusables(modal);
+  if(items.length && typeof items[0].focus === 'function') items[0].focus();
+}
+
+function restoreModalFocus(fallbackEl){
+  const target = _lastFocusedEl || fallbackEl;
+  _lastFocusedEl = null;
+  if(target && typeof target.focus === 'function') target.focus();
+}
+
+function openPauseModal(){
+  if(gameState !== 'playing') return;
+  clearHeldInput();
+  gameState = 'paused';
+  pausedAt = performance.now();
+  exitModal.style.display = 'flex';
+  focusFirstInModal(exitModal, exitBtn);
+}
+
+function resumeFromPause(){
+  if(gameState === 'paused'){
+    startTime += (performance.now() - pausedAt);
+    gameState = 'playing';
+  }
+  exitModal.style.display = 'none';
+  restoreModalFocus(exitBtn);
+}
+
 window.addEventListener('keydown', e=>{
+  const modal = getActiveModal();
+  if(e.key === 'Escape'){
+    if(modal === scoresModal){
+      e.preventDefault();
+      scoresModal.style.display = 'none';
+      restoreModalFocus(document.getElementById('openScoresStartBtn'));
+      return;
+    }
+    if(modal === exitModal){
+      e.preventDefault();
+      resumeFromPause();
+      return;
+    }
+    if(modal === loreCard){
+      e.preventDefault();
+      loreCard.style.display = 'none';
+      restoreModalFocus(storyToggleBtn);
+      return;
+    }
+    if(gameState === 'playing'){
+      e.preventDefault();
+      openPauseModal();
+      return;
+    }
+  }
+  if(e.key === 'Tab' && modal){
+    const focusables = getModalFocusables(modal);
+    if(focusables.length){
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if(e.shiftKey){
+        if(active === first || !focusables.includes(active)){
+          e.preventDefault();
+          if(typeof last.focus === 'function') last.focus();
+        }
+      } else {
+        if(active === last || !focusables.includes(active)){
+          e.preventDefault();
+          if(typeof first.focus === 'function') first.focus();
+        }
+      }
+      return;
+    }
+  }
   if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
   if(e.repeat) return;
   if(e.code==='Space'){ e.preventDefault(); if(activeMode.allowHumanJump) startJump(); }
@@ -1680,19 +1800,11 @@ let pausedAt = 0;
 
 exitBtn.addEventListener('click', e=>{
   e.stopPropagation();
-  if(gameState !== 'playing') return;
-  clearHeldInput();
-  gameState = 'paused';
-  pausedAt = performance.now();
-  exitModal.style.display = 'flex';
+  openPauseModal();
 });
 document.getElementById('resumeRunBtn').addEventListener('click', e=>{
   e.stopPropagation();
-  if(gameState === 'paused'){
-    startTime += (performance.now() - pausedAt);
-    gameState = 'playing';
-  }
-  exitModal.style.display = 'none';
+  resumeFromPause();
 });
 document.getElementById('confirmExitBtn').addEventListener('click', e=>{
   e.stopPropagation();
@@ -1714,6 +1826,7 @@ document.getElementById('openScoresEndBtn').addEventListener('click', e=>{
 document.getElementById('closeScoresBtn').addEventListener('click', e=>{
   e.stopPropagation();
   scoresModal.style.display = 'none';
+  restoreModalFocus(document.getElementById('openScoresStartBtn'));
 });
 document.getElementById('sortByScoreBtn').addEventListener('click', e=>{
   e.stopPropagation();
@@ -1797,7 +1910,7 @@ function bindNameInput(inputEl, randBtnEl, isEndScreen){
         if(isEndScreen) updateLastRunName(clean);
       }
     });
-    inputEl.addEventListener('keydown', e=>e.stopPropagation());
+    inputEl.addEventListener('keydown', e=>{ if(e.key !== 'Escape') e.stopPropagation(); });
     inputEl.addEventListener('pointerdown', e=>e.stopPropagation());
     inputEl.addEventListener('pointerup', e=>e.stopPropagation());
   }
