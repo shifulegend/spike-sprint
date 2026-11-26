@@ -36,9 +36,13 @@
   #playHeroBtn{background:#7fc453;border-color:#245c18;box-shadow:3px 3px 0 #245c18;}
   #playHeroBtn:active{box-shadow:1px 1px 0 #245c18;}
   #playHeroBtn .mode-btn-sub{color:#12330b;}
-  .hero-mode-col{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .mode-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    padding:10px 12px;border-radius:10px;min-width:236px;box-sizing:border-box;}
+  .villain-card{background:rgba(20,16,42,0.72);border:2px solid rgba(255,204,0,0.45);}
+  .hero-card{background:rgba(16,44,14,0.78);border:2px solid #7fc453;box-shadow:0 0 0 1px rgba(36,92,24,0.6);}
+  .hero-diff-heading{font-size:10px;font-weight:bold;letter-spacing:1px;color:#b8ef96;margin-top:2px;text-transform:uppercase;}
   #heroDiffBar{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
-  .diff-pill{margin-top:0;padding:4px 8px;font-size:11px;font-weight:bold;background:rgba(26,31,74,0.88);
+  .diff-pill{margin-top:0;padding:4px 8px;font-size:11px;font-weight:bold;background:rgba(11,15,46,0.88);
     color:#d8e6cf;border:2px solid #3f6e2d;border-radius:4px;cursor:pointer;letter-spacing:0.4px;}
   .diff-pill.active{background:#7fc453;color:#0e2908;border-color:#ffcc00;box-shadow:0 0 0 1px #245c18;}
   #changeModeBtn{background:#e8e8e8;border-color:#444;color:#111;}
@@ -223,15 +227,18 @@
   <p id="storyHook">A rogue trespasser is tearing through the village.<br>Outrun the spiked barrel &mdash; or deploy traps to stop him.</p>
   <p id="startHint">Tap / Click / Space = Jump</p>
   <div class="mode-buttons">
-    <button id="playVillainBtn" class="mode-btn">
-      <span class="mode-btn-title">PLAY AS VILLAIN</span>
-      <span class="mode-btn-sub">Trespass, jump &amp; outrun the barrel</span>
-    </button>
-    <div class="hero-mode-col">
+    <div class="mode-card villain-card">
+      <button id="playVillainBtn" class="mode-btn">
+        <span class="mode-btn-title">PLAY AS VILLAIN</span>
+        <span class="mode-btn-sub">Trespass, jump &amp; outrun the barrel</span>
+      </button>
+    </div>
+    <div class="mode-card hero-card">
       <button id="playHeroBtn" class="mode-btn">
-        <span class="mode-btn-title">PLAY AS HERO</span>
+        <span id="playHeroTitle" class="mode-btn-title">PLAY AS HERO &middot; NORMAL</span>
         <span class="mode-btn-sub">Drop traps. Keep Havoc low.</span>
       </button>
+      <div class="hero-diff-heading">HERO DIFFICULTY</div>
       <div id="heroDiffBar" role="group" aria-label="Hero Difficulty">
         <button type="button" id="diffEasy" class="diff-pill" data-diff="easy">EASY</button>
         <button type="button" id="diffNormal" class="diff-pill active" data-diff="normal">NORMAL</button>
@@ -1236,6 +1243,8 @@ spawnHeroBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpaw
 function setHeroDifficulty(diffKey){
   if(!HERO_DIFFICULTIES[diffKey]) return;
   currentHeroDiff = diffKey;
+  const titleEl = document.getElementById('playHeroTitle');
+  if(titleEl) titleEl.textContent = 'PLAY AS HERO · ' + HERO_DIFFICULTIES[diffKey].label;
   ['easy','normal','hard','insane'].forEach(k=>{
     const el = document.getElementById('diff' + k[0].toUpperCase() + k.slice(1));
     if(el) el.classList.toggle('active', k === diffKey);

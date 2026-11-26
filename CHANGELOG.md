@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.0] - 2026-11-24
+### Added
+- **Four Hero Difficulty Tiers (`HERO_DIFFICULTIES`):** Easy (`0.55x`), Normal (`0.65x`, default), Hard (`0.75x`), and Insane (`0.90x`) with independent per-tier `MIN HAVOC` tracking.
+- **Explicit Hero-Only Difficulty Card UX:** Grouped **PLAY AS HERO**, the `HERO DIFFICULTY` label, and the 4 difficulty pills inside a dedicated green-bordered card with dynamic button text (`PLAY AS HERO · NORMAL`), visually separated from **PLAY AS VILLAIN**.
+- **Live Run Duration (`TIME MM:SS`):** Added live elapsed timer in the top-right HUD and on the end screen for both Villain and Hero modes.
+
 ## [2.0.0] - 2026-11-24
 ### Added
 - **Two-Mode Architecture (`BASE_MODE` / `MODES`):** Replaced single `START GAME` button with **Play as Villain** (legacy runner) and **Play as Hero** (village defense) plus **Change Mode** on the end screen, powered by one shared core engine with zero duplicated game loop.
