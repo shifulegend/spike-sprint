@@ -12,9 +12,10 @@
   #copyrightTag{position:absolute;bottom:2px;left:0;width:100%;text-align:center;color:rgba(255,255,255,0.4);font-size:9px;font-family:sans-serif;pointer-events:none;z-index:5;}
   #startScreen,#gameOverScreen{position:absolute;top:0;left:0;width:100%;height:100%;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:rgba(0,0,0,0.55);color:#fff;text-align:center;font-family:'Courier New',monospace;padding:16px;box-sizing:border-box;}
+    background:rgba(0,0,0,0.55);color:#fff;text-align:center;font-family:'Courier New',monospace;padding:16px;box-sizing:border-box;z-index:15;}
   #gameOverScreen{display:none;}
   h1{font-size:32px;margin:0 0 10px;text-shadow:2px 2px #000;}
+  #endFlavor{display:none;font-size:15px;color:#ffe680;margin:0 0 8px;font-style:italic;text-shadow:1px 1px #000;}
   #brandTitle{font-size:56px;font-weight:900;letter-spacing:4px;color:#ffcc00;
     text-shadow:4px 4px 0 #8c2c2c, 6px 6px 0 rgba(0,0,0,0.6);margin:0 0 6px;
     font-family:'Courier New',monospace;}
@@ -44,7 +45,7 @@
     border-radius:4px;
     cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    z-index:10;
+    z-index:20;
     box-shadow:3px 3px 0 #664400;
     transition:background 0.1s;
     padding:0;
@@ -61,11 +62,75 @@
   #loreCard{display:none;position:absolute;top:62px;left:12px;max-width:340px;
     background:rgba(11,15,46,0.95);border:3px solid #ffcc00;border-radius:6px;
     padding:14px 16px;color:#f4f4f4;text-align:left;font-size:12px;line-height:1.5;
-    z-index:20;box-shadow:4px 4px 0 rgba(0,0,0,0.6);}
+    z-index:25;box-shadow:4px 4px 0 rgba(0,0,0,0.6);}
   #loreCard h2{margin:0 0 8px;font-size:15px;color:#ffcc00;letter-spacing:1px;}
   #loreCard ul{margin:0 0 10px;padding-left:16px;}
   #loreCard li{margin-bottom:4px;}
   #loreCloseBtn{margin-top:4px;padding:6px 14px;font-size:13px;}
+
+  /* Hero Mode 3-Button Obstacle Bar */
+  #heroControls{
+    display:none;
+    position:absolute;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%);
+    gap:12px;
+    z-index:12;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .hero-spawn-btn{
+    position:relative;
+    overflow:hidden;
+    margin-top:0;
+    padding:8px 10px 6px;
+    width:92px;
+    height:78px;
+    background:#1a1f4a;
+    border:3px solid #ffcc00;
+    border-radius:8px;
+    box-shadow:3px 3px 0 #0b0f2e;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    cursor:pointer;
+    outline:none;
+    transition:transform 0.08s, border-color 0.15s, opacity 0.15s;
+    --cd-pct: 100%;
+  }
+  .hero-spawn-btn:active:not(.cooling){transform:translate(2px,2px);box-shadow:1px 1px 0 #0b0f2e;}
+  .hero-spawn-btn svg{width:38px;height:32px;display:block;position:relative;z-index:2;}
+  .hero-spawn-label{font-size:10px;font-weight:bold;letter-spacing:0.4px;color:#ffe680;position:relative;z-index:2;line-height:1.1;text-align:center;}
+  .hero-spawn-key{position:absolute;top:3px;right:5px;font-size:9px;color:rgba(255,255,255,0.45);z-index:2;}
+  .hero-cd-fill{
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:var(--cd-pct);
+    background:rgba(127,196,83,0.22);
+    z-index:1;
+    pointer-events:none;
+  }
+  .hero-spawn-btn.cooling{
+    opacity:0.62;
+    border-color:#5a607a;
+    cursor:not-allowed;
+  }
+  .hero-spawn-btn.cooling .hero-cd-fill{
+    background:rgba(255,204,0,0.32);
+  }
+  @keyframes readyFlash{
+    0%{box-shadow:0 0 0 0 rgba(255,204,0,0.85), 3px 3px 0 #0b0f2e;border-color:#fff;}
+    100%{box-shadow:0 0 12px 4px rgba(255,204,0,0), 3px 3px 0 #0b0f2e;border-color:#ffcc00;}
+  }
+  .hero-spawn-btn.ready-flash{
+    animation:readyFlash 0.24s ease-out;
+  }
 </style>
 </head>
 <body>
@@ -89,6 +154,51 @@
     <line x1="22" y1="8" x2="17" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
   </svg>
 </button>
+
+<div id="heroControls" aria-label="Hero Obstacle Controls">
+  <button id="spawnPitBtn" class="hero-spawn-btn" title="Spawn Pit (Key 1)" aria-label="Spawn Pit">
+    <span class="hero-cd-fill"></span>
+    <span class="hero-spawn-key">1</span>
+    <svg viewBox="0 0 40 32" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="40" height="14" fill="#bfe6ff"/>
+      <rect x="0" y="14" width="12" height="18" fill="#6b4423"/>
+      <rect x="0" y="14" width="10" height="4" fill="#4a2f18"/>
+      <rect x="12" y="14" width="16" height="18" fill="#8ed1ff"/>
+      <rect x="12" y="14" width="2.5" height="18" fill="#2b1a0d"/>
+      <rect x="25.5" y="14" width="2.5" height="18" fill="#2b1a0d"/>
+      <rect x="28" y="14" width="12" height="18" fill="#6b4423"/>
+      <rect x="30" y="14" width="10" height="4" fill="#4a2f18"/>
+    </svg>
+    <span class="hero-spawn-label">PIT</span>
+  </button>
+  <button id="spawnBushBtn" class="hero-spawn-btn" title="Spawn Bush (Key 2)" aria-label="Spawn Bush">
+    <span class="hero-cd-fill"></span>
+    <span class="hero-spawn-key">2</span>
+    <svg viewBox="0 0 40 32" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="20" cy="29" rx="14" ry="2.5" fill="rgba(0,0,0,0.3)"/>
+      <path d="M7 28 Q7 14 15 11 Q20 6 25 11 Q33 14 33 28 Z" fill="#245c18"/>
+      <ellipse cx="14" cy="19" rx="7" ry="7.5" fill="#347a22"/>
+      <ellipse cx="26" cy="19.5" rx="7" ry="7.5" fill="#347a22"/>
+      <ellipse cx="20" cy="14" rx="7.5" ry="7" fill="#347a22"/>
+      <ellipse cx="16.5" cy="12" rx="4.5" ry="4" fill="#4f9c37"/>
+      <ellipse cx="23.5" cy="12.5" rx="4.2" ry="3.8" fill="#4f9c37"/>
+      <ellipse cx="20" cy="9.5" rx="3.5" ry="3" fill="#7fc453"/>
+    </svg>
+    <span class="hero-spawn-label">BUSH</span>
+  </button>
+  <button id="spawnHeroBtn" class="hero-spawn-btn" title="Spawn Purple Hero (Key 3)" aria-label="Spawn Purple Hero">
+    <span class="hero-cd-fill"></span>
+    <span class="hero-spawn-key">3</span>
+    <svg viewBox="0 0 40 32" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="20" cy="16" rx="11" ry="11" fill="#5a2d82"/>
+      <rect x="11" y="24" width="5" height="5" fill="#3d1c5a"/>
+      <rect x="24" y="24" width="5" height="5" fill="#3d1c5a"/>
+      <circle cx="23.5" cy="13" r="2.6" fill="#fff"/>
+      <circle cx="24.2" cy="13" r="1.2" fill="#000"/>
+    </svg>
+    <span class="hero-spawn-label">PURPLE HERO</span>
+  </button>
+</div>
 
 <div id="startScreen">
   <button id="storyToggle" title="Village Story" aria-label="Village Story">?</button>
@@ -119,6 +229,7 @@
 
 <div id="gameOverScreen">
   <h1 id="gameOverTitle">GAME OVER</h1>
+  <p id="endFlavor"></p>
   <p id="finalScore"></p>
   <div class="end-buttons">
     <button id="restartBtn">RESTART</button>
@@ -297,6 +408,10 @@ function sfxBarrelWarn(){
   playTone({type:'sawtooth', freqStart:80, freqEnd:55, duration:0.2, volume:0.18});
 }
 
+function sfxSpawnTrap(){
+  playTone({type:'triangle', freqStart:260, freqEnd:150, duration:0.09, volume:0.16});
+}
+
 const soundToggleBtn = document.getElementById('soundToggle');
 const iconOn  = document.getElementById('iconSoundOn');
 const iconOff = document.getElementById('iconSoundOff');
@@ -341,13 +456,29 @@ const BASE_MODE = {
   bestLabel: 'HIGH SCORE',
   endBestLabel: 'High Score',
   endTitle: 'GAME OVER',
+  causeLabels: null,
   lowerIsBetter: false,
   updateRunner: null
 };
 
 const MODES = {
   villain: {}, // Legacy runner mode — inherits 100% of BASE_MODE
-  hero: {}     // Step 1: inherits BASE_MODE; Hero UI/cooldown/RL overrides land in Steps 2–3
+  hero: {
+    autoSpawn: false,
+    showSpawnControls: true,
+    scoreLabel: 'HAVOC ',
+    endScoreLabel: 'Havoc',
+    bestLabel: 'MIN HAVOC',
+    endBestLabel: 'Min Havoc',
+    endTitle: 'VILLAGE SAVED!',
+    causeLabels: {
+      pit: 'Tumbled into a pit!',
+      enemy: 'Stopped by a Purple Hero!',
+      barrel: 'Crushed by the spiked barrel!'
+    },
+    lowerIsBetter: true,
+    updateRunner: null // Step 3 plugs in the embedded DQN RL bot here
+  }
 };
 
 let currentModeKey = 'villain';
@@ -427,9 +558,52 @@ let pipes = [];
 let spawnTimer = 0;
 let nextSpawnAt = 60;
 
+// Shared deterministic Hero cooldown state (frames)
+let heroCooldownRemaining = 0;
+let heroCooldownTotal = 0;
+
 let barrelRoll = 0;
 let barrelCatchUp = 0;
 let playerStuckTimer = 0;
+
+const heroControlsEl = document.getElementById('heroControls');
+const spawnPitBtn = document.getElementById('spawnPitBtn');
+const spawnBushBtn = document.getElementById('spawnBushBtn');
+const spawnHeroBtn = document.getElementById('spawnHeroBtn');
+const heroSpawnBtns = [spawnPitBtn, spawnBushBtn, spawnHeroBtn];
+
+function updateHeroCooldownUI(justReady){
+  const pct = heroCooldownTotal > 0
+    ? Math.max(0, Math.min(100, (1 - heroCooldownRemaining / heroCooldownTotal) * 100))
+    : 100;
+  const cooling = heroCooldownRemaining > 0;
+  for(const btn of heroSpawnBtns){
+    btn.style.setProperty('--cd-pct', pct.toFixed(1) + '%');
+    if(cooling){
+      btn.classList.add('cooling');
+      btn.classList.remove('ready-flash');
+    } else {
+      btn.classList.remove('cooling');
+      if(justReady){
+        btn.classList.remove('ready-flash');
+        void btn.offsetWidth;
+        btn.classList.add('ready-flash');
+      }
+    }
+  }
+}
+
+function triggerHeroSpawn(spawnerFn){
+  if(gameState !== 'playing' || !activeMode.showSpawnControls) return false;
+  if(heroCooldownRemaining > 0) return false;
+  primeAudio();
+  spawnerFn();
+  sfxSpawnTrap();
+  heroCooldownTotal = getBaseSpawnInterval(speedMult);
+  heroCooldownRemaining = heroCooldownTotal;
+  updateHeroCooldownUI(false);
+  return true;
+}
 
 function resetGame(){
   score = 0;
@@ -438,6 +612,8 @@ function resetGame(){
   worldSpeed = activeMode.baseSpeed;
   enemies = []; pits = []; pipes = [];
   spawnTimer = 0; nextSpawnAt = 60;
+  heroCooldownRemaining = 0; heroCooldownTotal = 0;
+  updateHeroCooldownUI(false);
   barrelCatchUp = 0; barrelRoll = 0;
   playerStuckTimer = 0;
   player.y = groundY - player.h;
@@ -500,6 +676,9 @@ function update(dt){
       nextSpawnAt = getBaseSpawnInterval(speedMult) + Math.random()*30;
       spawnObstacle();
     }
+  } else if(heroCooldownRemaining > 0){
+    heroCooldownRemaining = Math.max(0, heroCooldownRemaining - dt*60);
+    updateHeroCooldownUI(heroCooldownRemaining === 0);
   }
 
   if(typeof activeMode.updateRunner === 'function'){
@@ -617,11 +796,21 @@ function update(dt){
 
 function endGame(cause){
   gameState = 'over';
+  heroControlsEl.style.display = 'none';
   updateSessionBest(score);
   sfxGameOver();
   const bestVal = getActiveBestValue();
   const bestStr = Number.isFinite(bestVal) ? String(Math.floor(bestVal)).padStart(5,'0') : '-----';
   document.getElementById('gameOverTitle').textContent = activeMode.endTitle;
+  const flavorEl = document.getElementById('endFlavor');
+  const flavorText = activeMode.causeLabels && cause ? activeMode.causeLabels[cause] : '';
+  if(flavorText){
+    flavorEl.textContent = flavorText;
+    flavorEl.style.display = 'block';
+  } else {
+    flavorEl.textContent = '';
+    flavorEl.style.display = 'none';
+  }
   document.getElementById('finalScore').textContent = activeMode.endScoreLabel + ': ' + String(Math.floor(score)).padStart(5,'0') + '  |  ' + activeMode.endBestLabel + ': ' + bestStr;
   document.getElementById('gameOverScreen').style.display='flex';
 }
@@ -870,6 +1059,11 @@ function endJump(){
 
 window.addEventListener('keydown', e=>{
   if(e.code==='Space'){ e.preventDefault(); startJump(); }
+  if(activeMode.showSpawnControls && gameState==='playing'){
+    if(e.key==='1'){ e.preventDefault(); triggerHeroSpawn(spawnPit); }
+    else if(e.key==='2'){ e.preventDefault(); triggerHeroSpawn(spawnBush); }
+    else if(e.key==='3'){ e.preventDefault(); triggerHeroSpawn(spawnEnemy); }
+  }
 });
 window.addEventListener('keyup', e=>{
   if(e.code==='Space'){ e.preventDefault(); endJump(); }
@@ -878,6 +1072,15 @@ canvas.addEventListener('pointerdown', e=>{ startJump(); });
 canvas.addEventListener('pointerup', e=>{ endJump(); });
 canvas.addEventListener('pointercancel', e=>{ endJump(); });
 
+// Hero spawn button bindings (stop propagation so taps never trigger canvas jump)
+spawnPitBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn(spawnPit); });
+spawnBushBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn(spawnBush); });
+spawnHeroBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn(spawnEnemy); });
+[heroControlsEl, ...heroSpawnBtns].forEach(el=>{
+  el.addEventListener('pointerdown', e=>e.stopPropagation());
+  el.addEventListener('pointerup',   e=>e.stopPropagation());
+});
+
 function startGame(modeKey){
   currentModeKey = MODES[modeKey] ? modeKey : 'villain';
   activeMode = { ...BASE_MODE, ...MODES[currentModeKey] };
@@ -885,6 +1088,7 @@ function startGame(modeKey){
   loreCard.style.display = 'none';
   document.getElementById('startScreen').style.display='none';
   document.getElementById('gameOverScreen').style.display='none';
+  heroControlsEl.style.display = activeMode.showSpawnControls ? 'flex' : 'none';
   resetGame();
   drawHUD();
   gameState='playing';
@@ -901,6 +1105,7 @@ document.getElementById('restartBtn').addEventListener('click', ()=>{
 });
 document.getElementById('changeModeBtn').addEventListener('click', ()=>{
   gameState = 'start';
+  heroControlsEl.style.display = 'none';
   document.getElementById('gameOverScreen').style.display='none';
   document.getElementById('startScreen').style.display='flex';
 });
