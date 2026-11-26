@@ -8,6 +8,7 @@
   #gameCanvas{display:block;background:linear-gradient(#8ed1ff,#c9ecff);touch-action:none;}
   #hud{position:absolute;top:10px;right:16px;color:#000;font-size:28px;font-weight:bold;text-shadow:1px 1px 0 #fff;letter-spacing:2px;}
   #speedTag{position:absolute;top:64px;right:16px;color:#000;font-size:14px;text-shadow:1px 1px 0 #fff;}
+  #timeTag{position:absolute;top:82px;right:16px;color:#000;font-size:14px;text-shadow:1px 1px 0 #fff;}
   #highScoreTag{position:absolute;top:44px;right:16px;color:#000;font-size:16px;font-weight:bold;text-shadow:1px 1px 0 #fff;}
   #copyrightTag{position:absolute;bottom:2px;left:0;width:100%;text-align:center;color:rgba(255,255,255,0.4);font-size:9px;font-family:sans-serif;pointer-events:none;z-index:5;}
   #startScreen,#gameOverScreen{position:absolute;top:0;left:0;width:100%;height:100%;
@@ -144,6 +145,7 @@
 <div id="hud">00000</div>
 <div id="highScoreTag">HIGH SCORE: 00000</div>
 <div id="speedTag">SPEED x1.0</div>
+<div id="timeTag">TIME 00:00</div>
 
 <button id="soundToggle" title="Toggle Sound" aria-label="Toggle Sound">
   <svg id="iconSoundOn" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -953,7 +955,7 @@ function endGame(cause){
     flavorEl.textContent = '';
     flavorEl.style.display = 'none';
   }
-  document.getElementById('finalScore').textContent = activeMode.endScoreLabel + ': ' + String(Math.floor(score)).padStart(5,'0') + '  |  ' + activeMode.endBestLabel + ': ' + bestStr;
+  document.getElementById('finalScore').textContent = activeMode.endScoreLabel + ': ' + String(Math.floor(score)).padStart(5,'0') + '  |  ' + activeMode.endBestLabel + ': ' + bestStr + '  |  Time: ' + formatDuration(elapsed);
   document.getElementById('gameOverScreen').style.display='flex';
 }
 
@@ -1148,11 +1150,19 @@ function drawBarrel(){
   }
 }
 
+function formatDuration(sec){
+  const total = Math.max(0, Math.floor(sec));
+  const mins = String(Math.floor(total / 60)).padStart(2,'0');
+  const secs = String(total % 60).padStart(2,'0');
+  return mins + ':' + secs;
+}
+
 function drawHUD(){
   const bestVal = getActiveBestValue();
   const bestStr = Number.isFinite(bestVal) ? String(Math.floor(bestVal)).padStart(5,'0') : '-----';
   document.getElementById('hud').textContent = activeMode.scoreLabel + String(Math.floor(score)).padStart(5,'0');
   document.getElementById('speedTag').textContent = 'SPEED x' + speedMult.toFixed(2);
+  document.getElementById('timeTag').textContent = 'TIME ' + formatDuration(elapsed);
   document.getElementById('highScoreTag').textContent = activeMode.bestLabel + ': ' + bestStr;
 }
 
