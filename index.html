@@ -226,6 +226,10 @@
     .mode-buttons{flex-direction:column;width:100%;max-width:340px;}
     .modal-box{width:92vw;max-height:85vh;overflow-y:auto;}
   }
+  #replayBadge{display:none;position:absolute;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:6px 14px;background:#7c2d12;color:#ffedd5;border:2px solid #fb923c;border-radius:4px;font-size:13px;font-weight:bold;letter-spacing:1.2px;z-index:22;align-items:center;gap:6px;pointer-events:none;}
+  #scoresStatus{min-height:18px;font-size:12px;color:#ffb4b4;margin:4px 0 6px;}
+  .watch-btn{padding:3px 8px;font-family:'Courier New',monospace;font-size:11px;font-weight:bold;background:#1a3b2e;color:#9ef0c2;border:1px solid #4ade80;border-radius:4px;cursor:pointer;}
+  .watch-btn:active{transform:translate(1px,1px);}
 </style>
 </head>
 <body>
@@ -250,6 +254,7 @@
     <line x1="22" y1="8" x2="17" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
   </svg>
 </button>
+<div id="replayBadge" aria-live="polite">REPLAY</div>
 <button id="exitBtn" title="Exit Run" aria-label="Exit Run">&#10005; EXIT</button>
 
 <div id="heroControls" aria-label="Hero Obstacle Controls">
@@ -382,6 +387,7 @@
       <button type="button" id="sortByScoreBtn" class="score-sort-btn active">TOP SCORES</button>
       <button type="button" id="sortByTimeBtn" class="score-sort-btn">LONGEST RUNS</button>
     </div>
+    <div id="scoresStatus" role="status" aria-live="polite"></div>
     <div id="scoreTableWrap" class="score-table-wrap"></div>
     <button type="button" id="closeScoresBtn">CLOSE</button>
   </div>
@@ -621,7 +627,7 @@ loreCloseBtn.addEventListener('click', e=>{
 });
 // ────────────────────────────────────────────────────────────────────────────
 
-// ── Inlined Pure Simulation Core (src/sim/core.js via scripts/build.js) ─────
+// ── Inlined Pure Modules (core.js, replay.js, replays.js via scripts/build.js) ─
 (function(root, factory){
   if(typeof module === 'object' && module.exports){
     module.exports = factory();
@@ -1131,74 +1137,594 @@ loreCloseBtn.addEventListener('click', e=>{
     createSim
   };
 });
+(function(root, factory){
+  if(typeof module === 'object' && module.exports){
+    module.exports = factory();
+  } else {
+    root.SpikeSprintReplay = factory();
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function(){
+  'use strict';
+
+  const REPLAY_FORMAT_VERSION = 1;
+  const BOT_HASH_PREFIX = '99d90952c2b64fac';
+  const MAX_REPLAY_EVENTS = 50000;
+  const MAX_REPLAY_TICKS = 72000; // 20 minutes at 60 Hz
+  const MAX_PAYLOAD_BYTES = 262144; // 256 KB hard cap
+  const MAX_B64_CHARS = 350000;
+
+  const EVT = {
+    JUMP_DOWN: 1,
+    JUMP_UP: 2,
+    SPAWN_PIT: 3,
+    SPAWN_BUSH: 4,
+    SPAWN_ENEMY: 5,
+    CLEAR_HELD: 6
+  };
+
+  const VALID_MODES = { villain: true, hero: true };
+  const VALID_DIFFS = { easy: true, normal: true, hard: true, insane: true };
+  const VALID_CAUSES = { pit: true, enemy: true, barrel: true, cap: true };
+
+  const B64_ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const B64_LUT = new Int16Array(128).fill(-1);
+  for(let i = 0; i < B64_ALPHA.length; i++) B64_LUT[B64_ALPHA.charCodeAt(i)] = i;
+
+  function encodeBytesToBase64(bytes){
+    let out = '';
+    const len = bytes.length;
+    for(let i = 0; i < len; i += 3){
+      const b0 = bytes[i];
+      const b1 = i + 1 < len ? bytes[i + 1] : 0;
+      const b2 = i + 2 < len ? bytes[i + 2] : 0;
+      out += B64_ALPHA[b0 >> 2];
+      out += B64_ALPHA[((b0 & 3) << 4) | (b1 >> 4)];
+      out += i + 1 < len ? B64_ALPHA[((b1 & 15) << 2) | (b2 >> 6)] : '=';
+      out += i + 2 < len ? B64_ALPHA[b2 & 63] : '=';
+    }
+    return out;
+  }
+
+  function decodeBase64ToBytes(b64){
+    if(typeof b64 !== 'string' || b64.length > MAX_B64_CHARS) return null;
+    if(b64.length === 0) return new Uint8Array(0);
+    if(b64.length % 4 !== 0) return null;
+    let len = b64.length;
+    if(b64.charCodeAt(len - 1) === 61) len--;
+    if(len > 0 && b64.charCodeAt(len - 1) === 61) len--;
+    const outLen = (len * 3) >> 2;
+    if(outLen > MAX_PAYLOAD_BYTES) return null;
+    const out = new Uint8Array(outLen);
+    let o = 0;
+    for(let i = 0; i < len; i += 4){
+      const a0 = b64.charCodeAt(i);
+      const a1 = b64.charCodeAt(i + 1);
+      const a2 = i + 2 < len ? b64.charCodeAt(i + 2) : 65;
+      const a3 = i + 3 < len ? b64.charCodeAt(i + 3) : 65;
+      if(a0 >= 128 || a1 >= 128 || a2 >= 128 || a3 >= 128) return null;
+      const c0 = B64_LUT[a0], c1 = B64_LUT[a1], c2 = B64_LUT[a2], c3 = B64_LUT[a3];
+      if(c0 < 0 || c1 < 0 || c2 < 0 || c3 < 0) return null;
+      out[o++] = (c0 << 2) | (c1 >> 4);
+      if(o < outLen) out[o++] = ((c1 & 15) << 4) | (c2 >> 2);
+      if(o < outLen) out[o++] = ((c2 & 3) << 6) | c3;
+    }
+    return out;
+  }
+
+  function writeVarint(buf, val){
+    let v = val >>> 0;
+    while(v >= 0x80){
+      buf.push((v & 0x7f) | 0x80);
+      v >>>= 7;
+    }
+    buf.push(v);
+  }
+
+  function encodeEvents(events){
+    const bytes = [];
+    let prevTick = 0;
+    for(let i = 0; i < events.length; i++){
+      const ev = events[i];
+      const delta = ev.tick - prevTick;
+      if(delta < 0) throw new Error('Replay events must be non-decreasing in tick order');
+      prevTick = ev.tick;
+      writeVarint(bytes, delta);
+      bytes.push(ev.code & 0xff);
+    }
+    return new Uint8Array(bytes);
+  }
+
+  function decodeEvents(bytes, expectedCount){
+    const events = [];
+    let pos = 0;
+    let tick = 0;
+    while(pos < bytes.length){
+      if(events.length >= MAX_REPLAY_EVENTS) return { ok: false, error: 'Event count exceeds limit' };
+      let delta = 0;
+      let shift = 0;
+      let done = false;
+      while(pos < bytes.length){
+        const b = bytes[pos++];
+        delta |= (b & 0x7f) << shift;
+        if((b & 0x80) === 0){ done = true; break; }
+        shift += 7;
+        if(shift > 28) return { ok: false, error: 'Varint overflow' };
+      }
+      if(!done) return { ok: false, error: 'Truncated varint' };
+      if(pos >= bytes.length) return { ok: false, error: 'Missing event code' };
+      const code = bytes[pos++];
+      if(code < 1 || code > 6) return { ok: false, error: 'Invalid event code' };
+      tick += (delta >>> 0);
+      if(tick > MAX_REPLAY_TICKS) return { ok: false, error: 'Event tick exceeds limit' };
+      events.push({ tick, code });
+    }
+    if(expectedCount !== undefined && events.length !== expectedCount){
+      return { ok: false, error: 'Event count mismatch' };
+    }
+    return { ok: true, events };
+  }
+
+  function fnv1a32(str, init){
+    let h = init >>> 0;
+    for(let i = 0; i < str.length; i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(16).padStart(8, '0');
+  }
+
+  function computeIntegrityHash(env){
+    const canonical = [
+      env.formatVersion,
+      env.simVersion,
+      env.botHashPrefix,
+      env.modeKey,
+      env.heroDiff || '',
+      env.seed >>> 0,
+      env.finalTick >>> 0,
+      env.finalScore,
+      env.stopCause,
+      env.eventCount >>> 0,
+      env.eventsB64
+    ].join('|');
+    return fnv1a32(canonical, 0x811c9dc5) + fnv1a32('S2:' + canonical, 0x9e3779b9);
+  }
+
+  function createRecorder(opts, SimModule){
+    if(!SimModule || typeof SimModule.createSim !== 'function'){
+      throw new Error('SimModule with createSim() is required');
+    }
+    const sim = SimModule.createSim(opts);
+    const events = [];
+
+    function pushEvent(code){
+      if(sim.state.gameState !== 'playing') return;
+      if(events.length >= MAX_REPLAY_EVENTS) return;
+      events.push({ tick: sim.state.simTicks, code });
+    }
+
+    function startJump(){
+      pushEvent(EVT.JUMP_DOWN);
+      return sim.startJump();
+    }
+
+    function endJump(){
+      pushEvent(EVT.JUMP_UP);
+      sim.endJump();
+    }
+
+    function clearHeldOnPause(){
+      if(sim.state.jumpKeyDown){
+        pushEvent(EVT.CLEAR_HELD);
+        sim.state.jumpKeyDown = false;
+      }
+    }
+
+    function triggerHeroSpawn(kind){
+      const code = kind === 'pit' ? EVT.SPAWN_PIT : kind === 'bush' ? EVT.SPAWN_BUSH : kind === 'enemy' ? EVT.SPAWN_ENEMY : 0;
+      if(!code) return false;
+      pushEvent(code);
+      return sim.triggerHeroSpawn(kind);
+    }
+
+    function step(){
+      return sim.step();
+    }
+
+    function finalize(){
+      const rawBytes = encodeEvents(events);
+      const eventsB64 = encodeBytesToBase64(rawBytes);
+      const envelope = {
+        formatVersion: REPLAY_FORMAT_VERSION,
+        simVersion: SimModule.SIM_VERSION,
+        botHashPrefix: BOT_HASH_PREFIX,
+        modeKey: sim.state.modeKey,
+        heroDiff: sim.state.modeKey === 'hero' ? sim.state.heroDiff : null,
+        seed: sim.state.seed >>> 0,
+        finalTick: sim.state.simTicks >>> 0,
+        finalScore: Math.floor(sim.state.score),
+        stopCause: sim.state.stopCause || 'cap',
+        eventCount: events.length,
+        eventsB64
+      };
+      envelope.integrityHash = computeIntegrityHash(envelope);
+      return envelope;
+    }
+
+    return {
+      sim,
+      events,
+      startJump,
+      endJump,
+      clearHeldOnPause,
+      triggerHeroSpawn,
+      step,
+      finalize
+    };
+  }
+
+  function decodeReplay(envelope, SimModule){
+    if(!envelope || typeof envelope !== 'object' || Array.isArray(envelope)){
+      return { ok: false, error: 'Replay must be an object' };
+    }
+    if(envelope.formatVersion !== REPLAY_FORMAT_VERSION){
+      return { ok: false, error: 'Unsupported replay formatVersion' };
+    }
+    if(SimModule && envelope.simVersion !== SimModule.SIM_VERSION){
+      return { ok: false, error: 'Incompatible simVersion: ' + envelope.simVersion };
+    }
+    if(envelope.botHashPrefix !== BOT_HASH_PREFIX){
+      return { ok: false, error: 'Incompatible botHashPrefix' };
+    }
+    if(!VALID_MODES[envelope.modeKey]){
+      return { ok: false, error: 'Invalid modeKey' };
+    }
+    if(envelope.modeKey === 'hero' && !VALID_DIFFS[envelope.heroDiff]){
+      return { ok: false, error: 'Invalid heroDiff' };
+    }
+    if(!VALID_CAUSES[envelope.stopCause]){
+      return { ok: false, error: 'Invalid stopCause' };
+    }
+    if(!Number.isInteger(envelope.seed) || envelope.seed < 0 || envelope.seed > 0xffffffff){
+      return { ok: false, error: 'Invalid seed' };
+    }
+    if(!Number.isInteger(envelope.finalTick) || envelope.finalTick < 0 || envelope.finalTick > MAX_REPLAY_TICKS){
+      return { ok: false, error: 'Invalid finalTick' };
+    }
+    if(!Number.isInteger(envelope.finalScore) || envelope.finalScore < 0 || envelope.finalScore > 1e9){
+      return { ok: false, error: 'Invalid finalScore' };
+    }
+    if(!Number.isInteger(envelope.eventCount) || envelope.eventCount < 0 || envelope.eventCount > MAX_REPLAY_EVENTS){
+      return { ok: false, error: 'Invalid eventCount' };
+    }
+    const expectedHash = computeIntegrityHash(envelope);
+    if(envelope.integrityHash !== expectedHash){
+      return { ok: false, error: 'Integrity hash mismatch (tampered replay)' };
+    }
+    const bytes = decodeBase64ToBytes(envelope.eventsB64);
+    if(!bytes) return { ok: false, error: 'Invalid Base64 payload' };
+    const decoded = decodeEvents(bytes, envelope.eventCount);
+    if(!decoded.ok) return decoded;
+    return { ok: true, header: envelope, events: decoded.events, rawBytes: bytes.length };
+  }
+
+  function applyEvent(sim, code){
+    if(code === EVT.JUMP_DOWN) sim.startJump();
+    else if(code === EVT.JUMP_UP) sim.endJump();
+    else if(code === EVT.SPAWN_PIT) sim.triggerHeroSpawn('pit');
+    else if(code === EVT.SPAWN_BUSH) sim.triggerHeroSpawn('bush');
+    else if(code === EVT.SPAWN_ENEMY) sim.triggerHeroSpawn('enemy');
+    else if(code === EVT.CLEAR_HELD) sim.state.jumpKeyDown = false;
+  }
+
+  function verifyReplay(envelope, SimModule){
+    const dec = decodeReplay(envelope, SimModule);
+    if(!dec.ok) return dec;
+    const sim = SimModule.createSim({
+      modeKey: dec.header.modeKey,
+      heroDiff: dec.header.heroDiff || 'normal',
+      seed: dec.header.seed
+    });
+    const events = dec.events;
+    let evIdx = 0;
+
+    for(let t = 0; t < dec.header.finalTick; t++){
+      while(evIdx < events.length && events[evIdx].tick === sim.state.simTicks){
+        applyEvent(sim, events[evIdx].code);
+        evIdx++;
+      }
+      if(sim.state.gameState !== 'playing') break;
+      sim.step();
+    }
+
+    const actualScore = Math.floor(sim.state.score);
+    const actualCause = sim.state.stopCause || 'cap';
+    if(sim.state.simTicks !== dec.header.finalTick){
+      return { ok: false, error: 'Replay tick mismatch: ' + sim.state.simTicks + ' vs ' + dec.header.finalTick };
+    }
+    if(actualScore !== dec.header.finalScore){
+      return { ok: false, error: 'Replay score mismatch: ' + actualScore + ' vs ' + dec.header.finalScore };
+    }
+    if(actualCause !== dec.header.stopCause){
+      return { ok: false, error: 'Replay stopCause mismatch: ' + actualCause + ' vs ' + dec.header.stopCause };
+    }
+    return {
+      ok: true,
+      finalTick: sim.state.simTicks,
+      finalScore: actualScore,
+      elapsed: sim.state.elapsed,
+      stopCause: actualCause,
+      rawBytes: dec.rawBytes,
+      snapshot: sim.getSnapshot()
+    };
+  }
+
+  return {
+    REPLAY_FORMAT_VERSION,
+    BOT_HASH_PREFIX,
+    MAX_REPLAY_EVENTS,
+    MAX_REPLAY_TICKS,
+    MAX_PAYLOAD_BYTES,
+    EVT,
+    encodeBytesToBase64,
+    decodeBase64ToBytes,
+    encodeEvents,
+    decodeEvents,
+    computeIntegrityHash,
+    createRecorder,
+    decodeReplay,
+    verifyReplay
+  };
+});
+(function(root, factory){
+  if(typeof module === 'object' && module.exports){
+    module.exports = factory();
+  } else {
+    root.SpikeSprintReplayStore = factory();
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function(){
+  'use strict';
+
+  const DB_NAME = 'spike_sprint_replays_v1';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'replays';
+
+  function createReplayStore(opts){
+    const cfg = opts || {};
+    const idbFactory = cfg.indexedDB !== undefined
+      ? cfg.indexedDB
+      : (typeof globalThis !== 'undefined' && globalThis.indexedDB ? globalThis.indexedDB : null);
+    const nav = cfg.navigator !== undefined
+      ? cfg.navigator
+      : (typeof globalThis !== 'undefined' && globalThis.navigator ? globalThis.navigator : null);
+
+    const memoryMap = new Map();
+    const knownRunIds = new Set();
+    let dbPromise = null;
+    let usingMemoryFallback = false;
+    let persistRequested = false;
+    let lastStorageWarning = null;
+
+    function requestPersistenceOnce(){
+      if(persistRequested) return Promise.resolve(false);
+      persistRequested = true;
+      try {
+        if(nav && nav.storage && typeof nav.storage.persist === 'function'){
+          return Promise.resolve(nav.storage.persist()).then(Boolean, () => false);
+        }
+      } catch(e){}
+      return Promise.resolve(false);
+    }
+
+    function openDb(){
+      if(usingMemoryFallback || !idbFactory){
+        usingMemoryFallback = true;
+        return Promise.resolve(null);
+      }
+      if(dbPromise) return dbPromise;
+      dbPromise = new Promise(resolve => {
+        try {
+          const req = idbFactory.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = () => {
+            try {
+              const db = req.result;
+              if(!db.objectStoreNames.contains(STORE_NAME)){
+                db.createObjectStore(STORE_NAME, { keyPath: 'runId' });
+              }
+            } catch(e){}
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => {
+            usingMemoryFallback = true;
+            lastStorageWarning = 'IndexedDB open failed; using in-memory fallback';
+            resolve(null);
+          };
+        } catch(e){
+          usingMemoryFallback = true;
+          lastStorageWarning = 'IndexedDB blocked (' + (e && e.name ? e.name : 'Error') + '); using in-memory fallback';
+          resolve(null);
+        }
+      });
+      return dbPromise;
+    }
+
+    function hydrateKeys(){
+      requestPersistenceOnce();
+      return openDb().then(db => {
+        if(!db) return Array.from(knownRunIds);
+        return new Promise(resolve => {
+          try {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.getAllKeys();
+            req.onsuccess = () => {
+              const keys = Array.isArray(req.result) ? req.result : [];
+              for(const k of keys) knownRunIds.add(String(k));
+              resolve(Array.from(knownRunIds));
+            };
+            req.onerror = () => resolve(Array.from(knownRunIds));
+          } catch(e){
+            usingMemoryFallback = true;
+            resolve(Array.from(knownRunIds));
+          }
+        });
+      });
+    }
+
+    function saveReplay(runId, envelope){
+      if(!runId || !envelope) return Promise.resolve({ ok: false, persisted: false });
+      const key = String(runId);
+      memoryMap.set(key, envelope);
+      knownRunIds.add(key);
+      return openDb().then(db => {
+        if(!db) return { ok: true, persisted: false, fallback: true };
+        return new Promise(resolve => {
+          try {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.put({ runId: key, envelope });
+            req.onsuccess = () => resolve({ ok: true, persisted: true, fallback: false });
+            req.onerror = () => {
+              usingMemoryFallback = true;
+              lastStorageWarning = 'IndexedDB write failed (quota/blocked); kept in memory';
+              resolve({ ok: true, persisted: false, fallback: true });
+            };
+            tx.onerror = () => {
+              usingMemoryFallback = true;
+              lastStorageWarning = 'IndexedDB transaction failed; kept in memory';
+              resolve({ ok: true, persisted: false, fallback: true });
+            };
+          } catch(e){
+            usingMemoryFallback = true;
+            lastStorageWarning = 'IndexedDB put threw; kept in memory';
+            resolve({ ok: true, persisted: false, fallback: true });
+          }
+        });
+      });
+    }
+
+    function loadRawReplay(runId){
+      const key = String(runId || '');
+      if(!key) return Promise.resolve(null);
+      if(memoryMap.has(key)) return Promise.resolve(memoryMap.get(key));
+      return openDb().then(db => {
+        if(!db) return null;
+        return new Promise(resolve => {
+          try {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.get(key);
+            req.onsuccess = () => {
+              const rec = req.result;
+              resolve(rec && rec.envelope ? rec.envelope : null);
+            };
+            req.onerror = () => resolve(null);
+          } catch(e){
+            resolve(null);
+          }
+        });
+      });
+    }
+
+    function loadReplay(runId, ReplayMod, SimMod){
+      return loadRawReplay(runId).then(env => {
+        if(!env) return { ok: false, error: 'Replay not found' };
+        if(!ReplayMod || typeof ReplayMod.decodeReplay !== 'function'){
+          return { ok: false, error: 'Replay decoder unavailable' };
+        }
+        return ReplayMod.decodeReplay(env, SimMod);
+      });
+    }
+
+    function gcReplays(keepRunIds){
+      const keep = keepRunIds instanceof Set ? keepRunIds : new Set(keepRunIds || []);
+      let removed = 0;
+      for(const k of Array.from(memoryMap.keys())){
+        if(!keep.has(k)){
+          memoryMap.delete(k);
+          knownRunIds.delete(k);
+          removed++;
+        }
+      }
+      return openDb().then(db => {
+        if(!db) return { removed };
+        return new Promise(resolve => {
+          try {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.getAllKeys();
+            req.onsuccess = () => {
+              const keys = Array.isArray(req.result) ? req.result : [];
+              const toDelete = [];
+              for(const k of keys){
+                const ks = String(k);
+                if(!keep.has(ks)){
+                  toDelete.push(ks);
+                  knownRunIds.delete(ks);
+                }
+              }
+              if(!toDelete.length){ resolve({ removed }); return; }
+              let remaining = toDelete.length;
+              const doneOne = () => { remaining--; if(remaining <= 0) resolve({ removed: removed + toDelete.length }); };
+              for(const ks of toDelete){
+                const dreq = store.delete(ks);
+                if(dreq){
+                  dreq.onsuccess = doneOne;
+                  dreq.onerror = doneOne;
+                } else {
+                  doneOne();
+                }
+              }
+            };
+            req.onerror = () => resolve({ removed });
+          } catch(e){
+            resolve({ removed });
+          }
+        });
+      });
+    }
+
+    function hasReplaySync(runId){
+      return Boolean(runId && knownRunIds.has(String(runId)));
+    }
+
+    function getStatus(){
+      return {
+        usingMemoryFallback,
+        persistRequested,
+        knownCount: knownRunIds.size,
+        lastStorageWarning
+      };
+    }
+
+    return {
+      DB_NAME,
+      STORE_NAME,
+      requestPersistenceOnce,
+      hydrateKeys,
+      saveReplay,
+      loadReplay,
+      gcReplays,
+      hasReplaySync,
+      getStatus
+    };
+  }
+
+  return {
+    DB_NAME,
+    DB_VERSION,
+    STORE_NAME,
+    createReplayStore
+  };
+});
 const {
   SIM_VERSION, WORLD_W: _SIM_W, WORLD_H: _SIM_H, GROUND_Y: _SIM_GY,
   RL_NET_SIZES, RL_ACTION_HOLD_MS, RL_FRAME_SKIP, RL_WEIGHTS_B64,
   BASE_MODE, MODES, HERO_DIFFICULTIES,
   getRlLayers, rlForward, createPrng, getBaseSpawnInterval
 } = SpikeSprintSim;
-let _simRand = createPrng(1337);
-let rlFrameCounter = 0;
-let rlHoldRemainingMs = 0;
-
-function buildRlObservation(){
-  const obs = new Float32Array(21);
-  obs[0] = (groundY - (player.y + player.h)) / 150;
-  obs[1] = player.vy / 17;
-  obs[2] = player.onGround ? 1 : 0;
-  obs[3] = player.stuck ? 1 : 0;
-  obs[4] = jumpKeyDown ? 1 : 0;
-  obs[5] = barrelCatchUp;
-  obs[6] = speedMult / 3;
-  const p = player;
-  const L = [];
-  for(const e of enemies) if(e.alive && e.x + e.w > p.x) L.push([e.x, e.w, e.h, 1, 0, 0]);
-  for(const o of pits)    if(o.x + o.w > p.x)           L.push([o.x, o.w, 0,   0, 1, 0]);
-  for(const o of pipes)   if(o.x + o.w > p.x)           L.push([o.x, o.w, o.h, 0, 0, 1]);
-  L.sort((a, b) => a[0] - b[0]);
-  for(let k=0;k<2;k++){
-    const o = L[k];
-    const base = 7 + k * 7;
-    if(o){
-      obs[base] = 1;
-      obs[base + 1] = (o[0] - p.x - p.w) / 300;
-      obs[base + 2] = (o[0] + o[1] - p.x) / 300;
-      obs[base + 3] = o[2] / 60;
-      obs[base + 4] = o[3];
-      obs[base + 5] = o[4];
-      obs[base + 6] = o[5];
-    } else {
-      obs[base] = 0; obs[base + 1] = 2; obs[base + 2] = 2;
-      obs[base + 3] = 0; obs[base + 4] = 0; obs[base + 5] = 0; obs[base + 6] = 0;
-    }
-  }
-  return obs;
-}
-
-function rlBotUpdate(dt){
-  if(rlHoldRemainingMs > 0){
-    rlHoldRemainingMs -= dt * 1000;
-    if(rlHoldRemainingMs <= 0){
-      rlHoldRemainingMs = 0;
-      endJump();
-    }
-  }
-  if(rlFrameCounter % RL_FRAME_SKIP === 0){
-    const q = rlForward(buildRlObservation());
-    let bestAct = 0;
-    for(let a=1;a<q.length;a++) if(q[a] > q[bestAct]) bestAct = a;
-    if(bestAct === 0 && jumpKeyDown){
-      rlHoldRemainingMs = 0;
-      endJump();
-    } else if(bestAct > 0 && !jumpKeyDown){
-      startJump();
-      if(jumpKeyDown){
-        rlHoldRemainingMs = RL_ACTION_HOLD_MS[bestAct];
-      }
-    }
-  }
-  rlFrameCounter++;
-}
+const replayStore = SpikeSprintReplayStore.createReplayStore();
+replayStore.hydrateKeys();
 // ────────────────────────────────────────────────────────────────────────────
 
 let currentModeKey = 'villain';
@@ -1325,215 +1851,127 @@ function updateHeroCooldownUI(justReady){
   }
 }
 
-function triggerHeroSpawn(spawnerFn){
+let activeRecorder = null;
+let activeSim = null;
+let isReplaying = false;
+let activeReplayEvents = null;
+let activeReplayEvIdx = 0;
+let activeReplayFinalTick = 0;
+let currentRunSeed = 1337;
+let groundScroll = 0;
+
+function syncFromSim(){
+  if(!activeSim) return;
+  const st = activeSim.state;
+  simTicks = st.simTicks;
+  elapsed = st.elapsed;
+  score = st.score;
+  speedMult = st.speedMult;
+  worldSpeed = st.worldSpeed;
+  groundScroll = st.groundScroll;
+  heroCooldownRemaining = st.heroCooldownRemaining;
+  heroCooldownTotal = st.heroCooldownTotal;
+  barrelRoll = st.barrelRoll;
+  barrelCatchUp = st.barrelCatchUp;
+  playerStuckTimer = st.playerStuckTimer;
+  jumpHoldTime = st.jumpHoldTime;
+  jumpKeyDown = st.jumpKeyDown;
+  player.x = st.player.x;
+  player.y = st.player.y;
+  player.vy = st.player.vy;
+  player.onGround = st.player.onGround;
+  player.jumping = st.player.jumping;
+  player.stuck = st.player.stuck;
+  player.dead = st.player.dead;
+  player.legPhase = st.player.legPhase;
+  enemies = st.enemies;
+  pits = st.pits;
+  pipes = st.pipes;
+}
+
+function dispatchSimEvents(res){
+  if(!res || !res.events) return;
+  for(const ev of res.events){
+    if(ev === 'jump') sfxJump();
+    else if(ev === 'land') sfxLand();
+    else if(ev === 'squash') sfxSquash();
+    else if(ev === 'barrelWarn') sfxBarrelWarn();
+    else if(ev === 'cooldownUpdate') updateHeroCooldownUI(false);
+    else if(ev === 'cooldownReady') updateHeroCooldownUI(true);
+  }
+  if(!isReplaying && !activeMode.lowerIsBetter) updateSessionBest(score);
+  if(res.stopCause){
+    endGame(res.stopCause);
+  }
+}
+
+function triggerHeroSpawn(kindOrFn){
+  if(isReplaying) return false;
   if(gameState !== 'playing' || !activeMode.showSpawnControls) return false;
-  if(heroCooldownRemaining > 0) return false;
+  if(!activeRecorder) return false;
+  const kind = typeof kindOrFn === 'string' ? kindOrFn : null;
+  if(!kind) return false;
   primeAudio();
-  spawnerFn();
+  const ok = activeRecorder.triggerHeroSpawn(kind);
+  if(!ok) return false;
+  syncFromSim();
   sfxSpawnTrap();
-  heroCooldownTotal = Math.round(getBaseSpawnInterval(speedMult) * activeMode.cooldownScale);
-  heroCooldownRemaining = heroCooldownTotal;
   updateHeroCooldownUI(false);
   return true;
 }
 
-let currentRunSeed = 1337;
 function resetGame(seedOpt){
+  isReplaying = false;
+  activeReplayEvents = null;
+  activeReplayEvIdx = 0;
+  activeReplayFinalTick = 0;
+  const badge = document.getElementById('replayBadge');
+  if(badge) badge.style.display = 'none';
   currentRunSeed = (seedOpt !== undefined) ? (seedOpt >>> 0) : (((Math.random() * 0x100000000) >>> 0) || 1);
-  _simRand = createPrng(currentRunSeed);
-  score = 0;
-  simTicks = 0;
-  elapsed = 0;
+  activeRecorder = SpikeSprintReplay.createRecorder({
+    modeKey: currentModeKey,
+    heroDiff: currentHeroDiff,
+    seed: currentRunSeed
+  }, SpikeSprintSim);
+  activeSim = activeRecorder.sim;
   lastFrameTime = null;
   accumulatorMs = 0;
-  speedMult = 1;
-  worldSpeed = activeMode.baseSpeed;
-  enemies = []; pits = []; pipes = [];
-  spawnTimer = 0; nextSpawnAt = 60;
-  heroCooldownRemaining = 0; heroCooldownTotal = 0;
+  activePointerId = null;
+  syncFromSim();
   updateHeroCooldownUI(false);
-  barrelCatchUp = 0; barrelRoll = 0;
-  playerStuckTimer = 0;
-  player.y = groundY - player.h;
-  player.vy = 0; player.onGround = true; player.jumping=false;
-  player.stuck = false; player.dead = false;
-  jumpHoldTime = 0; jumpKeyDown = false; activePointerId = null;
-  rlFrameCounter = 0; rlHoldRemainingMs = 0;
 }
 
-let groundScroll = 0;
-
-function spawnEnemy(){
-  const size = player.h/2;
-  enemies.push({x: logicalW()+40, y: groundY-size, w:size, h:size, alive:true, legPhase:0});
-}
-
-function spawnPit(){
-  const pitWidth = 70 + _simRand()*50;
-  pits.push({x: logicalW()+40, w: pitWidth});
-}
-
-function spawnBush(){
-  const ph = 40+_simRand()*20;
-  pipes.push({x: logicalW()+40, w:34, h:ph});
-}
-
-function spawnObstacle(){
-  const roll = _simRand();
-  if(roll < 0.4){
-    spawnEnemy();
-  } else if(roll < 0.7){
-    spawnPit();
-  } else {
-    spawnBush();
-  }
-}
-
-function update(dt){
-  simTicks += 1;
-  elapsed = simTicks * FIXED_DT;
-
-  const t = elapsed;
-  if(t <= 300){
-    speedMult = 1 + (t/300)*1;
-  } else if(t <= 600){
-    speedMult = 2 + ((t-300)/300)*1;
-  } else {
-    speedMult = 3;
-  }
-  worldSpeed = activeMode.baseSpeed * speedMult;
-
-  score += 0.6 * speedMult * dt;
-  if(!activeMode.lowerIsBetter) updateSessionBest(score);
-
-  groundScroll -= worldSpeed;
-
-  if(activeMode.autoSpawn){
-    spawnTimer += dt*60;
-    if(spawnTimer > nextSpawnAt){
-      spawnTimer = 0;
-      nextSpawnAt = getBaseSpawnInterval(speedMult) + _simRand()*30;
-      spawnObstacle();
+function stepActiveSim(){
+  if(!activeSim || gameState !== 'playing') return;
+  if(isReplaying){
+    while(activeReplayEvents && activeReplayEvIdx < activeReplayEvents.length && activeReplayEvents[activeReplayEvIdx].tick === activeSim.state.simTicks){
+      const code = activeReplayEvents[activeReplayEvIdx].code;
+      const E = SpikeSprintReplay.EVT;
+      if(code === E.JUMP_DOWN){ if(activeSim.startJump()) sfxJump(); }
+      else if(code === E.JUMP_UP){ activeSim.endJump(); }
+      else if(code === E.SPAWN_PIT){ if(activeSim.triggerHeroSpawn('pit')) sfxSpawnTrap(); }
+      else if(code === E.SPAWN_BUSH){ if(activeSim.triggerHeroSpawn('bush')) sfxSpawnTrap(); }
+      else if(code === E.SPAWN_ENEMY){ if(activeSim.triggerHeroSpawn('enemy')) sfxSpawnTrap(); }
+      else if(code === E.CLEAR_HELD){ activeSim.state.jumpKeyDown = false; }
+      activeReplayEvIdx++;
     }
-  } else if(heroCooldownRemaining > 0){
-    heroCooldownRemaining = Math.max(0, heroCooldownRemaining - dt*60);
-    updateHeroCooldownUI(heroCooldownRemaining === 0);
-  }
-
-  if(activeMode.useRlRunner){
-    rlBotUpdate(dt);
-  }
-
-  if(jumpKeyDown && player.jumping && jumpHoldTime < activeMode.maxHoldMs){
-    jumpHoldTime += dt*1000;
-  }
-  player.vy += activeMode.gravity;
-  player.y += player.vy;
-
-  let overPit = false;
-  for(const p of pits){
-    const feetL = player.x + player.w*0.15;
-    const feetR = player.x + player.w*0.85;
-    if(feetR > p.x && feetL < p.x + p.w){
-      overPit = true;
+    if(activeSim.state.simTicks >= activeReplayFinalTick){
+      syncFromSim();
+      endGame(activeSim.state.stopCause || 'cap');
+      return;
     }
-  }
-
-  if(!overPit && player.y + player.h >= groundY){
-    // landing sound: fire when transitioning from air to ground
-    if(!player.onGround) sfxLand();
-    player.y = groundY - player.h;
-    player.vy = 0;
-    player.onGround = true;
-    player.jumping = false;
-  } else {
-    player.onGround = false;
-  }
-
-  if(overPit && player.y > groundY - player.h*0.2){
-    endGame('pit');
+    const res = activeSim.step();
+    syncFromSim();
+    dispatchSimEvents(res);
+    if(gameState === 'playing' && activeSim.state.simTicks >= activeReplayFinalTick){
+      endGame(activeSim.state.stopCause || 'cap');
+    }
     return;
   }
-  if(player.y > logicalH() + 100){
-    endGame('pit');
-    return;
-  }
-
-  player.legPhase += (player.onGround ? worldSpeed*0.12 : 0);
-
-  for(const e of enemies){
-    if(!e.alive) continue;
-    e.x -= worldSpeed;
-    e.legPhase += worldSpeed*0.15;
-  }
-  enemies = enemies.filter(e => e.x > -60);
-
-  for(const p of pits) p.x -= worldSpeed;
-  pits = pits.filter(p => p.x + p.w > -60);
-  for(const p of pipes) p.x -= worldSpeed;
-  pipes = pipes.filter(p => p.x + p.w > -60);
-
-  const px1 = player.x, px2 = player.x+player.w, py1=player.y, py2=player.y+player.h;
-  for(const e of enemies){
-    if(!e.alive) continue;
-    const ex1=e.x, ex2=e.x+e.w, ey1=e.y, ey2=e.y+e.h;
-    const overlapX = px2>ex1 && px1<ex2;
-    const overlapY = py2>ey1 && py1<ey2;
-    if(overlapX && overlapY){
-      if(player.vy > 0 && (py2 - ey1) < e.h*0.6){
-        e.alive = false;
-        sfxSquash();
-        score += 100;
-        if(!activeMode.lowerIsBetter) updateSessionBest(score);
-        player.vy = -9;
-      } else {
-        endGame('enemy');
-        return;
-      }
-    }
-  }
-  enemies = enemies.filter(e=>e.alive);
-
-  if(!player.stuck){
-    for(const p of pipes){
-      const overlapX = px2 > p.x+6 && px1 < p.x+p.w-6;
-      const overlapY = py2 > groundY - p.h;
-      if(overlapX && overlapY && player.onGround){
-        player.stuck = true;
-        playerStuckTimer = 0;
-        break;
-      }
-    }
-  } else {
-    playerStuckTimer += dt;
-  }
-
-  if(player.stuck){
-    const prevCatchUp = barrelCatchUp;
-    barrelCatchUp += dt/1.1;
-    if(barrelCatchUp > 1) barrelCatchUp = 1;
-    if(prevCatchUp <= 0.05 && barrelCatchUp > 0.05) sfxBarrelWarn();
-  } else {
-    barrelCatchUp = Math.max(0, barrelCatchUp - dt*2);
-  }
-  barrelRoll -= worldSpeed*1.3;
-
-  // Check actual barrel-vs-player touch: rightmost pixel of a spike touches leftmost pixel of the player
-  const barrelSize = 90;
-  const spikeLength = 14;
-  const spikeTipRadius = barrelSize/2 + spikeLength; // max reach of any spike tip from barrel center
-  const barrelBaseX = -barrelSize*0.66;
-  const barrelX = barrelBaseX + barrelCatchUp * (player.x - barrelBaseX + barrelSize*0.5);
-  const barrelCenterX = barrelX + barrelSize/2;
-  const barrelSpikeRightEdge = barrelCenterX + spikeTipRadius; // rightmost pixel any spike can reach
-  const playerLeftEdge = player.x; // leftmost pixel of the player
-  if(player.stuck && barrelSpikeRightEdge >= playerLeftEdge){
-    endGame('barrel');
-    return;
-  }
+  const res = activeRecorder.step();
+  syncFromSim();
+  dispatchSimEvents(res);
 }
-
-
 
 // ── Player Name (6-char A-Z0-9, 48 Spike Sprint defaults, safe persistence) ─
 const PLAYER_NAME_STORAGE_KEY = 'spike_sprint_player_name_v1';
@@ -1749,7 +2187,7 @@ function renderScoresModal(){
   table.className = 'score-table';
   const thead = document.createElement('thead');
   const headRow = document.createElement('tr');
-  ['#', 'Player', firstHead, secondHead].forEach(label => {
+  ['#', 'Player', firstHead, secondHead, 'Replay'].forEach(label => {
     const th = document.createElement('th');
     th.textContent = label;
     headRow.appendChild(th);
@@ -1782,10 +2220,25 @@ function renderScoresModal(){
     const tdSecond = document.createElement('td');
     tdSecond.textContent = secondVal;
 
+    const tdReplay = document.createElement('td');
+    if(r.runId && replayStore.hasReplaySync(r.runId)){
+      const watchBtn = document.createElement('button');
+      watchBtn.type = 'button';
+      watchBtn.className = 'watch-btn';
+      watchBtn.textContent = 'WATCH';
+      watchBtn.addEventListener('click', ev => {
+        ev.stopPropagation();
+        watchReplayByRunId(r.runId);
+      });
+      tdReplay.appendChild(watchBtn);
+    } else {
+      tdReplay.textContent = '-';
+    }
     tr.appendChild(tdRank);
     tr.appendChild(tdName);
     tr.appendChild(tdFirst);
     tr.appendChild(tdSecond);
+    tr.appendChild(tdReplay);
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
@@ -1803,14 +2256,26 @@ function openScoresModal(defaultBucket){
 
 function endGame(cause){
   gameState = 'over';
+  player.dead = true;
   heroControlsEl.style.display = 'none';
   exitBtn.style.display = 'none';
-  updateSessionBest(score);
-  recordCompletedRun(score, elapsed);
+  exitModal.style.display = 'none';
+  const badge = document.getElementById('replayBadge');
+  if(badge) badge.style.display = 'none';
+  if(!isReplaying){
+    updateSessionBest(score);
+    recordCompletedRun(score, elapsed);
+    if(activeRecorder && lastRunId){
+      const env = activeRecorder.finalize();
+      replayStore.saveReplay(lastRunId, env).then(() => {
+        replayStore.gcReplays(collectReferencedRunIds(lastRunId));
+      });
+    }
+  }
   sfxGameOver();
   const bestVal = getActiveBestValue();
   const bestStr = Number.isFinite(bestVal) ? String(Math.floor(bestVal)).padStart(5,'0') : '-----';
-  document.getElementById('gameOverTitle').textContent = activeMode.endTitle;
+  document.getElementById('gameOverTitle').textContent = isReplaying ? 'REPLAY COMPLETE' : activeMode.endTitle;
   const flavorEl = document.getElementById('endFlavor');
   const flavorText = activeMode.causeLabels && cause ? activeMode.causeLabels[cause] : '';
   if(flavorText){
@@ -2044,7 +2509,7 @@ function loop(now){
       accumulatorMs += Math.min(rawDelta, MAX_FRAME_DELTA_MS);
       let steps = 0;
       while(accumulatorMs >= FIXED_STEP_MS && steps < MAX_STEPS_PER_FRAME && gameState === 'playing'){
-        update(FIXED_DT);
+        stepActiveSim();
         accumulatorMs -= FIXED_STEP_MS;
         steps++;
       }
@@ -2075,33 +2540,26 @@ function loop(now){
 }
 
 function startJump(){
-  if(gameState!=='playing') return;
-  primeAudio(); // ensure AudioContext is running on every gesture (Safari)
-  if(player.onGround || player.stuck){
+  if(isReplaying || gameState!=='playing' || !activeRecorder) return;
+  primeAudio();
+  if(activeRecorder.startJump()){
     sfxJump();
-    jumpKeyDown = true;
-    jumpHoldTime = 0;
-    player.jumping = true;
-    player.onGround = false;
-    player.vy = activeMode.minJumpV;
-    if(player.stuck){ player.stuck=false; }
   }
+  syncFromSim();
 }
 function clearHeldInput(){
+  if(activeRecorder && !isReplaying) activeRecorder.clearHeldOnPause();
   jumpKeyDown = false;
   activePointerId = null;
+  syncFromSim();
 }
 
 function endJump(){
-  if(gameState==='playing' && jumpKeyDown){
-    const holdRatio = Math.min(1, jumpHoldTime/activeMode.maxHoldMs);
-    const extra = (activeMode.maxJumpV - activeMode.minJumpV)*holdRatio;
-    if(player.vy < 0){
-      player.vy = activeMode.minJumpV + extra;
-    }
-  }
+  if(isReplaying){ activePointerId = null; return; }
+  if(activeRecorder) activeRecorder.endJump();
   jumpKeyDown = false;
   activePointerId = null;
+  syncFromSim();
 }
 
 let _lastFocusedEl = null;
@@ -2133,8 +2591,79 @@ function restoreModalFocus(fallbackEl){
   if(target && typeof target.focus === 'function') target.focus();
 }
 
+function exitReplayToScores(){
+  isReplaying = false;
+  activeReplayEvents = null;
+  activeReplayEvIdx = 0;
+  activeReplayFinalTick = 0;
+  lastFrameTime = null;
+  accumulatorMs = 0;
+  gameState = 'start';
+  const badge = document.getElementById('replayBadge');
+  if(badge) badge.style.display = 'none';
+  exitBtn.style.display = 'none';
+  heroControlsEl.style.display = 'none';
+  document.getElementById('gameOverScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+  openScoresModal(activeScoreBucket);
+}
+
+function startReplay(decoded){
+  const h = decoded.header;
+  currentModeKey = h.modeKey;
+  if(h.modeKey === 'hero' && h.heroDiff) setHeroDifficulty(h.heroDiff);
+  activeMode = SpikeSprintSim.resolveModeConfig(currentModeKey, currentHeroDiff);
+  isReplaying = true;
+  activeRecorder = null;
+  activeSim = SpikeSprintSim.createSim({ modeKey: h.modeKey, heroDiff: h.heroDiff || 'normal', seed: h.seed });
+  activeReplayEvents = decoded.events;
+  activeReplayEvIdx = 0;
+  activeReplayFinalTick = h.finalTick;
+  lastFrameTime = null;
+  accumulatorMs = 0;
+  activePointerId = null;
+  syncFromSim();
+  scoresModal.style.display = 'none';
+  loreCard.style.display = 'none';
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameOverScreen').style.display = 'none';
+  heroControlsEl.style.display = 'none';
+  exitBtn.style.display = 'flex';
+  const badge = document.getElementById('replayBadge');
+  if(badge) badge.style.display = 'flex';
+  drawHUD();
+  gameState = 'playing';
+}
+
+function watchReplayByRunId(runId){
+  const statusEl = document.getElementById('scoresStatus');
+  if(statusEl) statusEl.textContent = '';
+  return replayStore.loadReplay(runId, SpikeSprintReplay, SpikeSprintSim).then(res => {
+    if(!res || !res.ok){
+      if(statusEl) statusEl.textContent = 'Replay unavailable: ' + (res && res.error ? res.error : 'corrupted or incompatible version');
+      return false;
+    }
+    startReplay(res);
+    return true;
+  });
+}
+
+function collectReferencedRunIds(extraRunId){
+  const store = loadScores();
+  const keep = new Set();
+  if(extraRunId) keep.add(String(extraRunId));
+  for(const k of SCORE_BUCKETS){
+    const b = store[k];
+    if(!b) continue;
+    for(const r of (b.byScore || [])) if(r && r.runId) keep.add(String(r.runId));
+    for(const r of (b.byTime || []))  if(r && r.runId) keep.add(String(r.runId));
+  }
+  return keep;
+}
+
 function openPauseModal(){
   if(gameState !== 'playing') return;
+  if(isReplaying){ exitReplayToScores(); return; }
   clearHeldInput();
   lastFrameTime = null;
   accumulatorMs = 0;
@@ -2203,9 +2732,9 @@ window.addEventListener('keydown', e=>{
   if(e.repeat) return;
   if(e.code==='Space'){ e.preventDefault(); if(activeMode.allowHumanJump) startJump(); }
   if(activeMode.showSpawnControls && gameState==='playing'){
-    if(e.key==='1'){ e.preventDefault(); triggerHeroSpawn(spawnPit); }
-    else if(e.key==='2'){ e.preventDefault(); triggerHeroSpawn(spawnBush); }
-    else if(e.key==='3'){ e.preventDefault(); triggerHeroSpawn(spawnEnemy); }
+    if(e.key==='1'){ e.preventDefault(); triggerHeroSpawn('pit'); }
+    else if(e.key==='2'){ e.preventDefault(); triggerHeroSpawn('bush'); }
+    else if(e.key==='3'){ e.preventDefault(); triggerHeroSpawn('enemy'); }
   }
 });
 window.addEventListener('keyup', e=>{
@@ -2231,9 +2760,9 @@ window.addEventListener('pointercancel', handlePointerRelease);
 window.addEventListener('blur', () => { clearHeldInput(); });
 
 // Hero spawn button bindings (stop propagation so taps never trigger canvas jump)
-spawnPitBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn(spawnPit); });
-spawnBushBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn(spawnBush); });
-spawnHeroBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn(spawnEnemy); });
+spawnPitBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn('pit'); });
+spawnBushBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn('bush'); });
+spawnHeroBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn('enemy'); });
 [heroControlsEl, ...heroSpawnBtns].forEach(el=>{
   el.addEventListener('pointerdown', e=>e.stopPropagation());
   el.addEventListener('pointerup',   e=>e.stopPropagation());
