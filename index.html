@@ -35,6 +35,11 @@
   #playHeroBtn{background:#7fc453;border-color:#245c18;box-shadow:3px 3px 0 #245c18;}
   #playHeroBtn:active{box-shadow:1px 1px 0 #245c18;}
   #playHeroBtn .mode-btn-sub{color:#12330b;}
+  .hero-mode-col{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  #heroDiffBar{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
+  .diff-pill{margin-top:0;padding:4px 8px;font-size:11px;font-weight:bold;background:rgba(26,31,74,0.88);
+    color:#d8e6cf;border:2px solid #3f6e2d;border-radius:4px;cursor:pointer;letter-spacing:0.4px;}
+  .diff-pill.active{background:#7fc453;color:#0e2908;border-color:#ffcc00;box-shadow:0 0 0 1px #245c18;}
   #changeModeBtn{background:#e8e8e8;border-color:#444;color:#111;}
   #credit{position:absolute;bottom:6px;left:8px;color:#ffffffaa;font-size:11px;font-family:sans-serif;}
   #soundToggle,#storyToggle{
@@ -220,10 +225,18 @@
       <span class="mode-btn-title">PLAY AS VILLAIN</span>
       <span class="mode-btn-sub">Trespass, jump &amp; outrun the barrel</span>
     </button>
-    <button id="playHeroBtn" class="mode-btn">
-      <span class="mode-btn-title">PLAY AS HERO</span>
-      <span class="mode-btn-sub">Drop traps. Keep Havoc low.</span>
-    </button>
+    <div class="hero-mode-col">
+      <button id="playHeroBtn" class="mode-btn">
+        <span class="mode-btn-title">PLAY AS HERO</span>
+        <span class="mode-btn-sub">Drop traps. Keep Havoc low.</span>
+      </button>
+      <div id="heroDiffBar" role="group" aria-label="Hero Difficulty">
+        <button type="button" id="diffEasy" class="diff-pill" data-diff="easy">EASY</button>
+        <button type="button" id="diffNormal" class="diff-pill active" data-diff="normal">NORMAL</button>
+        <button type="button" id="diffHard" class="diff-pill" data-diff="hard">HARD</button>
+        <button type="button" id="diffInsane" class="diff-pill" data-diff="insane">INSANE</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -599,11 +612,19 @@ const MODES = {
   }
 };
 
+const HERO_DIFFICULTIES = {
+  easy:   { label: 'EASY',   cooldownScale: 0.55 },
+  normal: { label: 'NORMAL', cooldownScale: 0.65 },
+  hard:   { label: 'HARD',   cooldownScale: 0.75 },
+  insane: { label: 'INSANE', cooldownScale: 0.90 }
+};
+
 let currentModeKey = 'villain';
+let currentHeroDiff = 'normal';
 let activeMode = { ...BASE_MODE };
 const sessionBest = {
   villain: 0,
-  hero: Infinity
+  hero: { easy: Infinity, normal: Infinity, hard: Infinity, insane: Infinity }
 };
 
 function getBaseSpawnInterval(mult){
@@ -611,11 +632,13 @@ function getBaseSpawnInterval(mult){
 }
 
 function getActiveBestValue(){
-  return sessionBest[currentModeKey];
+  return currentModeKey === 'hero' ? sessionBest.hero[currentHeroDiff] : sessionBest[currentModeKey];
 }
 
 function updateSessionBest(val){
-  if(activeMode.lowerIsBetter){
+  if(currentModeKey === 'hero'){
+    if(val < sessionBest.hero[currentHeroDiff]) sessionBest.hero[currentHeroDiff] = val;
+  } else if(activeMode.lowerIsBetter){
     if(val < sessionBest[currentModeKey]) sessionBest[currentModeKey] = val;
   } else {
     if(val > sessionBest[currentModeKey]) sessionBest[currentModeKey] = val;
@@ -1200,9 +1223,36 @@ spawnHeroBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpaw
   el.addEventListener('pointerup',   e=>e.stopPropagation());
 });
 
+function setHeroDifficulty(diffKey){
+  if(!HERO_DIFFICULTIES[diffKey]) return;
+  currentHeroDiff = diffKey;
+  ['easy','normal','hard','insane'].forEach(k=>{
+    const el = document.getElementById('diff' + k[0].toUpperCase() + k.slice(1));
+    if(el) el.classList.toggle('active', k === diffKey);
+  });
+}
+
+['easy','normal','hard','insane'].forEach(k=>{
+  const el = document.getElementById('diff' + k[0].toUpperCase() + k.slice(1));
+  if(el){
+    el.addEventListener('click', e=>{ e.stopPropagation(); setHeroDifficulty(k); });
+    el.addEventListener('pointerdown', e=>e.stopPropagation());
+    el.addEventListener('pointerup', e=>e.stopPropagation());
+  }
+});
+
 function startGame(modeKey){
   currentModeKey = MODES[modeKey] ? modeKey : 'villain';
-  activeMode = { ...BASE_MODE, ...MODES[currentModeKey] };
+  const diffCfg = currentModeKey === 'hero' ? HERO_DIFFICULTIES[currentHeroDiff] : null;
+  activeMode = diffCfg
+    ? {
+        ...BASE_MODE,
+        ...MODES[currentModeKey],
+        cooldownScale: diffCfg.cooldownScale,
+        bestLabel: 'MIN HAVOC (' + diffCfg.label + ')',
+        endBestLabel: 'Min Havoc (' + diffCfg.label + ')'
+      }
+    : { ...BASE_MODE, ...MODES[currentModeKey] };
   primeAudio();
   loreCard.style.display = 'none';
   document.getElementById('startScreen').style.display='none';
