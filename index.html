@@ -202,9 +202,12 @@
   }
   .name-input:focus{border-color:#fff;box-shadow:0 0 0 2px rgba(255,204,0,0.35);}
   .name-rand-btn{
-    margin-top:0;padding:5px 8px;font-size:11px;font-weight:bold;
-    background:#1a1f4a;color:#ffcc00;border:2px solid #664400;border-radius:4px;cursor:pointer;
+    margin-top:0;width:32px;height:32px;padding:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:#1a1f4a;color:#ffcc00;border:2px solid #ffcc00;border-radius:4px;cursor:pointer;
+    box-shadow:2px 2px 0 #664400;
   }
+  .name-rand-btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #664400;}
 </style>
 </head>
 <body>
@@ -294,7 +297,7 @@
   <div class="name-bar">
     <label for="startNameInput">PLAYER:</label>
     <input id="startNameInput" class="name-input" type="text" maxlength="6" autocomplete="off" spellcheck="false" aria-label="Player Name (max 6 characters)">
-    <button type="button" id="randNameStartBtn" class="name-rand-btn" title="Random Name">RND</button>
+    <button type="button" id="randNameStartBtn" class="name-rand-btn" title="Random Name" aria-label="Random Name"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#ffcc00" stroke-width="2" fill="#101538"/><circle cx="8" cy="8" r="1.6" fill="#ffcc00"/><circle cx="16" cy="8" r="1.6" fill="#ffcc00"/><circle cx="12" cy="12" r="1.6" fill="#ffcc00"/><circle cx="8" cy="16" r="1.6" fill="#ffcc00"/><circle cx="16" cy="16" r="1.6" fill="#ffcc00"/></svg></button>
   </div>
   <div class="mode-buttons">
     <div class="mode-card villain-card">
@@ -327,7 +330,7 @@
   <div class="name-bar">
     <label for="endNameInput">PLAYER:</label>
     <input id="endNameInput" class="name-input" type="text" maxlength="6" autocomplete="off" spellcheck="false" aria-label="Edit Player Name">
-    <button type="button" id="randNameEndBtn" class="name-rand-btn" title="Random Name">RND</button>
+    <button type="button" id="randNameEndBtn" class="name-rand-btn" title="Random Name" aria-label="Random Name"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#ffcc00" stroke-width="2" fill="#101538"/><circle cx="8" cy="8" r="1.6" fill="#ffcc00"/><circle cx="16" cy="8" r="1.6" fill="#ffcc00"/><circle cx="12" cy="12" r="1.6" fill="#ffcc00"/><circle cx="8" cy="16" r="1.6" fill="#ffcc00"/><circle cx="16" cy="16" r="1.6" fill="#ffcc00"/></svg></button>
   </div>
   <div class="end-buttons">
     <button id="restartBtn">RESTART</button>
