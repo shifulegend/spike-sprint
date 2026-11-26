@@ -399,46 +399,61 @@ let audioCtx = null;
 let soundEnabled = true;
 let _audioUnlocked = false; // iOS dummy-unlock done flag — run at most once
 
+function safePromise(p){
+  if(p && typeof p.catch === 'function') p.catch(() => {});
+}
+
 function getAudioCtx(){
-  if(!audioCtx) audioCtx = new AC();
-  if(audioCtx.state !== 'running') audioCtx.resume();
-  return audioCtx;
+  if(!AC) return null;
+  try {
+    if(audioCtx && audioCtx.state === 'closed') audioCtx = null;
+    if(!audioCtx) audioCtx = new AC();
+    if(audioCtx.state !== 'running') safePromise(audioCtx.resume());
+    return audioCtx;
+  } catch(e){
+    return null;
+  }
 }
 
 // Called at the top of every user-gesture handler (click, keydown, pointerdown).
-// On first call: runs the iOS dummy-unlock pattern (one throwaway AudioContext)
-// and creates the real context. On all subsequent calls: just resumes if needed.
+// Best-effort only: audio failures must never interrupt gameplay input.
 // Guarded by _audioUnlocked so we never exceed Chrome's 6-context/tab limit.
 function primeAudio(){
+  if(!AC) return;
   if(!_audioUnlocked){
-    _audioUnlocked = true;
-    // iOS dummy-unlock: create + resume a throwaway ctx synchronously.
-    // This flips iOS's internal "tab audio allowed" flag for all future ctxs.
-    // We close it immediately so it counts against the Chrome limit only once.
     try {
       const dummy = new AC();
       const p = dummy.resume();
-      if(p && typeof p.finally === 'function') p.finally(() => dummy.close());
-      else dummy.close();
+      const closeDummy = () => { try { safePromise(dummy.close()); } catch(e){} };
+      if(p && typeof p.then === 'function') p.then(closeDummy, closeDummy);
+      else closeDummy();
     } catch(e){}
-    // Create the real context right after, while still inside the gesture
-    if(!audioCtx) audioCtx = new AC();
+    try {
+      if(audioCtx && audioCtx.state === 'closed') audioCtx = null;
+      if(!audioCtx) audioCtx = new AC();
+      _audioUnlocked = true;
+    } catch(e){}
   }
-  // Always resume if suspended (handles Chrome + Firefox + Safari macOS too)
-  if(audioCtx && audioCtx.state !== 'running') audioCtx.resume();
+  try {
+    if(audioCtx && audioCtx.state === 'closed') audioCtx = new AC();
+    if(audioCtx && audioCtx.state !== 'running') safePromise(audioCtx.resume());
+  } catch(e){}
 }
 
 // Re-resume on tab return (iOS re-suspends context when tab goes to background)
 document.addEventListener('visibilitychange', () => {
-  if(document.visibilityState === 'visible' && audioCtx && audioCtx.state !== 'running'){
-    audioCtx.resume();
-  }
+  try {
+    if(document.visibilityState === 'visible' && audioCtx && audioCtx.state !== 'running' && audioCtx.state !== 'closed'){
+      safePromise(audioCtx.resume());
+    }
+  } catch(e){}
 });
 
 function playTone(opts){
   if(!soundEnabled) return;
   try {
     const ac = getAudioCtx();
+    if(!ac) return;
     const osc = ac.createOscillator();
     const gain = ac.createGain();
     osc.connect(gain);
@@ -460,6 +475,7 @@ function playNoise(duration, volume){
   if(!soundEnabled) return;
   try {
     const ac = getAudioCtx();
+    if(!ac) return;
     const bufferSize = Math.ceil(ac.sampleRate * duration);
     const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
     const data = buffer.getChannelData(0);
@@ -495,6 +511,7 @@ function sfxSquash(){
   if(!soundEnabled) return;
   try {
     const ac = getAudioCtx();
+    if(!ac) return;
     [[440,180,0],[320,120,0.08]].forEach(([fs,fe,offset])=>{
       const t = ac.currentTime + offset;
       const osc = ac.createOscillator();
@@ -517,6 +534,7 @@ function sfxGameOver(){
   if(!soundEnabled) return;
   try {
     const ac = getAudioCtx();
+    if(!ac) return;
     const notes = [330, 262, 196, 147];
     notes.forEach((f, i) => {
       const t = ac.currentTime + i * 0.13;
@@ -808,6 +826,7 @@ const player = {
 const GRAVITY = BASE_MODE.gravity;
 let jumpHoldTime = 0;
 let jumpKeyDown = false;
+let activePointerId = null;
 const MIN_JUMP_V = BASE_MODE.minJumpV;
 const MAX_JUMP_V = BASE_MODE.maxJumpV;
 const MAX_HOLD_MS = BASE_MODE.maxHoldMs;
@@ -879,7 +898,7 @@ function resetGame(){
   player.y = groundY - player.h;
   player.vy = 0; player.onGround = true; player.jumping=false;
   player.stuck = false; player.dead = false;
-  jumpHoldTime = 0; jumpKeyDown = false;
+  jumpHoldTime = 0; jumpKeyDown = false; activePointerId = null;
   rlFrameCounter = 0; rlHoldRemainingMs = 0;
   startTime = performance.now();
 }
@@ -1516,9 +1535,13 @@ function startJump(){
     if(player.stuck){ player.stuck=false; }
   }
 }
+function clearHeldInput(){
+  jumpKeyDown = false;
+  activePointerId = null;
+}
+
 function endJump(){
-  if(gameState!=='playing') return;
-  if(jumpKeyDown){
+  if(gameState==='playing' && jumpKeyDown){
     const holdRatio = Math.min(1, jumpHoldTime/activeMode.maxHoldMs);
     const extra = (activeMode.maxJumpV - activeMode.minJumpV)*holdRatio;
     if(player.vy < 0){
@@ -1526,10 +1549,12 @@ function endJump(){
     }
   }
   jumpKeyDown = false;
+  activePointerId = null;
 }
 
 window.addEventListener('keydown', e=>{
   if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
+  if(e.repeat) return;
   if(e.code==='Space'){ e.preventDefault(); if(activeMode.allowHumanJump) startJump(); }
   if(activeMode.showSpawnControls && gameState==='playing'){
     if(e.key==='1'){ e.preventDefault(); triggerHeroSpawn(spawnPit); }
@@ -1540,9 +1565,24 @@ window.addEventListener('keydown', e=>{
 window.addEventListener('keyup', e=>{
   if(e.code==='Space'){ e.preventDefault(); if(activeMode.allowHumanJump) endJump(); }
 });
-canvas.addEventListener('pointerdown', e=>{ if(activeMode.allowHumanJump) startJump(); });
-canvas.addEventListener('pointerup', e=>{ if(activeMode.allowHumanJump) endJump(); });
-canvas.addEventListener('pointercancel', e=>{ if(activeMode.allowHumanJump) endJump(); });
+canvas.addEventListener('pointerdown', e=>{
+  if(!activeMode.allowHumanJump) return;
+  const pid = e && e.pointerId !== undefined ? e.pointerId : 0;
+  if(activePointerId !== null && activePointerId !== pid) return;
+  activePointerId = pid;
+  startJump();
+});
+function handlePointerRelease(e){
+  if(!activeMode.allowHumanJump) return;
+  const pid = e && e.pointerId !== undefined ? e.pointerId : 0;
+  if(activePointerId !== null && activePointerId !== pid) return;
+  endJump();
+}
+canvas.addEventListener('pointerup', handlePointerRelease);
+canvas.addEventListener('pointercancel', handlePointerRelease);
+window.addEventListener('pointerup', handlePointerRelease);
+window.addEventListener('pointercancel', handlePointerRelease);
+window.addEventListener('blur', () => { clearHeldInput(); });
 
 // Hero spawn button bindings (stop propagation so taps never trigger canvas jump)
 spawnPitBtn.addEventListener('click', e=>{ e.stopPropagation(); triggerHeroSpawn(spawnPit); });
@@ -1581,6 +1621,7 @@ let pausedAt = 0;
 exitBtn.addEventListener('click', e=>{
   e.stopPropagation();
   if(gameState !== 'playing') return;
+  clearHeldInput();
   gameState = 'paused';
   pausedAt = performance.now();
   exitModal.style.display = 'flex';
