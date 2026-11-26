@@ -461,6 +461,10 @@ function primeAudio(){
 // Re-resume on tab return (iOS re-suspends context when tab goes to background)
 document.addEventListener('visibilitychange', () => {
   try {
+    if((document.hidden || document.visibilityState === 'hidden') && gameState === 'playing'){
+      if(typeof openPauseModal === 'function') openPauseModal();
+      return;
+    }
     if(document.visibilityState === 'visible' && audioCtx && audioCtx.state !== 'running' && audioCtx.state !== 'closed'){
       safePromise(audioCtx.resume());
     }
@@ -831,7 +835,12 @@ resize();
 window.addEventListener('resize', resize);
 
 let gameState = 'start';
-let startTime = 0, elapsed = 0;
+const FIXED_DT = 1 / 60;
+const FIXED_STEP_MS = 1000 / 60;
+const MAX_STEPS_PER_FRAME = 6;
+const MAX_FRAME_DELTA_MS = FIXED_STEP_MS * MAX_STEPS_PER_FRAME;
+let simTicks = 0, elapsed = 0;
+let lastFrameTime = null, accumulatorMs = 0;
 let score = 0;
 let speedMult = 1;
 let worldSpeed = BASE_MODE.baseSpeed;
@@ -904,7 +913,10 @@ function triggerHeroSpawn(spawnerFn){
 
 function resetGame(){
   score = 0;
+  simTicks = 0;
   elapsed = 0;
+  lastFrameTime = null;
+  accumulatorMs = 0;
   speedMult = 1;
   worldSpeed = activeMode.baseSpeed;
   enemies = []; pits = []; pipes = [];
@@ -918,7 +930,6 @@ function resetGame(){
   player.stuck = false; player.dead = false;
   jumpHoldTime = 0; jumpKeyDown = false; activePointerId = null;
   rlFrameCounter = 0; rlHoldRemainingMs = 0;
-  startTime = performance.now();
 }
 
 let groundScroll = 0;
@@ -950,7 +961,8 @@ function spawnObstacle(){
 }
 
 function update(dt){
-  elapsed = (performance.now() - startTime)/1000;
+  simTicks += 1;
+  elapsed = simTicks * FIXED_DT;
 
   const t = elapsed;
   if(t <= 300){
@@ -1592,9 +1604,25 @@ function drawHUD(){
   document.getElementById('highScoreTag').textContent = activeMode.bestLabel + ': ' + bestStr;
 }
 
-function loop(){
+function loop(now){
+  const ts = (typeof now === 'number' && Number.isFinite(now)) ? now : performance.now();
   if(gameState==='playing'){
-    update(1/60);
+    if(lastFrameTime === null){
+      lastFrameTime = ts;
+    } else {
+      const rawDelta = Math.max(0, ts - lastFrameTime);
+      lastFrameTime = ts;
+      accumulatorMs += Math.min(rawDelta, MAX_FRAME_DELTA_MS);
+      let steps = 0;
+      while(accumulatorMs >= FIXED_STEP_MS && steps < MAX_STEPS_PER_FRAME && gameState === 'playing'){
+        update(FIXED_DT);
+        accumulatorMs -= FIXED_STEP_MS;
+        steps++;
+      }
+    }
+  } else {
+    lastFrameTime = null;
+    accumulatorMs = 0;
   }
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.save();
@@ -1672,15 +1700,17 @@ function restoreModalFocus(fallbackEl){
 function openPauseModal(){
   if(gameState !== 'playing') return;
   clearHeldInput();
+  lastFrameTime = null;
+  accumulatorMs = 0;
   gameState = 'paused';
-  pausedAt = performance.now();
   exitModal.style.display = 'flex';
   focusFirstInModal(exitModal, exitBtn);
 }
 
 function resumeFromPause(){
   if(gameState === 'paused'){
-    startTime += (performance.now() - pausedAt);
+    lastFrameTime = null;
+    accumulatorMs = 0;
     gameState = 'playing';
   }
   exitModal.style.display = 'none';
@@ -1796,7 +1826,6 @@ function setHeroDifficulty(diffKey){
 const exitBtn = document.getElementById('exitBtn');
 const exitModal = document.getElementById('exitModal');
 const scoresModal = document.getElementById('scoresModal');
-let pausedAt = 0;
 
 exitBtn.addEventListener('click', e=>{
   e.stopPropagation();
