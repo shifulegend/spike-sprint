@@ -1,0 +1,63 @@
+=== M1-S4 RUN 1 ===
+========================================================================
+Spike Sprint — M1-S4 Leaderboard Hardening & Dead-Code Cleanup Suite
+Node: v18.20.4
+Target: /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 99769 bytes | Lines: 1825 | SHA-256: b298a5310106ab3338ab6549f923e425bf1fa1abf3d32be60272881a2b8f76f6
+========================================================================
+[PASS] M1-S4-C04-01: loadScores() rejects null, primitives, arrays, markup, NaN/Inf/negative rows (TC-FIX-07 / S-02) — Rejected 8 invalid/markup rows; preserved boundary (0,0) and coerced valid row
+[PASS] M1-S4-C04-02: renderScoresModal() builds DOM via textContent with ZERO innerHTML writes — 0 innerHTML writes (populated & empty states); static scan clean
+[PASS] M1-S4-S01: Player name sanitization (A-Z0-9, max 6) & formatDuration NaN safety — Name sanitization and formatDuration NaN/negative guards verified
+[PASS] M1-S4-FIX09: All 7 dead symbols removed; active BASE_MODE/HERO_DIFFICULTIES intact (TC-FIX-09) — 7/7 dead symbols absent; active mode configs intact
+[PASS] D-01-PARITY: Zero-diff characterization parity vs. v2.5.1_characterization.json (all 10 scenarios) — 10/10 scenarios match v2.5.1 golden snapshot with ZERO differences
+[PASS] BOT-01-AND-HYGIENE: RL weights unchanged, zero external requests, zero Drive URLs, zero scattered mode branches — 99769 bytes, BOT-01 & hygiene scans clean
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== M1-S4 RUN 2 (REPRODUCIBILITY CHECK) ===
+========================================================================
+Spike Sprint — M1-S4 Leaderboard Hardening & Dead-Code Cleanup Suite
+Node: v18.20.4
+Target: /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 99769 bytes | Lines: 1825 | SHA-256: b298a5310106ab3338ab6549f923e425bf1fa1abf3d32be60272881a2b8f76f6
+========================================================================
+[PASS] M1-S4-C04-01: loadScores() rejects null, primitives, arrays, markup, NaN/Inf/negative rows (TC-FIX-07 / S-02) — Rejected 8 invalid/markup rows; preserved boundary (0,0) and coerced valid row
+[PASS] M1-S4-C04-02: renderScoresModal() builds DOM via textContent with ZERO innerHTML writes — 0 innerHTML writes (populated & empty states); static scan clean
+[PASS] M1-S4-S01: Player name sanitization (A-Z0-9, max 6) & formatDuration NaN safety — Name sanitization and formatDuration NaN/negative guards verified
+[PASS] M1-S4-FIX09: All 7 dead symbols removed; active BASE_MODE/HERO_DIFFICULTIES intact (TC-FIX-09) — 7/7 dead symbols absent; active mode configs intact
+[PASS] D-01-PARITY: Zero-diff characterization parity vs. v2.5.1_characterization.json (all 10 scenarios) — 10/10 scenarios match v2.5.1 golden snapshot with ZERO differences
+[PASS] BOT-01-AND-HYGIENE: RL weights unchanged, zero external requests, zero Drive URLs, zero scattered mode branches — 99769 bytes, BOT-01 & hygiene scans clean
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== M1-S3 NON-REGRESSION CHECK ===
+========================================================================
+Spike Sprint — M1-S3 Audio & Input Safety Suite (C03 & C05 + D-01 Parity)
+Node: v18.20.4
+Target: /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 99769 bytes | Lines: 1825 | SHA-256: b298a5310106ab3338ab6549f923e425bf1fa1abf3d32be60272881a2b8f76f6
+========================================================================
+[PASS] M1-S3-C05-01: Missing AudioContext API never blocks startJump() or triggerHeroSpawn() — Villain jump & Hero spawn both succeeded with AudioContext=undefined
+[PASS] M1-S3-C05-02: AudioContext constructor throw never breaks input or sets false unlock — Constructor throw safely caught; gameplay unaffected
+[PASS] M1-S3-C05-03: Rejected dummy/real resume() & close() emit zero unhandledRejection (TC-FIX-08) — zero unhandledRejection events; dummy closed (1)
+[PASS] M1-S3-C05-04: Closed AudioContext never breaks playTone/visibilitychange/primeAudio — Closed context handled safely
+[PASS] M1-S3-C03-01: Space press -> pause -> Space release while paused -> resume clears jumpKeyDown (TC-FIX-06) — jumpKeyDown cleared on pause/keyup; vy untouched while paused; resume jump OK
+[PASS] M1-S3-C03-02: keydown with e.repeat=true is ignored for Space and Hero 1/2/3 — Repeated Space and Hero 1/2/3 keydown events ignored
+[PASS] M1-S3-C03-03: Multi-touch pointer ownership & off-canvas window pointerup release — Secondary touch ignored; off-canvas window pointerup released primary jump cleanly
+[PASS] M1-S3-C03-04: window.blur clears held jumpKeyDown and activePointerId — window.blur cleared jumpKeyDown and activePointerId
+[PASS] D-01-PARITY: Zero-diff characterization parity vs. v2.5.1_characterization.json (all 10 scenarios) — 10/10 scenarios (640w & 490w, Villain + 4 Hero tiers) match v2.5.1 golden snapshot with ZERO differences
+[PASS] BOT-01-LOCK: RL bot policy.state weights unchanged — 23572 bytes, SHA-256 verified
+[PASS] HYGIENE-SCAN: Zero external requests, zero Drive URLs, zero scattered mode branches — 99769 bytes, clean static scans
+========================================================================
+SUMMARY: 11/11 PASS, 0 FAIL
+========================================================================
+
+=== ARTIFACT FINGERPRINTS ===
+b298a5310106ab3338ab6549f923e425bf1fa1abf3d32be60272881a2b8f76f6  index.html
+54c3169c7485336217330f4e1a51581e800ecfec27af8223a73a2e3e2d89105e  tests/run_m1_s4_leaderboard_cleanup.js
+0f25e8600c41605c80306a4c4bf284d332af524dd25934ac5fa7c14cd898c525  tests/snapshots/v2.5.1_characterization.json
+  1825  99769 index.html
+   469  19734 tests/run_m1_s4_leaderboard_cleanup.js
+  2294 119503 total

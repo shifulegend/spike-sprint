@@ -1,0 +1,69 @@
+=== BUILD 1 ===
+Built /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 139516 bytes (136.25 KB) | Lines: 2931 | SHA-256: 6ab0b44c781cb3e4bb951ce92014e36e536a0b28861bd229abe1dcc19e7d42a1
+WARNING: Build size 139516 exceeds warning-first budget 122880 bytes (non-blocking per Doc 16).
+=== BUILD 2 (BYTE-IDENTICAL BUILD CHECK) ===
+Built /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 139516 bytes (136.25 KB) | Lines: 2931 | SHA-256: 6ab0b44c781cb3e4bb951ce92014e36e536a0b28861bd229abe1dcc19e7d42a1
+WARNING: Build size 139516 exceeds warning-first budget 122880 bytes (non-blocking per Doc 16).
+Byte-identical build check: PASS (6ab0b44c781cb3e4bb951ce92014e36e536a0b28861bd229abe1dcc19e7d42a1)
+
+=== M4-S2 RUN 1 ===
+========================================================================
+Spike Sprint — M4-S2 Replay Storage (ST-01..ST-08) & Replay UX (TC-37)
+Node: v18.20.4
+Built index.html: 139516 bytes (136.25 KB) | SHA-256: 6ab0b44c781cb3e4bb951ce92014e36e536a0b28861bd229abe1dcc19e7d42a1
+========================================================================
+[PASS] M4-S2-ST01-07-08: Normal IndexedDB save/load, async write-once & navigator.storage.persist() (ST-01/07/08) — IDB persisted (putCount=1), persistCalls=1, loaded OK
+[PASS] M4-S2-ST02-03: Blocked IndexedDB (SecurityError) & QuotaExceeded fall back cleanly to memory (ST-02/03) — Blocked & QuotaExceeded both fell back cleanly without losing current run
+[PASS] M4-S2-ST04-05: Corrupted record & simVersion/botHash mismatch refused cleanly (ST-04/05) — Corrupted & version-mismatched records cleanly refused
+[PASS] M4-S2-ST06: GC deletes unreferenced replays while retaining Top 10 & latest run (ST-06) — GC removed 2 unreferenced replays; retained top_1 & latest_run
+[PASS] M4-S2-TC37: Replay UX: input lock, zero score mutation, instant EXIT to scores & mismatch refusal (TC-37) — Input lock, zero score mutation, instant EXIT to scores, and mismatch banner verified
+[PASS] M4-S2-DEDUP-HYGIENE: Template deduplicated onto SpikeSprintSim; zero external requests & zero Drive URLs — Template deduplicated; built index.html = 139516 bytes (136.25 KB)
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== M4-S2 RUN 2 (REPRODUCIBILITY CHECK) ===
+========================================================================
+Spike Sprint — M4-S2 Replay Storage (ST-01..ST-08) & Replay UX (TC-37)
+Node: v18.20.4
+Built index.html: 139516 bytes (136.25 KB) | SHA-256: 6ab0b44c781cb3e4bb951ce92014e36e536a0b28861bd229abe1dcc19e7d42a1
+========================================================================
+[PASS] M4-S2-ST01-07-08: Normal IndexedDB save/load, async write-once & navigator.storage.persist() (ST-01/07/08) — IDB persisted (putCount=1), persistCalls=1, loaded OK
+[PASS] M4-S2-ST02-03: Blocked IndexedDB (SecurityError) & QuotaExceeded fall back cleanly to memory (ST-02/03) — Blocked & QuotaExceeded both fell back cleanly without losing current run
+[PASS] M4-S2-ST04-05: Corrupted record & simVersion/botHash mismatch refused cleanly (ST-04/05) — Corrupted & version-mismatched records cleanly refused
+[PASS] M4-S2-ST06: GC deletes unreferenced replays while retaining Top 10 & latest run (ST-06) — GC removed 2 unreferenced replays; retained top_1 & latest_run
+[PASS] M4-S2-TC37: Replay UX: input lock, zero score mutation, instant EXIT to scores & mismatch refusal (TC-37) — Input lock, zero score mutation, instant EXIT to scores, and mismatch banner verified
+[PASS] M4-S2-DEDUP-HYGIENE: Template deduplicated onto SpikeSprintSim; zero external requests & zero Drive URLs — Template deduplicated; built index.html = 139516 bytes (136.25 KB)
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== M4-S1 NON-REGRESSION CHECK ===
+========================================================================
+Spike Sprint — M4-S1 Replay Engine & 1,000-Run Property Test Suite
+Node: v18.20.4 | SIM_VERSION: 2.6.0-sim1 | FORMAT_V: 1
+========================================================================
+[PASS] M4-S1-PURITY: src/sim/replay.js has zero Math.random, DOM, window, wall-clock, audio, Buffer, or Drive URLs — Zero forbidden tokens in src/sim/replay.js (11328 bytes)
+[PASS] M4-S1-TC35: Villain live run matches deterministic replay bit-for-bit (TC-35) — finalTick=123, score=1, cause=enemy, payload=4B
+[PASS] M4-S1-TC36: Hero + DQN RL bot matches replay bit-for-bit across Easy/Normal/Hard/Insane (TC-36) — easy(t=555,ev=21,42B), normal(t=237,ev=8,16B), hard(t=1200,ev=34,68B), insane(t=1200,ev=29,58B)
+[PASS] M4-S1-D03: 1,000 randomized live-vs-replay runs (Villain + Hero + pause/blur CLEAR_HELD) match 100% (D-03) — 1,000/1,000 PASS (Villain=515, Hero=485, pauseClears=373)
+[PASS] M4-S1-TC38: 1-min, 5-min, and 10-min encoded replay sizes within compact budget (TC-38) — 1m:V=240B(320b64)/H=240B(320b64); 5m:V=1200B(1600b64)/H=1200B(1600b64); 10m:V=2400B(3200b64)/H=2400B(3200b64)
+[PASS] M4-S1-S04: Tampered payload, score edit, version/bot mismatch, and truncated varint cleanly rejected (S-04) — All 5 tamper/mismatch/malformed cases cleanly rejected
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== ARTIFACT FINGERPRINTS ===
+b4d2491e88b5e81cf7e0a65eb98b1d66814090e030ead75825c346e8f73926df  src/storage/replays.js
+bdce55040f0bc6cf634d71dfaf9aad6c27e3c39e36b3d9e842047a13aa401e74  src/template.html
+dad6dc7f210d91c97ab645f9d5f1e3d97284cc3620df6f374fbdd334381089c1  scripts/build.js
+6ab0b44c781cb3e4bb951ce92014e36e536a0b28861bd229abe1dcc19e7d42a1  index.html
+19806298d23fd187835cc71c0dc34e4d941a87f3754b9d7ddc9ab44f0b8dbee8  tests/run_m4_s2_replay_ui_storage.js
+   241   8022 src/storage/replays.js
+  1845  72707 src/template.html
+    43   1723 scripts/build.js
+  2931 139516 index.html
+   396  18309 tests/run_m4_s2_replay_ui_storage.js
+  5456 240277 total

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Spike Sprint</title>
+<style>
+  html,body{margin:0;padding:0;background:#0b0f2e;overflow:hidden;height:100%;font-family:'Courier New',monospace;}
+  #gameCanvas{display:block;background:linear-gradient(#8ed1ff,#c9ecff);touch-action:none;}
+  #hud{position:absolute;top:10px;right:16px;color:#000;font-size:28px;font-weight:bold;text-shadow:1px 1px 0 #fff;letter-spacing:2px;}
+  #speedTag{position:absolute;top:64px;right:16px;color:#000;font-size:14px;text-shadow:1px 1px 0 #fff;}
+  #highScoreTag{position:absolute;top:44px;right:16px;color:#000;font-size:16px;font-weight:bold;text-shadow:1px 1px 0 #fff;}
+  #copyrightTag{position:absolute;bottom:2px;left:0;width:100%;text-align:center;color:rgba(255,255,255,0.4);font-size:9px;font-family:sans-serif;pointer-events:none;z-index:5;}
+  #startScreen,#gameOverScreen{position:absolute;top:0;left:0;width:100%;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.55);color:#fff;text-align:center;font-family:'Courier New',monospace;}
+  #gameOverScreen{display:none;}
+  h1{font-size:32px;margin:0 0 10px;text-shadow:2px 2px #000;}
+  #brandTitle{font-size:56px;font-weight:900;letter-spacing:4px;color:#ffcc00;
+    text-shadow:4px 4px 0 #8c2c2c, 6px 6px 0 rgba(0,0,0,0.6);margin:0 0 6px;
+    font-family:'Courier New',monospace;}
+  #brandTagline{font-size:15px;font-style:italic;color:#e8e8e8cc;letter-spacing:1px;margin:0 0 22px;}
+  #startHint{font-size:14px;color:#fff;margin:0 0 4px;}
+  button{margin-top:16px;padding:10px 26px;font-size:18px;background:#ffcc00;border:3px solid #664400;
+    border-radius:6px;cursor:pointer;font-weight:bold;}
+  #credit{position:absolute;bottom:6px;left:8px;color:#ffffffaa;font-size:11px;font-family:sans-serif;}
+  #soundToggle{
+    position:absolute;top:10px;left:12px;
+    width:42px;height:42px;
+    background:#1a1f4a;
+    border:3px solid #ffcc00;
+    border-radius:4px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    z-index:10;
+    box-shadow:3px 3px 0 #664400;
+    transition:background 0.1s;
+    padding:0;
+    outline:none;
+  }
+  #soundToggle:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #664400;}
+  #soundToggle svg{width:22px;height:22px;display:block;}
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="copyrightTag">Copyright (c) 2026 shifulegend</div>
+<div id="hud">00000</div>
+<div id="highScoreTag">HIGH SCORE: 00000</div>
+<div id="speedTag">SPEED x1.0</div>
+
+<button id="soundToggle" title="Toggle Sound" aria-label="Toggle Sound">
+  <svg id="iconSoundOn" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="8" width="6" height="8" rx="1" fill="#ffcc00"/>
+    <polygon points="8,8 15,3 15,21 8,16" fill="#ffcc00"/>
+    <path d="M17.5 7.5 C19.5 9 20.5 11 20.5 12 C20.5 13 19.5 15 17.5 16.5" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M17.5 10 C18.5 10.8 19 11.4 19 12 C19 12.6 18.5 13.2 17.5 14" stroke="#ffcc00" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  </svg>
+  <svg id="iconSoundOff" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <rect x="2" y="8" width="6" height="8" rx="1" fill="#888"/>
+    <polygon points="8,8 15,3 15,21 8,16" fill="#888"/>
+    <line x1="17" y1="8" x2="22" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22" y1="8" x2="17" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+</button>
+
+<div id="startScreen">
+  <div id="brandTitle">SPIKE SPRINT</div>
+  <div id="brandTagline">A poorly coded pixel runner</div>
+  <p id="startHint">Tap / Click / Space = Jump</p>
+  <button id="startBtn">START GAME</button>
+</div>
+
+<div id="gameOverScreen">
+  <h1>GAME OVER</h1>
+  <p id="finalScore"></p>
+  <button id="restartBtn">RESTART</button>
+</div>
+
+
+
+<script>
+// ── Web Audio ────────────────────────────────────────────────────────────────
+//
+// Cross-browser Web Audio strategy:
+//
+// Chrome/Edge  — AudioContext starts suspended until a user gesture;
+//               resume() inside any click/keydown/pointerdown is enough.
+//               Hard limit: 6 AudioContext instances per tab (throws DOMException).
+//               DO NOT create new AudioContext() on every gesture — only once.
+//
+// Firefox      — Same autoplay policy as Chrome. resume() in gesture works.
+//
+// Safari macOS — Same as Chrome. resume() in gesture works.
+//
+// Safari iOS   — Strictest. Has an internal per-tab "unlocked" flag.
+//               Calling resume() on a suspended ctx is silently ignored until
+//               the flag is flipped. Flag flips only when a dummy throwaway
+//               AudioContext is created + resumed inside a gesture.
+//               Fix: run the dummy-unlock ONCE per page load, then never again.
+//               Also re-suspends on background — need visibilitychange resume.
+//
+// Hardware ringer (iOS): if silent/vibrate, Web Audio is muted. No code fix.
+//
+const AC = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let soundEnabled = true;
+let _audioUnlocked = false; // iOS dummy-unlock done flag — run at most once
+
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new AC();
+  if(audioCtx.state !== 'running') audioCtx.resume();
+  return audioCtx;
+}
+
+// Called at the top of every user-gesture handler (click, keydown, pointerdown).
+// On first call: runs the iOS dummy-unlock pattern (one throwaway AudioContext)
+// and creates the real context. On all subsequent calls: just resumes if needed.
+// Guarded by _audioUnlocked so we never exceed Chrome's 6-context/tab limit.
+function primeAudio(){
+  if(!_audioUnlocked){
+    _audioUnlocked = true;
+    // iOS dummy-unlock: create + resume a throwaway ctx synchronously.
+    // This flips iOS's internal "tab audio allowed" flag for all future ctxs.
+    // We close it immediately so it counts against the Chrome limit only once.
+    try {
+      const dummy = new AC();
+      const p = dummy.resume();
+      if(p && typeof p.finally === 'function') p.finally(() => dummy.close());
+      else dummy.close();
+    } catch(e){}
+    // Create the real context right after, while still inside the gesture
+    if(!audioCtx) audioCtx = new AC();
+  }
+  // Always resume if suspended (handles Chrome + Firefox + Safari macOS too)
+  if(audioCtx && audioCtx.state !== 'running') audioCtx.resume();
+}
+
+// Re-resume on tab return (iOS re-suspends context when tab goes to background)
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && audioCtx && audioCtx.state !== 'running'){
+    audioCtx.resume();
+  }
+});
+
+function playTone(opts){
+  if(!soundEnabled) return;
+  try {
+    const ac = getAudioCtx();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.type = opts.type || 'square';
+    const now = ac.currentTime;
+    osc.frequency.setValueAtTime(opts.freqStart || 220, now);
+    if(opts.freqEnd !== undefined)
+      osc.frequency.linearRampToValueAtTime(opts.freqEnd, now + (opts.duration || 0.15));
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(opts.volume || 0.25, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + (opts.duration || 0.15));
+    osc.start(now);
+    osc.stop(now + (opts.duration || 0.15) + 0.02);
+  } catch(e){}
+}
+
+function playNoise(duration, volume){
+  if(!soundEnabled) return;
+  try {
+    const ac = getAudioCtx();
+    const bufferSize = Math.ceil(ac.sampleRate * duration);
+    const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1);
+    const src = ac.createBufferSource();
+    src.buffer = buffer;
+    const gain = ac.createGain();
+    const filter = ac.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 300;
+    const now = ac.currentTime;
+    gain.gain.setValueAtTime(volume || 0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+    src.start(now);
+    src.stop(now + duration + 0.02);
+  } catch(e){}
+}
+
+function sfxJump(){
+  playTone({type:'square', freqStart:180, freqEnd:420, duration:0.13, volume:0.18});
+}
+
+function sfxLand(){
+  playTone({type:'square', freqStart:90, freqEnd:60, duration:0.08, volume:0.12});
+  playNoise(0.06, 0.06);
+}
+
+function sfxSquash(){
+  // Use AudioContext scheduling to avoid setTimeout breaking Safari gesture chain.
+  if(!soundEnabled) return;
+  try {
+    const ac = getAudioCtx();
+    [[440,180,0],[320,120,0.08]].forEach(([fs,fe,offset])=>{
+      const t = ac.currentTime + offset;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.connect(gain); gain.connect(ac.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(fs, t);
+      osc.frequency.linearRampToValueAtTime(fe, t + 0.1);
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.22, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      osc.start(t); osc.stop(t + 0.12);
+    });
+  } catch(e){}
+}
+
+function sfxGameOver(){
+  // Use AudioContext scheduling instead of setTimeout so Safari doesn't lose
+  // the gesture trust context between the note callbacks.
+  if(!soundEnabled) return;
+  try {
+    const ac = getAudioCtx();
+    const notes = [330, 262, 196, 147];
+    notes.forEach((f, i) => {
+      const t = ac.currentTime + i * 0.13;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(f, t);
+      osc.frequency.linearRampToValueAtTime(f * 0.85, t + 0.18);
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.22, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      osc.start(t);
+      osc.stop(t + 0.20);
+    });
+  } catch(e){}
+}
+
+function sfxBarrelWarn(){
+  playTone({type:'sawtooth', freqStart:80, freqEnd:55, duration:0.2, volume:0.18});
+}
+
+const soundToggleBtn = document.getElementById('soundToggle');
+const iconOn  = document.getElementById('iconSoundOn');
+const iconOff = document.getElementById('iconSoundOff');
+soundToggleBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  soundEnabled = !soundEnabled;
+  iconOn.style.display  = soundEnabled ? '' : 'none';
+  iconOff.style.display = soundEnabled ? 'none' : '';
+  soundToggleBtn.style.borderColor = soundEnabled ? '#ffcc00' : '#555';
+});
+soundToggleBtn.addEventListener('pointerdown', e=>e.stopPropagation());
+soundToggleBtn.addEventListener('pointerup',   e=>e.stopPropagation());
+// ────────────────────────────────────────────────────────────────────────────
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const GROUND_Y_RATIO = 0.78;
+const ZOOM = 2;
+function logicalW(){ return canvas.width/ZOOM; }
+function logicalH(){ return canvas.height/ZOOM; }
+let groundY = 0;
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight; groundY = logicalH()*GROUND_Y_RATIO;}
+resize();
+window.addEventListener('resize', resize);
+
+let gameState = 'start';
+let startTime = 0, elapsed = 0;
+let score = 0;
+let sessionHighScore = 0;
+let speedMult = 1;
+const BASE_SPEED = 6;
+let worldSpeed = BASE_SPEED;
+
+const player = {
+  x: 120, y: 0, w: 34, h: 46,
+  vy: 0, onGround: true,
+  legPhase: 0,
+  jumping:false,
+  stuck:false,
+  dead:false
+};
+const GRAVITY = 0.85;
+let jumpHoldTime = 0;
+let jumpKeyDown = false;
+const MIN_JUMP_V = -9;
+const MAX_JUMP_V = -16.5;
+const MAX_HOLD_MS = 320;
+
+let enemies = [];
+let pits = [];
+let pipes = [];
+let spawnTimer = 0;
+let nextSpawnAt = 60;
+
+let barrelRoll = 0;
+let barrelCatchUp = 0;
+let playerStuckTimer = 0;
+
+function resetGame(){
+  score = 0;
+  elapsed = 0;
+  speedMult = 1;
+  worldSpeed = BASE_SPEED;
+  enemies = []; pits = []; pipes = [];
+  spawnTimer = 0; nextSpawnAt = 60;
+  barrelCatchUp = 0; barrelRoll = 0;
+  playerStuckTimer = 0;
+  player.y = groundY - player.h;
+  player.vy = 0; player.onGround = true; player.jumping=false;
+  player.stuck = false; player.dead = false;
+  jumpHoldTime = 0; jumpKeyDown = false;
+  startTime = performance.now();
+}
+
+let groundScroll = 0;
+
+function spawnObstacle(){
+  const roll = Math.random();
+  const groundTop = groundY;
+  if(roll < 0.4){
+    const size = player.h/2;
+    enemies.push({x: logicalW()+40, y: groundTop-size, w:size, h:size, alive:true, legPhase:0});
+  } else if(roll < 0.7){
+    const pitWidth = 70 + Math.random()*50;
+    pits.push({x: logicalW()+40, w: pitWidth});
+  } else {
+    const ph = 40+Math.random()*20;
+    pipes.push({x: logicalW()+40, w:34, h:ph});
+  }
+}
+
+function update(dt){
+  elapsed = (performance.now() - startTime)/1000;
+
+  const t = elapsed;
+  if(t <= 300){
+    speedMult = 1 + (t/300)*1;
+  } else if(t <= 600){
+    speedMult = 2 + ((t-300)/300)*1;
+  } else {
+    speedMult = 3;
+  }
+  worldSpeed = BASE_SPEED * speedMult;
+
+  score += 0.6 * speedMult * dt;
+  if(score > sessionHighScore) sessionHighScore = score;
+
+  groundScroll -= worldSpeed;
+
+  spawnTimer += dt*60;
+  if(spawnTimer > nextSpawnAt){
+    spawnTimer = 0;
+    nextSpawnAt = 55 - Math.min(25, speedMult*8) + Math.random()*30;
+    spawnObstacle();
+  }
+
+  if(jumpKeyDown && player.jumping && jumpHoldTime < MAX_HOLD_MS){
+    jumpHoldTime += dt*1000;
+  }
+  player.vy += GRAVITY;
+  player.y += player.vy;
+
+  let overPit = false;
+  for(const p of pits){
+    const feetL = player.x + player.w*0.15;
+    const feetR = player.x + player.w*0.85;
+    if(feetR > p.x && feetL < p.x + p.w){
+      overPit = true;
+    }
+  }
+
+  if(!overPit && player.y + player.h >= groundY){
+    // landing sound: fire when transitioning from air to ground
+    if(!player.onGround) sfxLand();
+    player.y = groundY - player.h;
+    player.vy = 0;
+    player.onGround = true;
+    player.jumping = false;
+  } else {
+    player.onGround = false;
+  }
+
+  if(overPit && player.y > groundY - player.h*0.2){
+    endGame();
+    return;
+  }
+  if(player.y > logicalH() + 100){
+    endGame();
+    return;
+  }
+
+  player.legPhase += (player.onGround ? worldSpeed*0.12 : 0);
+
+  for(const e of enemies){
+    if(!e.alive) continue;
+    e.x -= worldSpeed;
+    e.legPhase += worldSpeed*0.15;
+  }
+  enemies = enemies.filter(e => e.x > -60);
+
+  for(const p of pits) p.x -= worldSpeed;
+  pits = pits.filter(p => p.x + p.w > -60);
+  for(const p of pipes) p.x -= worldSpeed;
+  pipes = pipes.filter(p => p.x + p.w > -60);
+
+  const px1 = player.x, px2 = player.x+player.w, py1=player.y, py2=player.y+player.h;
+  for(const e of enemies){
+    if(!e.alive) continue;
+    const ex1=e.x, ex2=e.x+e.w, ey1=e.y, ey2=e.y+e.h;
+    const overlapX = px2>ex1 && px1<ex2;
+    const overlapY = py2>ey1 && py1<ey2;
+    if(overlapX && overlapY){
+      if(player.vy > 0 && (py2 - ey1) < e.h*0.6){
+        e.alive = false;
+        sfxSquash();
+        score += 100;
+        if(score > sessionHighScore) sessionHighScore = score;
+        player.vy = -9;
+      } else {
+        endGame();
+        return;
+      }
+    }
+  }
+  enemies = enemies.filter(e=>e.alive);
+
+  if(!player.stuck){
+    for(const p of pipes){
+      const overlapX = px2 > p.x+6 && px1 < p.x+p.w-6;
+      const overlapY = py2 > groundY - p.h;
+      if(overlapX && overlapY && player.onGround){
+        player.stuck = true;
+        playerStuckTimer = 0;
+        break;
+      }
+    }
+  } else {
+    playerStuckTimer += dt;
+  }
+
+  if(player.stuck){
+    const prevCatchUp = barrelCatchUp;
+    barrelCatchUp += dt/1.1;
+    if(barrelCatchUp > 1) barrelCatchUp = 1;
+    if(prevCatchUp <= 0.05 && barrelCatchUp > 0.05) sfxBarrelWarn();
+  } else {
+    barrelCatchUp = Math.max(0, barrelCatchUp - dt*2);
+  }
+  barrelRoll -= worldSpeed*1.3;
+
+  // Check actual barrel-vs-player touch: rightmost pixel of a spike touches leftmost pixel of the player
+  const barrelSize = 90;
+  const spikeLength = 14;
+  const spikeTipRadius = barrelSize/2 + spikeLength; // max reach of any spike tip from barrel center
+  const barrelBaseX = -barrelSize*0.66;
+  const barrelX = barrelBaseX + barrelCatchUp * (player.x - barrelBaseX + barrelSize*0.5);
+  const barrelCenterX = barrelX + barrelSize/2;
+  const barrelSpikeRightEdge = barrelCenterX + spikeTipRadius; // rightmost pixel any spike can reach
+  const playerLeftEdge = player.x; // leftmost pixel of the player
+  if(player.stuck && barrelSpikeRightEdge >= playerLeftEdge){
+    endGame();
+    return;
+  }
+}
+
+function endGame(){
+  gameState = 'over';
+  sfxGameOver();
+  document.getElementById('finalScore').textContent = 'Score: ' + String(Math.floor(score)).padStart(5,'0') + '  |  High Score: ' + String(Math.floor(sessionHighScore)).padStart(5,'0');
+  document.getElementById('gameOverScreen').style.display='flex';
+}
+
+function drawBackground(){
+  ctx.fillStyle = '#bfe6ff';
+  ctx.fillRect(0,0,logicalW(), groundY);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  for(let i=0;i<4;i++){
+    const cx = ((i*260 + (groundScroll*0.2)) % (logicalW()+200)) - 100;
+    ctx.beginPath();
+    ctx.ellipse(cx, 60+i*20%80, 40,18,0,0,Math.PI*2);
+    ctx.ellipse(cx+30, 55+i*20%80, 26,14,0,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawGround(){
+  ctx.fillStyle = '#6b4423';
+  ctx.fillRect(0, groundY, logicalW(), logicalH()-groundY);
+  ctx.fillStyle = '#4a2f18';
+  const tileW = 24;
+  let off = ((groundScroll)%tileW+tileW)%tileW;
+  for(let x=-tileW; x<logicalW()+tileW; x+=tileW){
+    ctx.fillRect(x+off, groundY, tileW-4, 6);
+  }
+  for(const p of pits){
+    ctx.fillStyle = '#8ed1ff';
+    ctx.fillRect(p.x, groundY, p.w, logicalH()-groundY);
+    ctx.fillStyle = '#2b1a0d';
+    ctx.fillRect(p.x, groundY, 4, logicalH()-groundY);
+    ctx.fillRect(p.x+p.w-4, groundY, 4, logicalH()-groundY);
+  }
+}
+
+function drawPlayer(){
+  const x = player.x, y = player.y, w = player.w, h = player.h;
+  ctx.save();
+  ctx.translate(x,y);
+  const legSwing = Math.sin(player.legPhase) * (player.onGround?10:0);
+  ctx.fillStyle='rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.ellipse(w/2, groundY-y+4, w*0.5, 5,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#2a4d8f';
+  ctx.fillRect(6, h-16, 8, 16+legSwing*0.3);
+  ctx.fillRect(w-14, h-16, 8, 16-legSwing*0.3);
+  ctx.fillStyle = '#e0432b';
+  ctx.fillRect(4, h*0.35, w-8, h*0.4);
+  ctx.fillStyle = '#c9351f';
+  ctx.fillRect(0, h*0.4, 6, 14);
+  ctx.fillRect(w-6, h*0.4, 6, 14);
+  ctx.fillStyle = '#f2c49b';
+  ctx.fillRect(6, 0, w-12, h*0.32);
+  ctx.fillStyle = '#8a1f14';
+  ctx.fillRect(4, -4, w-8, 8);
+  ctx.fillRect(w-10, 0, 12, 6);
+  ctx.fillStyle='#1a1a1a';
+  ctx.fillRect(w-11, 8, 3,3);
+  if(player.stuck){
+    ctx.fillStyle='rgba(255,0,0,0.35)';
+    ctx.fillRect(-4,-4,w+8,h+8);
+  }
+  ctx.restore();
+}
+
+function drawEnemy(e){
+  ctx.save();
+  ctx.translate(e.x, e.y);
+  const swing = Math.sin(e.legPhase)*4;
+  ctx.fillStyle='#5a2d82';
+  ctx.beginPath();
+  ctx.ellipse(e.w/2, e.h/2, e.w/2, e.h/2, 0,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle='#3d1c5a';
+  ctx.fillRect(2, e.h-4, 5, 4+swing*0.2);
+  ctx.fillRect(e.w-7, e.h-4, 5, 4-swing*0.2);
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(e.w*0.65, e.h*0.35,2.2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#000';
+  ctx.beginPath();ctx.arc(e.w*0.68, e.h*0.35,1,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+function drawPipe(p){
+  const ph = p.h;
+  const py = groundY - ph;
+  const w = p.w;
+  ctx.save();
+  ctx.translate(p.x + w/2, py + ph);
+
+  // ground contact shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.beginPath();
+  ctx.ellipse(0, 2, w*0.6, 5, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // fill the same rectangular footprint as the old pipe with layered lumps
+  // base dark layer (fills bottom of footprint fully, corner to corner)
+  ctx.fillStyle = '#245c18';
+  ctx.beginPath();
+  ctx.moveTo(-w/2, 0);
+  ctx.quadraticCurveTo(-w/2, -ph*0.55, -w*0.15, -ph*0.7);
+  ctx.quadraticCurveTo(0, -ph*0.85, w*0.18, -ph*0.72);
+  ctx.quadraticCurveTo(w/2, -ph*0.55, w/2, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // mid-tone lumps for volume, still within footprint
+  ctx.fillStyle = '#347a22';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.24, -ph*0.42, w*0.3, ph*0.35, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(w*0.26, -ph*0.4, w*0.3, ph*0.36, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, -ph*0.62, w*0.32, ph*0.34, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // lighter highlight clumps near top
+  ctx.fillStyle = '#4f9c37';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.14, -ph*0.72, w*0.2, ph*0.2, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(w*0.16, -ph*0.7, w*0.19, ph*0.19, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, -ph*0.82, w*0.15, ph*0.14, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // sunlit tips
+  ctx.fillStyle = '#7fc453';
+  ctx.beginPath();
+  ctx.ellipse(-w*0.08, -ph*0.86, w*0.09, ph*0.08, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(w*0.14, -ph*0.78, w*0.07, ph*0.06, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // shadow speckle texture for leafy depth
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  for(let i=0;i<6;i++){
+    const ang = (i/6)*Math.PI*2;
+    const rx = Math.cos(ang)*w*0.22;
+    const ry = -ph*0.48 + Math.sin(ang)*ph*0.2;
+    ctx.beginPath();
+    ctx.arc(rx, ry, 1.8, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawBarrel(){
+  const size = 90;
+  const baseX = -size*0.66;
+  const catchX = baseX + barrelCatchUp * (player.x - baseX + size*0.5);
+  const bx = catchX;
+  const by = groundY - size*0.9;
+  ctx.save();
+  ctx.translate(bx+size/2, by+size/2);
+  ctx.rotate((barrelRoll*0.02)%(Math.PI*2));
+  ctx.fillStyle = '#5b1a1a';
+  ctx.beginPath();
+  ctx.arc(0,0,size/2,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle='#8c2c2c';
+  ctx.beginPath();
+  ctx.arc(0,0,size/2-8,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle='#3a3a3a';
+  for(let i=0;i<10;i++){
+    const ang = i*(Math.PI*2/10);
+    const tx = Math.cos(ang)*(size/2+14);
+    const ty = Math.sin(ang)*(size/2+14);
+    const px1 = Math.cos(ang+0.12)*(size/2-2);
+    const py1 = Math.sin(ang+0.12)*(size/2-2);
+    const px2 = Math.cos(ang-0.12)*(size/2-2);
+    const py2 = Math.sin(ang-0.12)*(size/2-2);
+    ctx.beginPath();
+    ctx.moveTo(px1,py1);
+    ctx.lineTo(tx,ty);
+    ctx.lineTo(px2,py2);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+  if(barrelCatchUp>0.05){
+    ctx.fillStyle = `rgba(255,0,0,${Math.min(0.35,barrelCatchUp*0.4)})`;
+    ctx.fillRect(0,0,logicalW(),logicalH());
+  }
+}
+
+function drawHUD(){
+  document.getElementById('hud').textContent = String(Math.floor(score)).padStart(5,'0');
+  document.getElementById('speedTag').textContent = 'SPEED x' + speedMult.toFixed(2);
+  document.getElementById('highScoreTag').textContent = 'HIGH SCORE: ' + String(Math.floor(sessionHighScore)).padStart(5,'0');
+}
+
+function loop(){
+  if(gameState==='playing'){
+    update(1/60);
+  }
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.scale(ZOOM, ZOOM);
+  drawBackground();
+  drawGround();
+  for(const p of pipes) drawPipe(p);
+  for(const e of enemies) if(e.alive) drawEnemy(e);
+  drawBarrel();
+  drawPlayer();
+  ctx.restore();
+  if(gameState==='playing') drawHUD();
+  requestAnimationFrame(loop);
+}
+
+function startJump(){
+  if(gameState!=='playing') return;
+  primeAudio(); // ensure AudioContext is running on every gesture (Safari)
+  if(player.onGround || player.stuck){
+    sfxJump();
+    jumpKeyDown = true;
+    jumpHoldTime = 0;
+    player.jumping = true;
+    player.onGround = false;
+    player.vy = MIN_JUMP_V;
+    if(player.stuck){ player.stuck=false; }
+  }
+}
+function endJump(){
+  if(gameState!=='playing') return;
+  if(jumpKeyDown){
+    const holdRatio = Math.min(1, jumpHoldTime/MAX_HOLD_MS);
+    const extra = (MAX_JUMP_V - MIN_JUMP_V)*holdRatio;
+    if(player.vy < 0){
+      player.vy = MIN_JUMP_V + extra;
+    }
+  }
+  jumpKeyDown = false;
+}
+
+window.addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); startJump(); }
+});
+window.addEventListener('keyup', e=>{
+  if(e.code==='Space'){ e.preventDefault(); endJump(); }
+});
+canvas.addEventListener('pointerdown', e=>{ startJump(); });
+canvas.addEventListener('pointerup', e=>{ endJump(); });
+canvas.addEventListener('pointercancel', e=>{ endJump(); });
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  primeAudio();
+  document.getElementById('startScreen').style.display='none';
+  resetGame();
+  gameState='playing';
+});
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  primeAudio();
+  document.getElementById('gameOverScreen').style.display='none';
+  resetGame();
+  gameState='playing';
+});
+
+groundY = logicalH()*GROUND_Y_RATIO;
+player.y = groundY - player.h;
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

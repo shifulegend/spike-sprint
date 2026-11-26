@@ -1,0 +1,30 @@
+17 - SPIKE SPRINT: SOURCE PRESERVATION AND EVIDENCE STATUS ADDENDUM v1.0
+Date: 2026-11-25
+Scope: archival instructions and status, not source code, not a substitute for the source archive.
+
+KNOWN SOURCE SNAPSHOT
+Original: index_v2.5.1.html
+Measured in the preceding static review: 97,313 bytes; 1,724 lines using Python splitlines().
+SHA-256: f865aa76e28b138e6a8e5d315e1d0afc8f34b0eb5d42a8e7bef9fdb88e802cf8
+The earlier 1,721-line description is not the measured count for this exact snapshot. Repository URL, branch and starting Git commit remain unconfirmed.
+
+TXT FALLBACK RESTORATION
+If stored as index_v2.5.1.html.txt, download as a plain file and remove only the final .txt extension. No code conversion or rewriting is intended. Preserve UTF-8 bytes and line endings. Check byte size and SHA-256 against the values above before execution. Do not use a rich-text export as a byte-exact backup. Do not rename a rendered PDF to HTML: it does not contain executable source.
+
+ARTIFACT DELIVERY STATUS
+The previous response generated and attached a byte-identical source TXT and a ZIP containing 20 entries, including available local project artifacts, restoration notes and checksums. Those attachments were not uploaded to Drive. This addendum contains neither their binary content nor their embedded bot weights. Do not mark source archival complete merely because this addendum exists. A new session must recreate or reload attached generated files before using them; prior Python variables/files are not assumed to persist.
+
+DRIVE STATUS
+Prior Drive metadata confirmed docs 10 v1.1 and 12-15, ADR v1.3 and doc 11; docs 13/14 were also retrieved as content. The standalone index_v2.5.1 Google document represents the rendered PDF, not verified raw HTML. The older v1.0-baseline.zip and runner bot JSON were seen in Drive metadata; they do not establish that the original full v2.5.1 ZIP was recovered. Do not duplicate existing documents solely because keyword search missed them.
+
+CONNECTOR LIMITATION CORRECTION
+The available create_file schema supports inline UTF-8 text and base64 binary uploads, with conversion disabled for preserving raw files. No extension rejection was demonstrated. It lacks a local-workspace-path upload argument. The prior failure to complete the large inline source transfer was not proof Drive rejects HTML, ZIP or TXT.
+
+EVIDENCE LIMITS
+- Doc 15 is a focused static second pass by the same assistant, not an external audit or full repository/security certification.
+- Original benchmark harness and episode CSVs remain unavailable. Summary values in docs 10/12 are reported historical results, not recovered raw evidence or fresh benchmarks.
+- No gameplay code change, dependency install, browser/device test, deployment, commit or push has been performed in this workflow.
+- File packaging and checksum verification are archival checks, not game tests.
+
+M1-S1 UPDATE
+Baseline identity is unresolved, but focused inspection of the HTML snapshot has occurred and is recorded in doc 15. Thus doc 14's earlier no-fresh-inspection status is historical. Repository/build/CI inspection remains incomplete. Next: preserve exact source on Drive and verify it; identify canonical baseline; complete a minimal inspection record; submit the next smallest step plan. No timing fix starts automatically.

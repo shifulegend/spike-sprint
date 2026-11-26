@@ -1,0 +1,34 @@
+16 - SPIKE SPRINT: CURRENT DECISIONS AND DOCUMENTATION PRECEDENCE ADDENDUM v1.0
+Date: 2026-11-25
+Scope: supplements docs 01-15; does not edit their original text or authorize implementation.
+
+DECISION HANDLING
+Explicit later owner decisions supersede conflicting older prose. Proposals remain proposals. Unresolved conflicts block the affected implementation only. Old Completed/PASS labels are historical, not evidence that future builds passed.
+
+CURRENT OWNER REQUIREMENTS
+- Logical world width 490 px, minimum presentation height 720 px; extend sky above, do not stretch art; ground anchored from bottom. Resize during ranked play changes rendering only.
+- Build step approved; standalone offline output may remain one index.html.
+- Freeze latest policy.state bot checkpoint. policy.best is a comparison candidate, not the selected replacement.
+- Guests on both boards; no player icon. Global Ranking: one best per player/category. Top Scores: multiple runs per player with no per-player slot cap.
+- Choose database before persistent backend development. Older Cloudflare D1 or Supabase wording does not settle the current database choice.
+- Evaluate free hosting first; paid fallback selection requires separate decision, with predictable fixed-monthly pricing preferred.
+- Every milestone uses the smallest coherent testable steps: inspect, detailed plan, owner approval, scoped code, thorough tests, record evidence/commit/push as applicable, owner review before advancing. No broad development batch.
+
+MULTIPLAYER REQUIREMENTS
+Unranked two-player Hero versus Villain, swap roles, survival-time scoring rather than Havoc. Random queue timeout 60 seconds; waiting-room expiry five minutes; each round capped at 120 seconds, ending early on death. Four minutes is maximum active gameplay, not guaranteed duration. Explicit AI offer allowed; no silent substitution. Colyseus is the agreed prototype direction, not a production hosting commitment.
+
+PROPOSALS / OPEN ITEMS
+- Five-minute pairing-to-result target excluding queue; cannot guarantee five minutes queue-to-result with a full minute queue and four minutes gameplay plus overhead.
+- Reconnect grace/freeze/forfeit policy, exact-tick ties, initial Hero cooldown, compressed multiplayer speed ramp and room expiry activity rule need final resolution.
+- IndexedDB remains a storage proposal, not completed code or a newly approved migration.
+- Deleted-account historical name handling, size policy, free-tier upgrade triggers and database remain open.
+- 120 KB is a proposed build budget, not a browser limit; warning-first enforcement is a recommendation.
+
+CORRECTIONS AND INTERPRETATIONS
+- Doc 11 Gate G3: use actual bridge coverage TC-39 and S-05; B-01 through B-05 are undefined references.
+- New unranked AI practice must not accidentally exclude existing solo Hero leaderboard categories, which already use the runner bot.
+- No AI Hero trap policy is established by the existing runner DQN.
+- Name sanitization does not validate other rendered fields. Doc 15 reports a conditional stored-score HTML sink; no remotely demonstrated exploit is claimed.
+
+RECONCILIATION RULE
+Use this addendum with docs 12-15, not as a claim that all originals have been rewritten. Further source-document revisions must preserve unresolved decisions and cite the approved replacement rule.

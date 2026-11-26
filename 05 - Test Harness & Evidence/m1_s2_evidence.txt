@@ -1,0 +1,111 @@
+=== RUN 1 ===
+========================================================================
+Spike Sprint — M1-S2 Baseline Test Harness & D-01 Characterization
+Node: v18.20.4
+Target: /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 97313 bytes | Lines: 1724 | SHA-256: f865aa76e28b138e6a8e5d315e1d0afc8f34b0eb5d42a8e7bef9fdb88e802cf8
+========================================================================
+[PASS] M1-S1-LOCK: Canonical v2.5.1 index.html fingerprint unchanged — 97313 bytes, 1724 lines, SHA-256 verified
+[PASS] TC-01: Start Screen, Story Placement & Mode Entry — Villain entry clean, HUD=00000, SPEED x1.00
+[PASS] TC-02: Variable-Height Jump & Physics Parity — shortPeakY=179.5, longPeakY=112.9, sfxLand=1
+[PASS] TC-03: Obstacle Spawner & Distribution Parity (C8 seeded) — 300 seeded spawns: Enemy=123, Pit=97, Bush=80
+[PASS] TC-04: Enemy Stomp (+100, bounce) vs. Side Collision (Game Over) — Stomp +100 & bounce=-9; side collision -> gameover
+[PASS] TC-05: Bush Trap & Spiked Barrel Touch Collision — Bush stuck -> jump free OK; barrel touch gameover in 23 ticks
+[PASS] TC-06: Pit Fall Detection — Pit fall gameover in 9 ticks
+[PASS] TC-07: Difficulty Ramp (1x -> 2x at 5m -> 3x cap at 10m+) — speedMult 2.00 at 300s, capped at 3.00 at 650s
+[PASS] TC-08: End Screen, Restart & Change Mode Navigation — Restart preserves best=420; Change Mode returns to startScreen
+[PASS] TC-09: Sound Toggle & Cross-Browser Audio Unlock — AudioContext creations bounded (2), mute toggle works
+[PASS] TC-10: Viewport Resize & Responsive Zoom Floor — 1280x720 -> ZOOM=2 (lw=640); 390x844 -> ZOOM=0.7959 (lw=490)
+[PASS] TC-11: Hero Mode Entry, Controls Visibility & HAVOC HUD — Hero HUD=HAVOC 00000, autoSpawn=false verified over 100 ticks
+[PASS] TC-12: Manual Spawning & Touch Propagation Isolation — Pit/Bush/Purple Hero manual spawns + pointerdown isolation OK
+[PASS] TC-13: Shared Global Deterministic Cooldown & Anti-Spam (C8 repaired) — 1x tier cooldowns Easy=26, Normal=31, Hard=35, Insane=42; anti-spam OK
+[PASS] TC-14: Cooldown Refill, Ready Flash & 1x/2x/3x Tier Scaling (C8 repaired) — All 4 tiers verified at 1x/2x/3x + ready-flash
+[PASS] TC-15: Hero Victory Screen (VILLAGE SAVED!) & Dynamic Stop-Cause Flavor — All 3 Hero stop-cause flavor texts verified
+[PASS] TC-16: Lower-Is-Better MIN HAVOC & Per-Mode Session Best Isolation — Hero normal MIN HAVOC 180 -> 75; Villain best stays 320
+[PASS] TC-17: Keyboard Shortcuts (1 / 2 / 3) Scoped to Hero Mode — Keys 1/2/3 spawn in Hero mode only
+[PASS] TC-18: Architectural Guardrail (Zero Scattered Mode Conditionals) — Zero scattered mode conditionals in update() and loop()
+[PASS] TC-19: Base64 Float32Array Decoding & Q-Value Parity — 5,893 finite floats decoded; q(0)=[4.991, 4.866, 4.752, 4.854, 4.760]
+[PASS] TC-20: Human Jump Isolation in Hero Mode vs. Villain Mode — allowHumanJump isolation verified
+[PASS] TC-21: Live Autonomous RL Bot Simulation in Hero Mode — spawns=14, autonomousJumps=14, endState=playing
+[PASS] TC-22: Single-File Footprint & Zero External Dependencies (C8 repaired) — 97313 bytes (<= 122880 warning budget), zero external requests
+[PASS] TC-23: RL Bot Pit Clearance & Key-Release Parity Fix — 6/6 pit widths (70–120px) cleared cleanly
+[PASS] TC-24: Consolidated into TC-25 (C8: dead MODES.hero.cooldownScale flagged for M1-S4) — Overridden by HERO_DIFFICULTIES; dead key scheduled for removal in M1-S4
+[PASS] TC-25: Four Hero Difficulty Tiers & Per-Tier MIN HAVOC Isolation — Independent MIN HAVOC across Easy/Normal/Hard/Insane verified
+[PASS] TC-26: Live Run Duration (TIME MM:SS) in Both Modes — TIME 01:25 (Villain) & TIME 00:24 (Hero) HUD + end screen OK
+[PASS] TC-27: Explicit Hero-Only Difficulty Card & Dynamic Button Label — Grouped Hero card + dynamic PLAY AS HERO · <DIFF> verified
+[PASS] TC-28: In-Game Exit Button (Pause, Time Preservation & Unscored Discard) — Pause preserved elapsed time; Exit discarded unscored run
+[PASS] TC-29: 5-Tab Dual Top 10 Leaderboard — Villain (high/long) & Hero (low/fast) dual Top 10 verified
+[PASS] TC-30: Safe localStorage Persistence & iOS data: URL Fallback — SecurityError fallback OK (score=555, name=BUSH)
+[PASS] TC-31: First-Launch Random Default Name (48-Name Pool) & Persistence — 48 valid defaults; first-launch name=BUSH
+[PASS] TC-32: Character Sanitization & Blank-Input Revert — Sanitized ab!12345 -> AB1234; blank blur reverted to AB1234
+[PASS] TC-33: End-Screen Name Edit (Just-Finished + Future Runs Only) — Run1=AB1234, Run2=HERO99, Run3=HERO99
+[PASS] TC-34: Leaderboard Player Column Rendering — Rendered leaderboard contains SPIKE1 and 777
+[PASS] BOT-01: Decoded policy.state weight bytes SHA-256 matches frozen checkpoint — 23572 bytes, SHA-256=99d90952c2b64faca1aefe3aadc7ca6ee6c38d785bb660f06982f503161d5361
+[PASS] BOT-02: Q-value parity against independent Float32 ReLU reference forward pass — 3 reference states verified, maxAbsDiff=0.00e+0 (<1e-5)
+[PASS] BOT-04: Release-fix ablation guard proves key-release fix is active — Normal=6/6 clears vs Ablated=2/6 clears
+[PASS] D-01: Characterization snapshot (640-wide & 490-wide, Villain + 4 Hero tiers) — 10 scenarios saved (85954 bytes, SHA-256=0f25e8600c41605c80306a4c4bf284d332af524dd25934ac5fa7c14cd898c525)
+========================================================================
+SUMMARY: 39/39 PASS, 0 FAIL
+========================================================================
+
+=== RUN 2 (REPRODUCIBILITY CHECK) ===
+========================================================================
+Spike Sprint — M1-S2 Baseline Test Harness & D-01 Characterization
+Node: v18.20.4
+Target: /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 97313 bytes | Lines: 1724 | SHA-256: f865aa76e28b138e6a8e5d315e1d0afc8f34b0eb5d42a8e7bef9fdb88e802cf8
+========================================================================
+[PASS] M1-S1-LOCK: Canonical v2.5.1 index.html fingerprint unchanged — 97313 bytes, 1724 lines, SHA-256 verified
+[PASS] TC-01: Start Screen, Story Placement & Mode Entry — Villain entry clean, HUD=00000, SPEED x1.00
+[PASS] TC-02: Variable-Height Jump & Physics Parity — shortPeakY=179.5, longPeakY=112.9, sfxLand=1
+[PASS] TC-03: Obstacle Spawner & Distribution Parity (C8 seeded) — 300 seeded spawns: Enemy=123, Pit=97, Bush=80
+[PASS] TC-04: Enemy Stomp (+100, bounce) vs. Side Collision (Game Over) — Stomp +100 & bounce=-9; side collision -> gameover
+[PASS] TC-05: Bush Trap & Spiked Barrel Touch Collision — Bush stuck -> jump free OK; barrel touch gameover in 23 ticks
+[PASS] TC-06: Pit Fall Detection — Pit fall gameover in 9 ticks
+[PASS] TC-07: Difficulty Ramp (1x -> 2x at 5m -> 3x cap at 10m+) — speedMult 2.00 at 300s, capped at 3.00 at 650s
+[PASS] TC-08: End Screen, Restart & Change Mode Navigation — Restart preserves best=420; Change Mode returns to startScreen
+[PASS] TC-09: Sound Toggle & Cross-Browser Audio Unlock — AudioContext creations bounded (2), mute toggle works
+[PASS] TC-10: Viewport Resize & Responsive Zoom Floor — 1280x720 -> ZOOM=2 (lw=640); 390x844 -> ZOOM=0.7959 (lw=490)
+[PASS] TC-11: Hero Mode Entry, Controls Visibility & HAVOC HUD — Hero HUD=HAVOC 00000, autoSpawn=false verified over 100 ticks
+[PASS] TC-12: Manual Spawning & Touch Propagation Isolation — Pit/Bush/Purple Hero manual spawns + pointerdown isolation OK
+[PASS] TC-13: Shared Global Deterministic Cooldown & Anti-Spam (C8 repaired) — 1x tier cooldowns Easy=26, Normal=31, Hard=35, Insane=42; anti-spam OK
+[PASS] TC-14: Cooldown Refill, Ready Flash & 1x/2x/3x Tier Scaling (C8 repaired) — All 4 tiers verified at 1x/2x/3x + ready-flash
+[PASS] TC-15: Hero Victory Screen (VILLAGE SAVED!) & Dynamic Stop-Cause Flavor — All 3 Hero stop-cause flavor texts verified
+[PASS] TC-16: Lower-Is-Better MIN HAVOC & Per-Mode Session Best Isolation — Hero normal MIN HAVOC 180 -> 75; Villain best stays 320
+[PASS] TC-17: Keyboard Shortcuts (1 / 2 / 3) Scoped to Hero Mode — Keys 1/2/3 spawn in Hero mode only
+[PASS] TC-18: Architectural Guardrail (Zero Scattered Mode Conditionals) — Zero scattered mode conditionals in update() and loop()
+[PASS] TC-19: Base64 Float32Array Decoding & Q-Value Parity — 5,893 finite floats decoded; q(0)=[4.991, 4.866, 4.752, 4.854, 4.760]
+[PASS] TC-20: Human Jump Isolation in Hero Mode vs. Villain Mode — allowHumanJump isolation verified
+[PASS] TC-21: Live Autonomous RL Bot Simulation in Hero Mode — spawns=14, autonomousJumps=14, endState=playing
+[PASS] TC-22: Single-File Footprint & Zero External Dependencies (C8 repaired) — 97313 bytes (<= 122880 warning budget), zero external requests
+[PASS] TC-23: RL Bot Pit Clearance & Key-Release Parity Fix — 6/6 pit widths (70–120px) cleared cleanly
+[PASS] TC-24: Consolidated into TC-25 (C8: dead MODES.hero.cooldownScale flagged for M1-S4) — Overridden by HERO_DIFFICULTIES; dead key scheduled for removal in M1-S4
+[PASS] TC-25: Four Hero Difficulty Tiers & Per-Tier MIN HAVOC Isolation — Independent MIN HAVOC across Easy/Normal/Hard/Insane verified
+[PASS] TC-26: Live Run Duration (TIME MM:SS) in Both Modes — TIME 01:25 (Villain) & TIME 00:24 (Hero) HUD + end screen OK
+[PASS] TC-27: Explicit Hero-Only Difficulty Card & Dynamic Button Label — Grouped Hero card + dynamic PLAY AS HERO · <DIFF> verified
+[PASS] TC-28: In-Game Exit Button (Pause, Time Preservation & Unscored Discard) — Pause preserved elapsed time; Exit discarded unscored run
+[PASS] TC-29: 5-Tab Dual Top 10 Leaderboard — Villain (high/long) & Hero (low/fast) dual Top 10 verified
+[PASS] TC-30: Safe localStorage Persistence & iOS data: URL Fallback — SecurityError fallback OK (score=555, name=BUSH)
+[PASS] TC-31: First-Launch Random Default Name (48-Name Pool) & Persistence — 48 valid defaults; first-launch name=BUSH
+[PASS] TC-32: Character Sanitization & Blank-Input Revert — Sanitized ab!12345 -> AB1234; blank blur reverted to AB1234
+[PASS] TC-33: End-Screen Name Edit (Just-Finished + Future Runs Only) — Run1=AB1234, Run2=HERO99, Run3=HERO99
+[PASS] TC-34: Leaderboard Player Column Rendering — Rendered leaderboard contains SPIKE1 and 777
+[PASS] BOT-01: Decoded policy.state weight bytes SHA-256 matches frozen checkpoint — 23572 bytes, SHA-256=99d90952c2b64faca1aefe3aadc7ca6ee6c38d785bb660f06982f503161d5361
+[PASS] BOT-02: Q-value parity against independent Float32 ReLU reference forward pass — 3 reference states verified, maxAbsDiff=0.00e+0 (<1e-5)
+[PASS] BOT-04: Release-fix ablation guard proves key-release fix is active — Normal=6/6 clears vs Ablated=2/6 clears
+[PASS] D-01: Characterization snapshot (640-wide & 490-wide, Villain + 4 Hero tiers) — 10 scenarios saved (85954 bytes, SHA-256=0f25e8600c41605c80306a4c4bf284d332af524dd25934ac5fa7c14cd898c525)
+========================================================================
+SUMMARY: 39/39 PASS, 0 FAIL
+========================================================================
+
+=== REPRODUCIBILITY & BASELINE INTEGRITY VERIFICATION ===
+Run 1 Exit Code: 0 | Snapshot SHA-256: 0f25e8600c41605c80306a4c4bf284d332af524dd25934ac5fa7c14cd898c525
+Run 2 Exit Code: 0 | Snapshot SHA-256: 0f25e8600c41605c80306a4c4bf284d332af524dd25934ac5fa7c14cd898c525
+Byte-identical snapshot check: PASS
+f865aa76e28b138e6a8e5d315e1d0afc8f34b0eb5d42a8e7bef9fdb88e802cf8  index.html
+4ca735bb2bb85ae4fe9c156048b20e4189ada3e285e65ef5e1e7ae2609d4f6e0  tests/run_m1_s2_baseline.js
+0f25e8600c41605c80306a4c4bf284d332af524dd25934ac5fa7c14cd898c525  tests/snapshots/v2.5.1_characterization.json
+ 54720 tests/run_m1_s2_baseline.js
+ 85954 tests/snapshots/v2.5.1_characterization.json
+ 11634 tests/logs/m1_s2_evidence.txt
+152308 total

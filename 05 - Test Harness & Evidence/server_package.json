@@ -1,0 +1,13 @@
+{
+  "name": "spike-sprint-mp-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Spike Sprint unranked two-player multiplayer server adapter (Doc 13 M5-S2)",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "colyseus": "0.15.24",
+    "ws": "8.11.0"
+  }
+}
