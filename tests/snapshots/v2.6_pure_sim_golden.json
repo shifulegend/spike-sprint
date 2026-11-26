@@ -1,0 +1,2119 @@
+{
+  "schema": "spike-sprint-v2.6-pure-sim-golden-v1",
+  "simVersion": "2.6.0-sim1",
+  "worldW": 490,
+  "worldH": 720,
+  "groundY": 561.6,
+  "botWeightsSha256": "99d90952c2b64faca1aefe3aadc7ca6ee6c38d785bb660f06982f503161d5361",
+  "scenarioCount": 5,
+  "runs": [
+    {
+      "scenario": "villain",
+      "modeKey": "villain",
+      "heroDiff": null,
+      "seed": 1001,
+      "finalTick": 123,
+      "finalScore": 1.234237,
+      "stopCause": "enemy",
+      "sampledFrames": [
+        {
+          "gameState": "playing",
+          "simTicks": 0,
+          "score": 0,
+          "elapsed": 0,
+          "speedMult": 1,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 30,
+          "score": 0.300258,
+          "elapsed": 0.5,
+          "speedMult": 1.001667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 60,
+          "score": 0.601017,
+          "elapsed": 1,
+          "speedMult": 1.003333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 479.45,
+            "vy": -3.9,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 90,
+          "score": 0.902275,
+          "elapsed": 1.5,
+          "speedMult": 1.005,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 349.245,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 120,
+          "score": 1.204033,
+          "elapsed": 2,
+          "speedMult": 1.006667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 168.19,
+              "y": 538.6,
+              "alive": true
+            },
+            {
+              "x": 481.689333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "over",
+          "simTicks": 123,
+          "score": 1.234237,
+          "elapsed": 2.05,
+          "speedMult": 1.006833,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 150.068,
+              "y": 538.6,
+              "alive": true
+            },
+            {
+              "x": 463.567333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        }
+      ]
+    },
+    {
+      "scenario": "hero_easy",
+      "modeKey": "hero",
+      "heroDiff": "easy",
+      "seed": 2001,
+      "finalTick": 92,
+      "finalScore": 0.922377,
+      "stopCause": "pit",
+      "sampledFrames": [
+        {
+          "gameState": "playing",
+          "simTicks": 0,
+          "score": 0,
+          "elapsed": 0,
+          "speedMult": 1,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 30,
+          "score": 0.300258,
+          "elapsed": 0.5,
+          "speedMult": 1.001667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 463.908333,
+              "w": 76.038035
+            }
+          ],
+          "pipes": [],
+          "heroCooldownRemaining": 15
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 60,
+          "score": 0.601017,
+          "elapsed": 1,
+          "speedMult": 1.003333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 283.453333,
+              "w": 76.038035
+            }
+          ],
+          "pipes": [
+            {
+              "x": 439.735,
+              "h": 49.773501
+            }
+          ],
+          "heroCooldownRemaining": 11
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 90,
+          "score": 0.902275,
+          "elapsed": 1.5,
+          "speedMult": 1.005,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 539.4,
+            "vy": 5.95,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 415.487,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 102.698333,
+              "w": 76.038035
+            }
+          ],
+          "pipes": [
+            {
+              "x": 258.98,
+              "h": 49.773501
+            }
+          ],
+          "heroCooldownRemaining": 7
+        },
+        {
+          "gameState": "over",
+          "simTicks": 92,
+          "score": 0.922377,
+          "elapsed": 1.533333,
+          "speedMult": 1.005111,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 553.85,
+            "vy": 7.65,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 409.456667,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 96.668,
+              "w": 76.038035
+            }
+          ],
+          "pipes": [
+            {
+              "x": 252.949667,
+              "h": 49.773501
+            }
+          ],
+          "heroCooldownRemaining": 5
+        }
+      ]
+    },
+    {
+      "scenario": "hero_normal",
+      "modeKey": "hero",
+      "heroDiff": "normal",
+      "seed": 2002,
+      "finalTick": 271,
+      "finalScore": 202.730476,
+      "stopCause": "pit",
+      "sampledFrames": [
+        {
+          "gameState": "playing",
+          "simTicks": 0,
+          "score": 0,
+          "elapsed": 0,
+          "speedMult": 1,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 30,
+          "score": 0.300258,
+          "elapsed": 0.5,
+          "speedMult": 1.001667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 463.908333,
+              "w": 84.052881
+            }
+          ],
+          "pipes": [],
+          "heroCooldownRemaining": 20
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 60,
+          "score": 0.601017,
+          "elapsed": 1,
+          "speedMult": 1.003333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 283.453333,
+              "w": 84.052881
+            }
+          ],
+          "pipes": [
+            {
+              "x": 469.815,
+              "h": 59.173257
+            }
+          ],
+          "heroCooldownRemaining": 21
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 90,
+          "score": 0.902275,
+          "elapsed": 1.5,
+          "speedMult": 1.005,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 401.3,
+            "vy": 3.175,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 475.742,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 102.698333,
+              "w": 84.052881
+            }
+          ],
+          "pipes": [
+            {
+              "x": 289.06,
+              "h": 59.173257
+            }
+          ],
+          "heroCooldownRemaining": 22
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 120,
+          "score": 1.204033,
+          "elapsed": 2,
+          "speedMult": 1.006667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 452.4625,
+            "vy": 2.11875,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 294.687,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": -78.356667,
+              "w": 84.052881
+            },
+            {
+              "x": 481.689333,
+              "w": 112.405918
+            }
+          ],
+          "pipes": [
+            {
+              "x": 108.005,
+              "h": 59.173257
+            }
+          ],
+          "heroCooldownRemaining": 23
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 150,
+          "score": 101.506292,
+          "elapsed": 2.5,
+          "speedMult": 1.008333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 484.5,
+            "vy": -8.15,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 300.334333,
+              "w": 112.405918
+            }
+          ],
+          "pipes": [
+            {
+              "x": -73.35,
+              "h": 59.173257
+            },
+            {
+              "x": 487.657,
+              "h": 45.70299
+            }
+          ],
+          "heroCooldownRemaining": 24
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 180,
+          "score": 101.80905,
+          "elapsed": 3,
+          "speedMult": 1.01,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 488.1,
+            "vy": -5.6,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 493.645,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 118.679333,
+              "w": 112.405918
+            }
+          ],
+          "pipes": [
+            {
+              "x": 306.002,
+              "h": 45.70299
+            }
+          ],
+          "heroCooldownRemaining": 24
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 210,
+          "score": 102.112308,
+          "elapsed": 3.5,
+          "speedMult": 1.011667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 506.925,
+            "vy": 12.45625,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 311.69,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": -63.275667,
+              "w": 112.405918
+            },
+            {
+              "x": 493.585,
+              "w": 115.286921
+            }
+          ],
+          "pipes": [
+            {
+              "x": 124.047,
+              "h": 45.70299
+            }
+          ],
+          "heroCooldownRemaining": 24
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 240,
+          "score": 102.416067,
+          "elapsed": 4,
+          "speedMult": 1.013333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 444.9375,
+            "vy": 7.35625,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 129.435,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 311.33,
+              "w": 115.286921
+            }
+          ],
+          "pipes": [
+            {
+              "x": -58.208,
+              "h": 45.70299
+            },
+            {
+              "x": 493.525,
+              "h": 57.245924
+            }
+          ],
+          "heroCooldownRemaining": 24
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 270,
+          "score": 202.720325,
+          "elapsed": 4.5,
+          "speedMult": 1.015,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 545.71875,
+            "vy": 12.25,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 493.465,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 128.775,
+              "w": 115.286921
+            }
+          ],
+          "pipes": [
+            {
+              "x": 310.97,
+              "h": 57.245924
+            }
+          ],
+          "heroCooldownRemaining": 24
+        },
+        {
+          "gameState": "over",
+          "simTicks": 271,
+          "score": 202.730476,
+          "elapsed": 4.516667,
+          "speedMult": 1.015056,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 558.81875,
+            "vy": 13.1,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 493.465,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 128.775,
+              "w": 115.286921
+            }
+          ],
+          "pipes": [
+            {
+              "x": 310.97,
+              "h": 57.245924
+            }
+          ],
+          "heroCooldownRemaining": 23
+        }
+      ]
+    },
+    {
+      "scenario": "hero_hard",
+      "modeKey": "hero",
+      "heroDiff": "hard",
+      "seed": 2003,
+      "finalTick": 600,
+      "finalScore": 506.100167,
+      "stopCause": null,
+      "sampledFrames": [
+        {
+          "gameState": "playing",
+          "simTicks": 0,
+          "score": 0,
+          "elapsed": 0,
+          "speedMult": 1,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 30,
+          "score": 0.300258,
+          "elapsed": 0.5,
+          "speedMult": 1.001667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 463.908333,
+              "w": 89.833818
+            }
+          ],
+          "pipes": [],
+          "heroCooldownRemaining": 24
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 60,
+          "score": 0.601017,
+          "elapsed": 1,
+          "speedMult": 1.003333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 283.453333,
+              "w": 89.833818
+            }
+          ],
+          "pipes": [
+            {
+              "x": 493.885,
+              "h": 59.388446
+            }
+          ],
+          "heroCooldownRemaining": 29
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 90,
+          "score": 0.902275,
+          "elapsed": 1.5,
+          "speedMult": 1.005,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 393.7,
+            "vy": -0.225,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 523.97,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 102.698333,
+              "w": 89.833818
+            }
+          ],
+          "pipes": [
+            {
+              "x": 313.13,
+              "h": 59.388446
+            }
+          ],
+          "heroCooldownRemaining": 34
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 120,
+          "score": 1.204033,
+          "elapsed": 2,
+          "speedMult": 1.006667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 449.0875,
+            "vy": -1.28125,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 342.915,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": -78.356667,
+              "w": 89.833818
+            }
+          ],
+          "pipes": [
+            {
+              "x": 132.075,
+              "h": 59.388446
+            }
+          ],
+          "heroCooldownRemaining": 4
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 150,
+          "score": 1.506292,
+          "elapsed": 2.5,
+          "speedMult": 1.008333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 478.85,
+            "vy": 2.9,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 161.56,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 372.808333,
+              "w": 72.650608
+            }
+          ],
+          "pipes": [
+            {
+              "x": -49.28,
+              "h": 59.388446
+            }
+          ],
+          "heroCooldownRemaining": 9
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 180,
+          "score": 101.80905,
+          "elapsed": 3,
+          "speedMult": 1.01,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 488.1,
+            "vy": -5.6,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 191.153333,
+              "w": 72.650608
+            }
+          ],
+          "pipes": [
+            {
+              "x": 402.81,
+              "h": 48.950462
+            }
+          ],
+          "heroCooldownRemaining": 14
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 210,
+          "score": 102.112308,
+          "elapsed": 3.5,
+          "speedMult": 1.011667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 506.925,
+            "vy": 12.45625,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 432.92,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 9.198333,
+              "w": 72.650608
+            }
+          ],
+          "pipes": [
+            {
+              "x": 220.855,
+              "h": 48.950462
+            }
+          ],
+          "heroCooldownRemaining": 19
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 240,
+          "score": 102.416067,
+          "elapsed": 4,
+          "speedMult": 1.013333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 250.665,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 463.138333,
+              "w": 71.477176
+            }
+          ],
+          "pipes": [
+            {
+              "x": 38.6,
+              "h": 48.950462
+            }
+          ],
+          "heroCooldownRemaining": 24
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 270,
+          "score": 202.720325,
+          "elapsed": 4.5,
+          "speedMult": 1.015,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 453,
+            "vy": 2.05,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 280.583333,
+              "w": 71.477176
+            }
+          ],
+          "pipes": [
+            {
+              "x": 493.465,
+              "h": 49.128515
+            }
+          ],
+          "heroCooldownRemaining": 29
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 300,
+          "score": 203.025083,
+          "elapsed": 5,
+          "speedMult": 1.016667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 409.8875,
+            "vy": 0.55625,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 523.9,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 97.728333,
+              "w": 71.477176
+            }
+          ],
+          "pipes": [
+            {
+              "x": 310.61,
+              "h": 49.128515
+            }
+          ],
+          "heroCooldownRemaining": 34
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 330,
+          "score": 203.330342,
+          "elapsed": 5.5,
+          "speedMult": 1.018333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 449.075,
+            "vy": 0.41875,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 340.745,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": -85.426667,
+              "w": 71.477176
+            }
+          ],
+          "pipes": [
+            {
+              "x": 127.455,
+              "h": 49.128515
+            }
+          ],
+          "heroCooldownRemaining": 4
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 360,
+          "score": 203.6361,
+          "elapsed": 6,
+          "speedMult": 1.02,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 487.2,
+            "vy": 4.6,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 157.29,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 370.988333,
+              "w": 104.235428
+            }
+          ],
+          "pipes": [
+            {
+              "x": -56,
+              "h": 49.128515
+            }
+          ],
+          "heroCooldownRemaining": 9
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 390,
+          "score": 303.942358,
+          "elapsed": 6.5,
+          "speedMult": 1.021667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 479.45,
+            "vy": -3.9,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 187.233333,
+              "w": 104.235428
+            }
+          ],
+          "pipes": [
+            {
+              "x": 401.34,
+              "h": 50.625062
+            }
+          ],
+          "heroCooldownRemaining": 14
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 420,
+          "score": 304.249117,
+          "elapsed": 7,
+          "speedMult": 1.023333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 431.8,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 3.178333,
+              "w": 104.235428
+            }
+          ],
+          "pipes": [
+            {
+              "x": 217.285,
+              "h": 50.625062
+            }
+          ],
+          "heroCooldownRemaining": 19
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 450,
+          "score": 304.556375,
+          "elapsed": 7.5,
+          "speedMult": 1.025,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 500.15,
+            "vy": -7.3,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 247.445,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 462.368333,
+              "w": 86.622546
+            }
+          ],
+          "pipes": [
+            {
+              "x": 32.93,
+              "h": 50.625062
+            }
+          ],
+          "heroCooldownRemaining": 24
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 480,
+          "score": 404.864133,
+          "elapsed": 8,
+          "speedMult": 1.026667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 462.2,
+            "vy": 2.9,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 277.713333,
+              "w": 86.622546
+            }
+          ],
+          "pipes": [
+            {
+              "x": 493.045,
+              "h": 52.063336
+            }
+          ],
+          "heroCooldownRemaining": 29
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 510,
+          "score": 405.172392,
+          "elapsed": 8.5,
+          "speedMult": 1.028333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 413.55,
+            "vy": 2.25625,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 523.83,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 92.758333,
+              "w": 86.622546
+            }
+          ],
+          "pipes": [
+            {
+              "x": 308.09,
+              "h": 52.063336
+            }
+          ],
+          "heroCooldownRemaining": 34
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 540,
+          "score": 405.48115,
+          "elapsed": 9,
+          "speedMult": 1.03,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 452.4625,
+            "vy": 2.11875,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 338.575,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": -92.496667,
+              "w": 86.622546
+            }
+          ],
+          "pipes": [
+            {
+              "x": 122.835,
+              "h": 52.063336
+            }
+          ],
+          "heroCooldownRemaining": 4
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 570,
+          "score": 505.790408,
+          "elapsed": 9.5,
+          "speedMult": 1.031667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 498.95,
+            "vy": -9,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 369.168333,
+              "w": 77.257046
+            }
+          ],
+          "pipes": [
+            {
+              "x": -62.72,
+              "h": 52.063336
+            }
+          ],
+          "heroCooldownRemaining": 9
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 600,
+          "score": 506.100167,
+          "elapsed": 10,
+          "speedMult": 1.033333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 459.3125,
+            "vy": -9.64375,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 183.313333,
+              "w": 77.257046
+            }
+          ],
+          "pipes": [
+            {
+              "x": 399.87,
+              "h": 41.091716
+            }
+          ],
+          "heroCooldownRemaining": 14
+        }
+      ]
+    },
+    {
+      "scenario": "hero_insane",
+      "modeKey": "hero",
+      "heroDiff": "insane",
+      "seed": 2004,
+      "finalTick": 600,
+      "finalScore": 406.100167,
+      "stopCause": null,
+      "sampledFrames": [
+        {
+          "gameState": "playing",
+          "simTicks": 0,
+          "score": 0,
+          "elapsed": 0,
+          "speedMult": 1,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [],
+          "pipes": [],
+          "heroCooldownRemaining": 0
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 30,
+          "score": 0.300258,
+          "elapsed": 0.5,
+          "speedMult": 1.001667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 463.908333,
+              "w": 88.126577
+            }
+          ],
+          "pipes": [],
+          "heroCooldownRemaining": 31
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 60,
+          "score": 0.601017,
+          "elapsed": 1,
+          "speedMult": 1.003333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 283.453333,
+              "w": 88.126577
+            }
+          ],
+          "pipes": [],
+          "heroCooldownRemaining": 1
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 90,
+          "score": 0.902275,
+          "elapsed": 1.5,
+          "speedMult": 1.005,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 393.7,
+            "vy": -0.225,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 102.698333,
+              "w": 88.126577
+            }
+          ],
+          "pipes": [
+            {
+              "x": 355.265333,
+              "h": 54.653062
+            }
+          ],
+          "heroCooldownRemaining": 13
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 120,
+          "score": 1.204033,
+          "elapsed": 2,
+          "speedMult": 1.006667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 459.3125,
+            "vy": -4.68125,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 427.365333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": -78.356667,
+              "w": 88.126577
+            }
+          ],
+          "pipes": [
+            {
+              "x": 174.210333,
+              "h": 54.653062
+            }
+          ],
+          "heroCooldownRemaining": 25
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 150,
+          "score": 1.506292,
+          "elapsed": 2.5,
+          "speedMult": 1.008333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 442.575,
+            "vy": -5.4625,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 246.010333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 499.753333,
+              "w": 115.986833
+            }
+          ],
+          "pipes": [
+            {
+              "x": -7.144667,
+              "h": 54.653062
+            }
+          ],
+          "heroCooldownRemaining": 37
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 180,
+          "score": 101.80905,
+          "elapsed": 3,
+          "speedMult": 1.01,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 457.3875,
+            "vy": 0.35,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 318.098333,
+              "w": 115.986833
+            }
+          ],
+          "pipes": [],
+          "heroCooldownRemaining": 7
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 210,
+          "score": 102.112308,
+          "elapsed": 3.5,
+          "speedMult": 1.011667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 419.3,
+            "vy": -7.025,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 136.143333,
+              "w": 115.986833
+            }
+          ],
+          "pipes": [
+            {
+              "x": 390.474333,
+              "h": 53.71674
+            }
+          ],
+          "heroCooldownRemaining": 19
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 240,
+          "score": 102.416067,
+          "elapsed": 4,
+          "speedMult": 1.013333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 463.138333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": -46.111667,
+              "w": 115.986833
+            }
+          ],
+          "pipes": [
+            {
+              "x": 208.219333,
+              "h": 53.71674
+            }
+          ],
+          "heroCooldownRemaining": 31
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 270,
+          "score": 102.720325,
+          "elapsed": 4.5,
+          "speedMult": 1.015,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 500.15,
+            "vy": -7.3,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 280.583333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [],
+          "pipes": [
+            {
+              "x": 25.664333,
+              "h": 53.71674
+            }
+          ],
+          "heroCooldownRemaining": 1
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 300,
+          "score": 203.025083,
+          "elapsed": 5,
+          "speedMult": 1.016667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 478.3875,
+            "vy": -6.45,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 353.235333,
+              "w": 109.131327
+            }
+          ],
+          "pipes": [],
+          "heroCooldownRemaining": 13
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 330,
+          "score": 203.330342,
+          "elapsed": 5.5,
+          "speedMult": 1.018333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 452.5,
+            "vy": -10.425,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 170.080333,
+              "w": 109.131327
+            }
+          ],
+          "pipes": [
+            {
+              "x": 426.175333,
+              "h": 40.142208
+            }
+          ],
+          "heroCooldownRemaining": 25
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 360,
+          "score": 203.6361,
+          "elapsed": 6,
+          "speedMult": 1.02,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 499.403333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": -13.374667,
+              "w": 109.131327
+            }
+          ],
+          "pipes": [
+            {
+              "x": 242.720333,
+              "h": 40.142208
+            }
+          ],
+          "heroCooldownRemaining": 37
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 390,
+          "score": 203.942358,
+          "elapsed": 6.5,
+          "speedMult": 1.021667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 315.648333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [],
+          "pipes": [
+            {
+              "x": 58.965333,
+              "h": 40.142208
+            }
+          ],
+          "heroCooldownRemaining": 7
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 420,
+          "score": 204.249117,
+          "elapsed": 7,
+          "speedMult": 1.023333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 489.6,
+            "vy": 9.8375,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 131.593333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 388.864333,
+              "w": 104.061558
+            }
+          ],
+          "pipes": [],
+          "heroCooldownRemaining": 19
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 450,
+          "score": 304.556375,
+          "elapsed": 7.5,
+          "speedMult": 1.025,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 479.45,
+            "vy": -3.9,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 204.509333,
+              "w": 104.061558
+            }
+          ],
+          "pipes": [
+            {
+              "x": 462.368333,
+              "h": 43.64563
+            }
+          ],
+          "heroCooldownRemaining": 31
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 480,
+          "score": 304.864133,
+          "elapsed": 8,
+          "speedMult": 1.026667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 479.8,
+            "vy": 11.675,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 19.854333,
+              "w": 104.061558
+            }
+          ],
+          "pipes": [
+            {
+              "x": 277.713333,
+              "h": 43.64563
+            }
+          ],
+          "heroCooldownRemaining": 1
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 510,
+          "score": 305.172392,
+          "elapsed": 8.5,
+          "speedMult": 1.028333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 483.025,
+            "vy": 7.21875,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 351.205333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [],
+          "pipes": [
+            {
+              "x": 92.758333,
+              "h": 43.64563
+            }
+          ],
+          "heroCooldownRemaining": 13
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 540,
+          "score": 305.48115,
+          "elapsed": 9,
+          "speedMult": 1.03,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 455.35,
+            "vy": 6.4375,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [
+            {
+              "x": 165.950333,
+              "y": 538.6,
+              "alive": true
+            }
+          ],
+          "pits": [
+            {
+              "x": 424.985333,
+              "w": 110.470856
+            }
+          ],
+          "pipes": [
+            {
+              "x": -92.496667,
+              "h": 43.64563
+            }
+          ],
+          "heroCooldownRemaining": 25
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 570,
+          "score": 405.790408,
+          "elapsed": 9.5,
+          "speedMult": 1.031667,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 515.6,
+            "vy": 0,
+            "onGround": true,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 239.430333,
+              "w": 110.470856
+            }
+          ],
+          "pipes": [
+            {
+              "x": 499.053333,
+              "h": 44.203868
+            }
+          ],
+          "heroCooldownRemaining": 37
+        },
+        {
+          "gameState": "playing",
+          "simTicks": 600,
+          "score": 406.100167,
+          "elapsed": 10,
+          "speedMult": 1.033333,
+          "groundY": 561.6,
+          "worldW": 490,
+          "worldH": 720,
+          "player": {
+            "x": 120,
+            "y": 410.2,
+            "vy": 4.875,
+            "onGround": false,
+            "stuck": false
+          },
+          "enemies": [],
+          "pits": [
+            {
+              "x": 53.575333,
+              "w": 110.470856
+            }
+          ],
+          "pipes": [
+            {
+              "x": 313.198333,
+              "h": 44.203868
+            }
+          ],
+          "heroCooldownRemaining": 7
+        }
+      ]
+    }
+  ]
+}

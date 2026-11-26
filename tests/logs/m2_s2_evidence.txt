@@ -1,0 +1,45 @@
+=== M2-S2 RUN 1 ===
+========================================================================
+Spike Sprint — M2-S2 Fixed 490x720 World, Resize & DPR Scaling Suite
+Node: v18.20.4
+Target: /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 105886 bytes | Lines: 1986 | SHA-256: 6ce6a73090a884a8df63602769b4fed08fda53558374526b9cb20348e5a92122
+========================================================================
+[PASS] M2-S2-L01: Fixed 490x720 world yields bit-identical sim across phone, tall phone & desktop (L-01) — 4 viewports x Villain & Hero identical (WORLD=490x720, groundY=561.6)
+[PASS] M2-S2-L02-L03: Tall portrait extends sky above ground; wide desktop centers with side bars (L-02 / L-03) — 390x844 extraSky=340.4px; 1920x1080 sideBarX=592.5px
+[PASS] M2-S2-FIX03: Mid-run & mid-jump resize/rotation leaves simulation state bit-identical (TC-FIX-03 / L-04) — Sim hash identical across 4 mid-run/mid-jump rotations (ae6f2a85c072...)
+[PASS] M2-S2-FIX10: DPR 1, 2, 3 scale backing store by min(DPR, 2) with bit-identical sim state (TC-FIX-10) — DPR 1->390x844, DPR 2->780x1688, DPR 3->clamped 780x1688; sim bit-identical
+[PASS] M2-S2-SNAPSHOT: Capture reproducible v2.6_fixed_world_characterization.json (Villain + 4 Hero tiers) — 5 scenarios saved (53683 bytes, SHA-256=fa6adeacd0504eb349348ca7b5f7e9aa6d5b91af7409e77dea01ae3bbbe4544f)
+[PASS] BOT-01-AND-HYGIENE: RL weights unchanged, size within 120 KB budget, zero external requests/Drive URLs — 105886 bytes (<= 122880), BOT-01 & hygiene clean
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== M2-S2 RUN 2 (REPRODUCIBILITY CHECK) ===
+========================================================================
+Spike Sprint — M2-S2 Fixed 490x720 World, Resize & DPR Scaling Suite
+Node: v18.20.4
+Target: /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 105886 bytes | Lines: 1986 | SHA-256: 6ce6a73090a884a8df63602769b4fed08fda53558374526b9cb20348e5a92122
+========================================================================
+[PASS] M2-S2-L01: Fixed 490x720 world yields bit-identical sim across phone, tall phone & desktop (L-01) — 4 viewports x Villain & Hero identical (WORLD=490x720, groundY=561.6)
+[PASS] M2-S2-L02-L03: Tall portrait extends sky above ground; wide desktop centers with side bars (L-02 / L-03) — 390x844 extraSky=340.4px; 1920x1080 sideBarX=592.5px
+[PASS] M2-S2-FIX03: Mid-run & mid-jump resize/rotation leaves simulation state bit-identical (TC-FIX-03 / L-04) — Sim hash identical across 4 mid-run/mid-jump rotations (ae6f2a85c072...)
+[PASS] M2-S2-FIX10: DPR 1, 2, 3 scale backing store by min(DPR, 2) with bit-identical sim state (TC-FIX-10) — DPR 1->390x844, DPR 2->780x1688, DPR 3->clamped 780x1688; sim bit-identical
+[PASS] M2-S2-SNAPSHOT: Capture reproducible v2.6_fixed_world_characterization.json (Villain + 4 Hero tiers) — 5 scenarios saved (53683 bytes, SHA-256=fa6adeacd0504eb349348ca7b5f7e9aa6d5b91af7409e77dea01ae3bbbe4544f)
+[PASS] BOT-01-AND-HYGIENE: RL weights unchanged, size within 120 KB budget, zero external requests/Drive URLs — 105886 bytes (<= 122880), BOT-01 & hygiene clean
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== REPRODUCIBILITY & ARTIFACT FINGERPRINTS ===
+Run 1 Snapshot SHA-256: fa6adeacd0504eb349348ca7b5f7e9aa6d5b91af7409e77dea01ae3bbbe4544f
+Run 2 Snapshot SHA-256: fa6adeacd0504eb349348ca7b5f7e9aa6d5b91af7409e77dea01ae3bbbe4544f
+Byte-identical snapshot check: PASS
+6ce6a73090a884a8df63602769b4fed08fda53558374526b9cb20348e5a92122  index.html
+d8a3bbb54be91e98912e906ead165478f14165697d5d0a2d5324e57f1b641dc2  tests/run_m2_s2_fixed_world.js
+fa6adeacd0504eb349348ca7b5f7e9aa6d5b91af7409e77dea01ae3bbbe4544f  tests/snapshots/v2.6_fixed_world_characterization.json
+  1986 105886 index.html
+   477  20133 tests/run_m2_s2_fixed_world.js
+  2343  53683 tests/snapshots/v2.6_fixed_world_characterization.json
+  4806 179702 total

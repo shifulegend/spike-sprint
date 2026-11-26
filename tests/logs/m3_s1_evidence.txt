@@ -1,0 +1,55 @@
+=== BUILD 1 ===
+Built /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 119763 bytes (116.96 KB) | Lines: 2402 | SHA-256: 90d12fc95768aec543265c303a26506d9dc6263b0d13a84094e91b2f1dc0b833
+=== BUILD 2 (BYTE-IDENTICAL BUILD CHECK) ===
+Built /working_dir/c_5685ddc42bea4f29/artifacts/file_generation/ttl=63d/output/index.html
+Size: 119763 bytes (116.96 KB) | Lines: 2402 | SHA-256: 90d12fc95768aec543265c303a26506d9dc6263b0d13a84094e91b2f1dc0b833
+Byte-identical build check: PASS (90d12fc95768aec543265c303a26506d9dc6263b0d13a84094e91b2f1dc0b833)
+
+=== M3-S1 RUN 1 ===
+========================================================================
+Spike Sprint — M3-S1 Pure Simulation Module & Build Pipeline Suite
+Node: v18.20.4 | SIM_VERSION: 2.6.0-sim1
+Built index.html: 119763 bytes | SHA-256: 90d12fc95768aec543265c303a26506d9dc6263b0d13a84094e91b2f1dc0b833
+========================================================================
+[PASS] M3-S1-PURITY: src/sim/core.js has zero Math.random, DOM, window, wall-clock, audio, or mode branches (D-06/D-07) — Zero forbidden tokens in src/sim/core.js (47543 bytes)
+[PASS] M3-S1-PARITY: Pure headless Node src/sim/core.js matches built index.html BIT-FOR-BIT across all 5 scenarios — 5/5 scenarios bit-exact (Node pure sim === built index.html); golden SHA-256=42a931c5f8ef...
+[PASS] M3-S1-D04: Same-tick press+release and Hero cooldown spam rejection behave deterministically (D-04) — Same-tick press+release identical; cooldown anti-spam enforced
+[PASS] M3-S1-D06: External Math.random() calls never perturb simulation RNG draw order (D-06) — 1,680 interleaved Math.random() calls caused zero sim divergence
+[PASS] M3-S1-BOT: Pure-JS Base64 weight decode matches policy.state SHA-256 & Q-value parity (BOT-01/BOT-02) — 23,572 bytes SHA-256 verified; maxAbsDiff=0.00e+0
+[PASS] M3-S1-BUILD-HYGIENE: Built index.html is within 120 KB budget, offline-only, and zero Drive URLs — 119763 bytes (<= 122880), single-file offline clean
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== M3-S1 RUN 2 (REPRODUCIBILITY CHECK) ===
+========================================================================
+Spike Sprint — M3-S1 Pure Simulation Module & Build Pipeline Suite
+Node: v18.20.4 | SIM_VERSION: 2.6.0-sim1
+Built index.html: 119763 bytes | SHA-256: 90d12fc95768aec543265c303a26506d9dc6263b0d13a84094e91b2f1dc0b833
+========================================================================
+[PASS] M3-S1-PURITY: src/sim/core.js has zero Math.random, DOM, window, wall-clock, audio, or mode branches (D-06/D-07) — Zero forbidden tokens in src/sim/core.js (47543 bytes)
+[PASS] M3-S1-PARITY: Pure headless Node src/sim/core.js matches built index.html BIT-FOR-BIT across all 5 scenarios — 5/5 scenarios bit-exact (Node pure sim === built index.html); golden SHA-256=42a931c5f8ef...
+[PASS] M3-S1-D04: Same-tick press+release and Hero cooldown spam rejection behave deterministically (D-04) — Same-tick press+release identical; cooldown anti-spam enforced
+[PASS] M3-S1-D06: External Math.random() calls never perturb simulation RNG draw order (D-06) — 1,680 interleaved Math.random() calls caused zero sim divergence
+[PASS] M3-S1-BOT: Pure-JS Base64 weight decode matches policy.state SHA-256 & Q-value parity (BOT-01/BOT-02) — 23,572 bytes SHA-256 verified; maxAbsDiff=0.00e+0
+[PASS] M3-S1-BUILD-HYGIENE: Built index.html is within 120 KB budget, offline-only, and zero Drive URLs — 119763 bytes (<= 122880), single-file offline clean
+========================================================================
+SUMMARY: 6/6 PASS, 0 FAIL
+========================================================================
+
+=== REPRODUCIBILITY & ARTIFACT FINGERPRINTS ===
+Byte-identical pure-sim golden check: PASS (42a931c5f8ef74d0583ec02fa829664947e9bf981a63a6fa22b876b60f84139a)
+d9e57efd6fec51b29805b9dc9d91231e1ac0a0ca0df96d1818202ffd7d436ad7  src/sim/core.js
+462bfefa9fd8cbbe07e40f6a0409ee0868f61ba1b6b2ee7a52ebe8fd56fe1e34  src/template.html
+bc9b97e763de8c2eede689ad17a08726ee44513e381b8d7c1c1fc0d928f6982c  scripts/build.js
+90d12fc95768aec543265c303a26506d9dc6263b0d13a84094e91b2f1dc0b833  index.html
+9b6102814665adc083a02517669221c32352e3ba83c2cd3b5fc09844cbf5be60  tests/run_m3_s1_pure_sim.js
+42a931c5f8ef74d0583ec02fa829664947e9bf981a63a6fa22b876b60f84139a  tests/snapshots/v2.6_pure_sim_golden.json
+   509  47543 src/sim/core.js
+  1894  72246 src/template.html
+    38   1453 scripts/build.js
+  2402 119763 index.html
+   322  15144 tests/run_m3_s1_pure_sim.js
+  2119  48540 tests/snapshots/v2.6_pure_sim_golden.json
+  7284 304689 total

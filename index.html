@@ -643,6 +643,8 @@ loreCloseBtn.addEventListener('click', e=>{
   const GROUND_Y_RATIO = 0.78;
   const GROUND_Y = WORLD_H * GROUND_Y_RATIO;
   const FIXED_DT = 1 / 60;
+  const MP_MAX_TICKS = 7200;
+  const MP_RAMP_DURATION_SEC = 120;
 
   const RL_NET_SIZES = [21, 64, 64, 5];
   const RL_ACTION_HOLD_MS = [0, 17, 100, 200, 320];
@@ -735,7 +737,9 @@ loreCloseBtn.addEventListener('click', e=>{
     lowerIsBetter: false,
     cooldownScale: 1.0,
     allowHumanJump: true,
-    useRlRunner: false
+    useRlRunner: false,
+    rampDurationSec: 600,
+    maxTicks: null
   };
 
   const MODES = {
@@ -756,6 +760,22 @@ loreCloseBtn.addEventListener('click', e=>{
       lowerIsBetter: true,
       allowHumanJump: false,
       useRlRunner: true
+    },
+    multiplayer: {
+      autoSpawn: false,
+      showSpawnControls: true,
+      allowHumanJump: true,
+      useRlRunner: false,
+      defaultHeroDiff: 'hard',
+      rampDurationSec: MP_RAMP_DURATION_SEC,
+      maxTicks: MP_MAX_TICKS,
+      endTitle: 'ROUND OVER',
+      causeLabels: {
+        pit: 'Tumbled into a pit!',
+        enemy: 'Stopped by a Purple Hero!',
+        barrel: 'Crushed by the spiked barrel!',
+        timeout: 'Survived the full 120 seconds!'
+      }
     }
   };
 
@@ -774,7 +794,8 @@ loreCloseBtn.addEventListener('click', e=>{
     const key = MODES[modeKey] ? modeKey : 'villain';
     const base = Object.assign({}, BASE_MODE, MODES[key]);
     if(base.showSpawnControls){
-      const diffCfg = HERO_DIFFICULTIES[heroDiff] || HERO_DIFFICULTIES.normal;
+      const effDiff = (heroDiff && HERO_DIFFICULTIES[heroDiff]) ? heroDiff : (base.defaultHeroDiff || 'normal');
+      const diffCfg = HERO_DIFFICULTIES[effDiff] || HERO_DIFFICULTIES.normal;
       base.cooldownScale = diffCfg.cooldownScale;
       base.bestLabel = 'MIN HAVOC (' + diffCfg.label + ')';
       base.endBestLabel = 'Min Havoc (' + diffCfg.label + ')';
@@ -785,10 +806,14 @@ loreCloseBtn.addEventListener('click', e=>{
   function createSim(opts){
     const cfg = opts || {};
     const modeKey = MODES[cfg.modeKey] ? cfg.modeKey : 'villain';
-    const heroDiff = HERO_DIFFICULTIES[cfg.heroDiff] ? cfg.heroDiff : 'normal';
+    const defaultDiff = (MODES[modeKey] && MODES[modeKey].defaultHeroDiff) || 'normal';
+    const heroDiff = HERO_DIFFICULTIES[cfg.heroDiff] ? cfg.heroDiff : defaultDiff;
     const seed = (cfg.seed !== undefined ? (cfg.seed >>> 0) : 1337);
     const activeMode = resolveModeConfig(modeKey, heroDiff);
     const rand = createPrng(seed);
+    const rampFullSec = activeMode.rampDurationSec || 600;
+    const rampHalfSec = rampFullSec / 2;
+    const maxTicks = (Number.isInteger(cfg.maxTicks) && cfg.maxTicks > 0) ? cfg.maxTicks : activeMode.maxTicks;
 
     const state = {
       modeKey,
@@ -927,7 +952,7 @@ loreCloseBtn.addEventListener('click', e=>{
     function finish(cause, events){
       state.gameState = 'over';
       state.stopCause = cause;
-      state.player.dead = true;
+      state.player.dead = (cause !== 'timeout');
       events.push('gameover');
       return { events, stopCause: cause };
     }
@@ -940,8 +965,8 @@ loreCloseBtn.addEventListener('click', e=>{
       state.elapsed = state.simTicks * FIXED_DT;
 
       const t = state.elapsed;
-      if(t <= 300) state.speedMult = 1 + (t / 300) * 1;
-      else if(t <= 600) state.speedMult = 2 + ((t - 300) / 300) * 1;
+      if(t <= rampHalfSec) state.speedMult = 1 + (t / rampHalfSec) * 1;
+      else if(t <= rampFullSec) state.speedMult = 2 + ((t - rampHalfSec) / rampHalfSec) * 1;
       else state.speedMult = 3;
 
       state.worldSpeed = activeMode.baseSpeed * state.speedMult;
@@ -1077,6 +1102,9 @@ loreCloseBtn.addEventListener('click', e=>{
       if(p.stuck && barrelSpikeRightEdge >= p.x){
         return finish('barrel', events);
       }
+      if(maxTicks !== null && state.simTicks >= maxTicks){
+        return finish('timeout', events);
+      }
       return { events, stopCause: null };
     }
 
@@ -1121,6 +1149,8 @@ loreCloseBtn.addEventListener('click', e=>{
     GROUND_Y_RATIO,
     GROUND_Y,
     FIXED_DT,
+    MP_MAX_TICKS,
+    MP_RAMP_DURATION_SEC,
     RL_NET_SIZES,
     RL_ACTION_HOLD_MS,
     RL_FRAME_SKIP,
@@ -1717,6 +1747,242 @@ loreCloseBtn.addEventListener('click', e=>{
     createReplayStore
   };
 });
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) {
+    module.exports = api;
+  }
+  if (root) {
+    root.SpikeSprintBridge = api;
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this), function () {
+  'use strict';
+
+  const BRIDGE_CONTRACT_VERSION = 1;
+  const DEFAULT_TIMEOUT_MS = 3000;
+  const ALLOWED_HOOKS = Object.freeze(['onRunStart', 'onRunComplete']);
+
+  function isPlainObject(val) {
+    if (val === null || typeof val !== 'object') return false;
+    if (Object.prototype.toString.call(val) !== '[object Object]') return false;
+    const proto = Object.getPrototypeOf(val);
+    if (proto === null) return true;
+    return Object.getPrototypeOf(proto) === null;
+  }
+
+  function deepCloneFreeze(value, seen) {
+    if (value === null || value === undefined) return value;
+    const t = typeof value;
+    if (t === 'boolean' || t === 'number' || t === 'string') return value;
+    if (t === 'function' || t === 'symbol' || t === 'bigint') {
+      throw new TypeError('Bridge payload may only contain plain JSON-safe data');
+    }
+    if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
+      throw new TypeError('Bridge payload must not contain ArrayBuffer or TypedArray views');
+    }
+    const visited = seen || new Set();
+    if (visited.has(value)) {
+      throw new TypeError('Bridge payload must not contain circular references');
+    }
+    visited.add(value);
+
+    if (Array.isArray(value)) {
+      const outArr = new Array(value.length);
+      for (let i = 0; i < value.length; i++) {
+        outArr[i] = deepCloneFreeze(value[i], visited);
+      }
+      visited.delete(value);
+      return Object.freeze(outArr);
+    }
+
+    if (!isPlainObject(value)) {
+      throw new TypeError('Bridge payload must only contain plain objects');
+    }
+
+    const outObj = {};
+    const keys = Object.keys(value);
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      outObj[k] = deepCloneFreeze(value[k], visited);
+    }
+    visited.delete(value);
+    return Object.freeze(outObj);
+  }
+
+  function formatError(err) {
+    if (!err) return 'Unknown bridge error';
+    if (typeof err === 'string') return err;
+    if (typeof err.message === 'string' && err.message) return err.message;
+    try {
+      return String(err);
+    } catch (_) {
+      return 'Unserializable bridge error';
+    }
+  }
+
+  function createBridgeDispatcher(options) {
+    const opts = options && typeof options === 'object' ? options : {};
+    const globalObj = opts.globalObj !== undefined
+      ? opts.globalObj
+      : (typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : null));
+    const propertyName = typeof opts.propertyName === 'string' && opts.propertyName
+      ? opts.propertyName
+      : 'SPIKE_SPRINT_BRIDGE';
+    const timeoutMs = (typeof opts.timeoutMs === 'number' && Number.isFinite(opts.timeoutMs) && opts.timeoutMs > 0)
+      ? Math.floor(opts.timeoutMs)
+      : DEFAULT_TIMEOUT_MS;
+
+    let lastResult = null;
+
+    function record(res) {
+      lastResult = Object.freeze(Object.assign({}, res));
+      return lastResult;
+    }
+
+    function dispatch(hookName, rawPayload) {
+      if (ALLOWED_HOOKS.indexOf(hookName) === -1) {
+        return Promise.resolve(record({ status: 'invalid-hook', hook: String(hookName) }));
+      }
+      if (!globalObj) {
+        return Promise.resolve(record({ status: 'no-bridge', hook: hookName }));
+      }
+
+      let bridge;
+      try {
+        bridge = globalObj[propertyName];
+      } catch (err) {
+        return Promise.resolve(record({ status: 'sync-error', hook: hookName, error: formatError(err) }));
+      }
+
+      if (!bridge || (typeof bridge !== 'object' && typeof bridge !== 'function')) {
+        return Promise.resolve(record({ status: 'no-bridge', hook: hookName }));
+      }
+
+      let hookFn;
+      try {
+        hookFn = bridge[hookName];
+      } catch (err) {
+        return Promise.resolve(record({ status: 'sync-error', hook: hookName, error: formatError(err) }));
+      }
+
+      if (typeof hookFn !== 'function') {
+        return Promise.resolve(record({ status: 'no-hook', hook: hookName }));
+      }
+
+      let frozenPayload;
+      try {
+        frozenPayload = deepCloneFreeze(rawPayload);
+      } catch (err) {
+        return Promise.resolve(record({ status: 'payload-error', hook: hookName, error: formatError(err) }));
+      }
+
+      let ret;
+      try {
+        ret = hookFn.call(bridge, frozenPayload);
+      } catch (err) {
+        return Promise.resolve(record({ status: 'sync-error', hook: hookName, error: formatError(err) }));
+      }
+
+      let thenFn = null;
+      if (ret !== null && (typeof ret === 'object' || typeof ret === 'function')) {
+        try {
+          if (typeof ret.then === 'function') {
+            thenFn = ret.then;
+          }
+        } catch (err) {
+          return Promise.resolve(record({ status: 'sync-error', hook: hookName, error: formatError(err) }));
+        }
+      }
+
+      if (!thenFn) {
+        return Promise.resolve(record({ status: 'ok', hook: hookName }));
+      }
+
+      return new Promise(function (resolve) {
+        let settled = false;
+        const timer = setTimeout(function () {
+          if (settled) return;
+          settled = true;
+          resolve(record({ status: 'timeout', hook: hookName, timeoutMs: timeoutMs }));
+        }, timeoutMs);
+
+        try {
+          thenFn.call(
+            ret,
+            function () {
+              if (settled) return;
+              settled = true;
+              clearTimeout(timer);
+              resolve(record({ status: 'ok', hook: hookName }));
+            },
+            function (err) {
+              if (settled) return;
+              settled = true;
+              clearTimeout(timer);
+              resolve(record({ status: 'async-error', hook: hookName, error: formatError(err) }));
+            }
+          );
+        } catch (err) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          resolve(record({ status: 'sync-error', hook: hookName, error: formatError(err) }));
+        }
+      });
+    }
+
+    function notifyRunStart(meta) {
+      const m = meta && typeof meta === 'object' ? meta : {};
+      return dispatch('onRunStart', {
+        contractVersion: BRIDGE_CONTRACT_VERSION,
+        simVersion: typeof m.simVersion === 'string' ? m.simVersion : '',
+        modeKey: typeof m.modeKey === 'string' ? m.modeKey : 'villain',
+        heroDiff: m.heroDiff ? String(m.heroDiff) : null,
+        seed: (Number(m.seed) >>> 0),
+        playerName: typeof m.playerName === 'string' ? m.playerName : ''
+      });
+    }
+
+    function notifyRunComplete(summary) {
+      const s = summary && typeof summary === 'object' ? summary : {};
+      return dispatch('onRunComplete', {
+        contractVersion: BRIDGE_CONTRACT_VERSION,
+        simVersion: typeof s.simVersion === 'string' ? s.simVersion : '',
+        runId: s.runId ? String(s.runId) : null,
+        modeKey: typeof s.modeKey === 'string' ? s.modeKey : 'villain',
+        heroDiff: s.heroDiff ? String(s.heroDiff) : null,
+        seed: (Number(s.seed) >>> 0),
+        score: Number.isFinite(s.score) ? Math.floor(s.score) : 0,
+        elapsed: Number.isFinite(s.elapsed) ? Number(s.elapsed.toFixed(6)) : 0,
+        totalTicks: (Number(s.totalTicks) >>> 0),
+        cause: s.cause ? String(s.cause) : 'cap',
+        playerName: typeof s.playerName === 'string' ? s.playerName : '',
+        replay: s.replay ? s.replay : null
+      });
+    }
+
+    function getLastResult() {
+      return lastResult;
+    }
+
+    return Object.freeze({
+      BRIDGE_CONTRACT_VERSION,
+      DEFAULT_TIMEOUT_MS,
+      dispatch,
+      notifyRunStart,
+      notifyRunComplete,
+      getLastResult
+    });
+  }
+
+  return Object.freeze({
+    BRIDGE_CONTRACT_VERSION,
+    DEFAULT_TIMEOUT_MS,
+    ALLOWED_HOOKS,
+    deepCloneFreeze,
+    createBridgeDispatcher
+  });
+});
 const {
   SIM_VERSION, WORLD_W: _SIM_W, WORLD_H: _SIM_H, GROUND_Y: _SIM_GY,
   RL_NET_SIZES, RL_ACTION_HOLD_MS, RL_FRAME_SKIP, RL_WEIGHTS_B64,
@@ -1725,6 +1991,7 @@ const {
 } = SpikeSprintSim;
 const replayStore = SpikeSprintReplayStore.createReplayStore();
 replayStore.hydrateKeys();
+const bridgeDispatcher = SpikeSprintBridge.createBridgeDispatcher({ globalObj: window });
 // ────────────────────────────────────────────────────────────────────────────
 
 let currentModeKey = 'villain';
@@ -2265,12 +2532,26 @@ function endGame(cause){
   if(!isReplaying){
     updateSessionBest(score);
     recordCompletedRun(score, elapsed);
+    let env = null;
     if(activeRecorder && lastRunId){
-      const env = activeRecorder.finalize();
+      env = activeRecorder.finalize();
       replayStore.saveReplay(lastRunId, env).then(() => {
         replayStore.gcReplays(collectReferencedRunIds(lastRunId));
       });
     }
+    bridgeDispatcher.notifyRunComplete({
+      simVersion: SIM_VERSION,
+      runId: lastRunId,
+      modeKey: currentModeKey,
+      heroDiff: currentModeKey === 'hero' ? currentHeroDiff : null,
+      seed: currentRunSeed,
+      score,
+      elapsed,
+      totalTicks: simTicks,
+      cause: cause || 'cap',
+      playerName: loadPlayerName(),
+      replay: env
+    });
   }
   sfxGameOver();
   const bestVal = getActiveBestValue();
@@ -2865,6 +3146,13 @@ function startGame(modeKey, seedOpt){
   resetGame(seedOpt);
   drawHUD();
   gameState='playing';
+  bridgeDispatcher.notifyRunStart({
+    simVersion: SIM_VERSION,
+    modeKey: currentModeKey,
+    heroDiff: currentModeKey === 'hero' ? currentHeroDiff : null,
+    seed: currentRunSeed,
+    playerName: loadPlayerName()
+  });
 }
 
 document.getElementById('playVillainBtn').addEventListener('click', ()=>{
