@@ -39,4 +39,11 @@ See `docs/ai/decision-log.md` for full rationale on: procedural asset generation
 - Single hardcoded difficulty curve (1x→2x over 5 min, 2x→3x over next 5 min, holds at 3x).
 
 ## Security Boundaries
+
+## v2.0 Two-Mode & Embedded RL Bot Architecture (2026-11-24)
+- **Mode Registry (`BASE_MODE` / `MODES`):** `MODES.villain` inherits 100% of `BASE_MODE` (legacy parity). `MODES.hero` overrides `autoSpawn: false`, `showSpawnControls: true`, `allowHumanJump: false`, `cooldownScale: 0.75`, `scoreLabel: 'HAVOC '`, `bestLabel: 'MIN HAVOC'`, `endTitle: 'VILLAGE SAVED!'`, `lowerIsBetter: true`, and `updateRunner: rlBotUpdate`.
+- **Atomic Spawners & Shared Cooldown:** `spawnObstacle()` split into `spawnEnemy()`, `spawnPit()`, and `spawnBush()`. Both modes share `getBaseSpawnInterval(speedMult) = 55 - Math.min(25, speedMult * 8)`.
+- **Embedded DQN RL Bot:** `[21, 64, 64, 5]` ReLU MLP packed as Base64 `Float32Array` (`RL_WEIGHTS_B64`, 5,893 floats, ~31.4 KB) with ~20-line vanilla JS forward pass (`RL_FRAME_SKIP = 4`) and step-level `no-op` key-release parity.
+- **Reversible Responsive Zoom:** `RESPONSIVE_ZOOM_ENABLED = true` caps `ZOOM = Math.min(2, canvas.width / 490)` on narrow WebViews; set `false` to revert to fixed `ZOOM = 2`.
+
 None applicable — no secrets, no network calls, no user data collected or transmitted.

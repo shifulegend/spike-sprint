@@ -572,6 +572,7 @@ const BASE_MODE = {
   endTitle: 'GAME OVER',
   causeLabels: null,
   lowerIsBetter: false,
+  cooldownScale: 1.0,
   allowHumanJump: true,
   updateRunner: null
 };
@@ -592,6 +593,7 @@ const MODES = {
       barrel: 'Crushed by the spiked barrel!'
     },
     lowerIsBetter: true,
+    cooldownScale: 0.75, // Easily tweakable: 1.0 = legacy spacing (47->31f), 0.75 = combo-friendly (35->23f)
     allowHumanJump: false,
     updateRunner: rlBotUpdate
   }
@@ -715,7 +717,7 @@ function triggerHeroSpawn(spawnerFn){
   primeAudio();
   spawnerFn();
   sfxSpawnTrap();
-  heroCooldownTotal = getBaseSpawnInterval(speedMult);
+  heroCooldownTotal = Math.round(getBaseSpawnInterval(speedMult) * activeMode.cooldownScale);
   heroCooldownRemaining = heroCooldownTotal;
   updateHeroCooldownUI(false);
   return true;

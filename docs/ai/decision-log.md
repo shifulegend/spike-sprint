@@ -3,6 +3,13 @@
 <!-- Newest entries first -->
 
 ## Entry Template
+### 2026-11-24 — v2.0 Two-Mode Registry, Hero Cooldown, Embedded DQN RL Bot & Responsive Zoom
+- **Mode Registry (ADR-01):** Adopted shared core engine + `BASE_MODE`/`MODES` override registry to prevent code duplication and isolate Hero mode changes from legacy Villain mode.
+- **Shared Deterministic Cooldown (ADR-02):** Reused `getBaseSpawnInterval(speedMult)` across all 3 Hero buttons with an easily-tweakable `MODES.hero.cooldownScale` (default `0.75`, giving 35->23 frames for tactical combos without spam).
+- **Single-File Embedded DQN RL Bot (ADR-03):** Embedded `[21, 64, 64, 5]` MLP weights as Base64 `Float32Array` (~31.4 KB) with step-level `no-op` release parity (11/11 pit clearance, 0 external deps).
+- **Havoc Scoring & Micro-Storytelling (ADR-04):** Added `HAVOC / MIN HAVOC`, `VILLAGE SAVED!` with stop-cause flavor, 2-line start-screen story hook, and opt-in `?` lore card.
+- **Reversible Responsive Zoom (ADR-05):** Added `RESPONSIVE_ZOOM_ENABLED = true` (`MIN_LOGICAL_W = 490`) and renamed purple defenders to **Purple Heroes**.
+
 ```
 ### [TIMESTAMP] — <Decision Title>
 - **Context**: Why this decision was needed

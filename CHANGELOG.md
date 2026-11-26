@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.0] - 2026-11-24
+### Added
+- **Two-Mode Architecture (`BASE_MODE` / `MODES`):** Replaced single `START GAME` button with **Play as Villain** (legacy runner) and **Play as Hero** (village defense) plus **Change Mode** on the end screen, powered by one shared core engine with zero duplicated game loop.
+- **Hero Mode Controls & Cooldown:** Added 3 procedural inline-SVG obstacle buttons (**Pit**, **Bush**, **Purple Hero**, keys `1`/`2`/`3`) with a shared deterministic cooldown (`getBaseSpawnInterval(speedMult) * MODES.hero.cooldownScale`, default `0.75` for combo play) and synchronized refill-wipe + gold ready-flash animation.
+- **Havoc Scoring & Story UX:** Added **HAVOC / MIN HAVOC** (lowest wins, isolated from Villain's `HIGH SCORE`), **`VILLAGE SAVED!`** victory screen with dynamic stop-cause flavor, 2-line `#startScreen` story hook, and opt-in `?` lore card.
+- **Embedded Single-File DQN RL Bot:** Packed the trained `[21, 64, 64, 5]` ReLU MLP (`Sprint_web_DQN.rlbot.json`, 5,893 weights) as a ~31.4 KB Base64 `Float32Array` with zero external libraries and step-level key-release parity (11/11 pit clearance).
+- **Reversible Responsive Zoom Floor:** Added `RESPONSIVE_ZOOM_ENABLED = true` (`MIN_LOGICAL_W = 490`) so narrow mobile WebViews match desktop/iOS Safari framing while keeping exact `ZOOM = 2` on `>= 980px` viewports.
+
 All notable changes to Spike Sprint are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [Semantic Versioning](https://semver.org/).

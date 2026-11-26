@@ -170,3 +170,9 @@ Contributions are welcome! Whether it's a bug report, a new game mechanic, or a 
 ## License
 
 MIT — see [LICENSE](LICENSE). All game assets are original works created for this project.
+
+
+## Two Playable Modes (v2.0)
+- **Play as Villain (Legacy Runner):** Run, jump (Tap / Click / Space), stomp Purple Heroes (`+100`), avoid pits, and outrun the spiked barrel for the highest **Score**.
+- **Play as Hero (Village Defense):** Deploy **Pit** (`1`), **Bush** (`2`), and **Purple Hero** (`3`) traps on a shared speed-scaled cooldown (`MODES.hero.cooldownScale`, default `0.75`) to stop an embedded single-file **DQN RL Bot** (`[21, 64, 64, 5]` ReLU MLP) and keep **Havoc** as low as possible (**`VILLAGE SAVED!`**).
+
