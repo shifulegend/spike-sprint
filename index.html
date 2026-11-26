@@ -378,11 +378,23 @@ function updateSessionBest(val){
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const GROUND_Y_RATIO = 0.78;
-const ZOOM = 2;
+const BASE_ZOOM = 2;
+const RESPONSIVE_ZOOM_ENABLED = true; // Flip to false to revert to legacy fixed ZOOM = 2
+const MIN_LOGICAL_W = 490;
+let ZOOM = BASE_ZOOM;
 function logicalW(){ return canvas.width/ZOOM; }
 function logicalH(){ return canvas.height/ZOOM; }
 let groundY = 0;
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight; groundY = logicalH()*GROUND_Y_RATIO;}
+let _sceneReady = false;
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ZOOM = RESPONSIVE_ZOOM_ENABLED ? Math.min(BASE_ZOOM, canvas.width / MIN_LOGICAL_W) : BASE_ZOOM;
+  groundY = logicalH() * GROUND_Y_RATIO;
+  if(_sceneReady && gameState === 'start'){
+    player.y = groundY - player.h;
+  }
+}
 resize();
 window.addEventListener('resize', resize);
 
@@ -895,6 +907,7 @@ document.getElementById('changeModeBtn').addEventListener('click', ()=>{
 
 groundY = logicalH()*GROUND_Y_RATIO;
 player.y = groundY - player.h;
+_sceneReady = true;
 requestAnimationFrame(loop);
 </script>
 </body>
