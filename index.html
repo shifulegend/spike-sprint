@@ -12,19 +12,32 @@
   #copyrightTag{position:absolute;bottom:2px;left:0;width:100%;text-align:center;color:rgba(255,255,255,0.4);font-size:9px;font-family:sans-serif;pointer-events:none;z-index:5;}
   #startScreen,#gameOverScreen{position:absolute;top:0;left:0;width:100%;height:100%;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:rgba(0,0,0,0.55);color:#fff;text-align:center;font-family:'Courier New',monospace;}
+    background:rgba(0,0,0,0.55);color:#fff;text-align:center;font-family:'Courier New',monospace;padding:16px;box-sizing:border-box;}
   #gameOverScreen{display:none;}
   h1{font-size:32px;margin:0 0 10px;text-shadow:2px 2px #000;}
   #brandTitle{font-size:56px;font-weight:900;letter-spacing:4px;color:#ffcc00;
     text-shadow:4px 4px 0 #8c2c2c, 6px 6px 0 rgba(0,0,0,0.6);margin:0 0 6px;
     font-family:'Courier New',monospace;}
-  #brandTagline{font-size:15px;font-style:italic;color:#e8e8e8cc;letter-spacing:1px;margin:0 0 22px;}
+  #brandTagline{font-size:15px;font-style:italic;color:#e8e8e8cc;letter-spacing:1px;margin:0 0 14px;}
+  #storyHook{font-size:13px;line-height:1.5;color:#f5e6b3;max-width:460px;margin:0 0 14px;
+    padding:8px 14px;background:rgba(11,15,46,0.65);border:1px solid rgba(255,204,0,0.35);border-radius:6px;}
   #startHint{font-size:14px;color:#fff;margin:0 0 4px;}
   button{margin-top:16px;padding:10px 26px;font-size:18px;background:#ffcc00;border:3px solid #664400;
-    border-radius:6px;cursor:pointer;font-weight:bold;}
+    border-radius:6px;cursor:pointer;font-weight:bold;font-family:'Courier New',monospace;color:#111;}
+  button:hover{filter:brightness(1.06);}
+  .mode-buttons,.end-buttons{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:14px;}
+  .mode-btn{margin-top:0;padding:12px 20px;min-width:210px;display:flex;flex-direction:column;align-items:center;gap:4px;
+    box-shadow:3px 3px 0 #664400;}
+  .mode-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #664400;}
+  .mode-btn-title{font-size:17px;font-weight:bold;letter-spacing:0.5px;}
+  .mode-btn-sub{font-size:11px;font-weight:normal;color:#3d2800;line-height:1.25;}
+  #playHeroBtn{background:#7fc453;border-color:#245c18;box-shadow:3px 3px 0 #245c18;}
+  #playHeroBtn:active{box-shadow:1px 1px 0 #245c18;}
+  #playHeroBtn .mode-btn-sub{color:#12330b;}
+  #changeModeBtn{background:#e8e8e8;border-color:#444;color:#111;}
   #credit{position:absolute;bottom:6px;left:8px;color:#ffffffaa;font-size:11px;font-family:sans-serif;}
-  #soundToggle{
-    position:absolute;top:10px;left:12px;
+  #soundToggle,#storyToggle{
+    position:absolute;top:10px;
     width:42px;height:42px;
     background:#1a1f4a;
     border:3px solid #ffcc00;
@@ -35,10 +48,24 @@
     box-shadow:3px 3px 0 #664400;
     transition:background 0.1s;
     padding:0;
+    margin-top:0;
     outline:none;
+    color:#ffcc00;
+    font-size:20px;
+    font-weight:bold;
   }
-  #soundToggle:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #664400;}
+  #soundToggle{left:12px;}
+  #storyToggle{left:64px;}
+  #soundToggle:active,#storyToggle:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #664400;}
   #soundToggle svg{width:22px;height:22px;display:block;}
+  #loreCard{display:none;position:absolute;top:62px;left:12px;max-width:340px;
+    background:rgba(11,15,46,0.95);border:3px solid #ffcc00;border-radius:6px;
+    padding:14px 16px;color:#f4f4f4;text-align:left;font-size:12px;line-height:1.5;
+    z-index:20;box-shadow:4px 4px 0 rgba(0,0,0,0.6);}
+  #loreCard h2{margin:0 0 8px;font-size:15px;color:#ffcc00;letter-spacing:1px;}
+  #loreCard ul{margin:0 0 10px;padding-left:16px;}
+  #loreCard li{margin-bottom:4px;}
+  #loreCloseBtn{margin-top:4px;padding:6px 14px;font-size:13px;}
 </style>
 </head>
 <body>
@@ -64,16 +91,39 @@
 </button>
 
 <div id="startScreen">
+  <button id="storyToggle" title="Village Story" aria-label="Village Story">?</button>
+  <div id="loreCard" role="dialog" aria-label="Village Story">
+    <h2>THE VILLAGE BREACH</h2>
+    <ul>
+      <li><strong>The Trespasser:</strong> A rogue Villain broke into the village and is sprinting through the main road.</li>
+      <li><strong>The Spiked Barrel:</strong> The village's rolling defense barrel hunts him down the moment thick <strong>Bushes</strong> tangle his feet.</li>
+      <li><strong>The Patrols:</strong> Purple <strong>Enemies</strong> guard the road, and deep <strong>Pits</strong> guard the crossings.</li>
+    </ul>
+    <button id="loreCloseBtn">GOT IT</button>
+  </div>
   <div id="brandTitle">SPIKE SPRINT</div>
   <div id="brandTagline">A poorly coded pixel runner</div>
+  <p id="storyHook">A rogue trespasser is tearing through the village.<br>Outrun the spiked barrel &mdash; or deploy traps to stop him.</p>
   <p id="startHint">Tap / Click / Space = Jump</p>
-  <button id="startBtn">START GAME</button>
+  <div class="mode-buttons">
+    <button id="playVillainBtn" class="mode-btn">
+      <span class="mode-btn-title">PLAY AS VILLAIN</span>
+      <span class="mode-btn-sub">Trespass, jump &amp; outrun the barrel</span>
+    </button>
+    <button id="playHeroBtn" class="mode-btn">
+      <span class="mode-btn-title">PLAY AS HERO</span>
+      <span class="mode-btn-sub">Drop traps. Keep Havoc low.</span>
+    </button>
+  </div>
 </div>
 
 <div id="gameOverScreen">
-  <h1>GAME OVER</h1>
+  <h1 id="gameOverTitle">GAME OVER</h1>
   <p id="finalScore"></p>
-  <button id="restartBtn">RESTART</button>
+  <div class="end-buttons">
+    <button id="restartBtn">RESTART</button>
+    <button id="changeModeBtn">CHANGE MODE</button>
+  </div>
 </div>
 
 
@@ -259,6 +309,70 @@ soundToggleBtn.addEventListener('click', e=>{
 });
 soundToggleBtn.addEventListener('pointerdown', e=>e.stopPropagation());
 soundToggleBtn.addEventListener('pointerup',   e=>e.stopPropagation());
+
+const storyToggleBtn = document.getElementById('storyToggle');
+const loreCard = document.getElementById('loreCard');
+const loreCloseBtn = document.getElementById('loreCloseBtn');
+storyToggleBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  loreCard.style.display = loreCard.style.display === 'block' ? 'none' : 'block';
+});
+loreCloseBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  loreCard.style.display = 'none';
+});
+[storyToggleBtn, loreCard, loreCloseBtn].forEach(el=>{
+  el.addEventListener('pointerdown', e=>e.stopPropagation());
+  el.addEventListener('pointerup',   e=>e.stopPropagation());
+});
+// ────────────────────────────────────────────────────────────────────────────
+
+// ── Mode Registry (Shared Core + Per-Mode Overrides) ────────────────────────
+const BASE_MODE = {
+  baseSpeed: 6,
+  gravity: 0.85,
+  minJumpV: -9,
+  maxJumpV: -16.5,
+  maxHoldMs: 320,
+  autoSpawn: true,
+  showSpawnControls: false,
+  scoreLabel: '',
+  endScoreLabel: 'Score',
+  bestLabel: 'HIGH SCORE',
+  endBestLabel: 'High Score',
+  endTitle: 'GAME OVER',
+  lowerIsBetter: false,
+  updateRunner: null
+};
+
+const MODES = {
+  villain: {}, // Legacy runner mode — inherits 100% of BASE_MODE
+  hero: {}     // Step 1: inherits BASE_MODE; Hero UI/cooldown/RL overrides land in Steps 2–3
+};
+
+let currentModeKey = 'villain';
+let activeMode = { ...BASE_MODE };
+const sessionBest = {
+  villain: 0,
+  hero: Infinity
+};
+
+function getBaseSpawnInterval(mult){
+  return 55 - Math.min(25, mult * 8);
+}
+
+function getActiveBestValue(){
+  return sessionBest[currentModeKey];
+}
+
+function updateSessionBest(val){
+  if(activeMode.lowerIsBetter){
+    if(val < sessionBest[currentModeKey]) sessionBest[currentModeKey] = val;
+  } else {
+    if(val > sessionBest[currentModeKey]) sessionBest[currentModeKey] = val;
+  }
+  sessionHighScore = sessionBest.villain;
+}
 // ────────────────────────────────────────────────────────────────────────────
 
 const canvas = document.getElementById('gameCanvas');
@@ -277,7 +391,7 @@ let startTime = 0, elapsed = 0;
 let score = 0;
 let sessionHighScore = 0;
 let speedMult = 1;
-const BASE_SPEED = 6;
+const BASE_SPEED = BASE_MODE.baseSpeed;
 let worldSpeed = BASE_SPEED;
 
 const player = {
@@ -288,12 +402,12 @@ const player = {
   stuck:false,
   dead:false
 };
-const GRAVITY = 0.85;
+const GRAVITY = BASE_MODE.gravity;
 let jumpHoldTime = 0;
 let jumpKeyDown = false;
-const MIN_JUMP_V = -9;
-const MAX_JUMP_V = -16.5;
-const MAX_HOLD_MS = 320;
+const MIN_JUMP_V = BASE_MODE.minJumpV;
+const MAX_JUMP_V = BASE_MODE.maxJumpV;
+const MAX_HOLD_MS = BASE_MODE.maxHoldMs;
 
 let enemies = [];
 let pits = [];
@@ -309,7 +423,7 @@ function resetGame(){
   score = 0;
   elapsed = 0;
   speedMult = 1;
-  worldSpeed = BASE_SPEED;
+  worldSpeed = activeMode.baseSpeed;
   enemies = []; pits = []; pipes = [];
   spawnTimer = 0; nextSpawnAt = 60;
   barrelCatchUp = 0; barrelRoll = 0;
@@ -323,18 +437,29 @@ function resetGame(){
 
 let groundScroll = 0;
 
+function spawnEnemy(){
+  const size = player.h/2;
+  enemies.push({x: logicalW()+40, y: groundY-size, w:size, h:size, alive:true, legPhase:0});
+}
+
+function spawnPit(){
+  const pitWidth = 70 + Math.random()*50;
+  pits.push({x: logicalW()+40, w: pitWidth});
+}
+
+function spawnBush(){
+  const ph = 40+Math.random()*20;
+  pipes.push({x: logicalW()+40, w:34, h:ph});
+}
+
 function spawnObstacle(){
   const roll = Math.random();
-  const groundTop = groundY;
   if(roll < 0.4){
-    const size = player.h/2;
-    enemies.push({x: logicalW()+40, y: groundTop-size, w:size, h:size, alive:true, legPhase:0});
+    spawnEnemy();
   } else if(roll < 0.7){
-    const pitWidth = 70 + Math.random()*50;
-    pits.push({x: logicalW()+40, w: pitWidth});
+    spawnPit();
   } else {
-    const ph = 40+Math.random()*20;
-    pipes.push({x: logicalW()+40, w:34, h:ph});
+    spawnBush();
   }
 }
 
@@ -349,24 +474,30 @@ function update(dt){
   } else {
     speedMult = 3;
   }
-  worldSpeed = BASE_SPEED * speedMult;
+  worldSpeed = activeMode.baseSpeed * speedMult;
 
   score += 0.6 * speedMult * dt;
-  if(score > sessionHighScore) sessionHighScore = score;
+  if(!activeMode.lowerIsBetter) updateSessionBest(score);
 
   groundScroll -= worldSpeed;
 
-  spawnTimer += dt*60;
-  if(spawnTimer > nextSpawnAt){
-    spawnTimer = 0;
-    nextSpawnAt = 55 - Math.min(25, speedMult*8) + Math.random()*30;
-    spawnObstacle();
+  if(activeMode.autoSpawn){
+    spawnTimer += dt*60;
+    if(spawnTimer > nextSpawnAt){
+      spawnTimer = 0;
+      nextSpawnAt = getBaseSpawnInterval(speedMult) + Math.random()*30;
+      spawnObstacle();
+    }
   }
 
-  if(jumpKeyDown && player.jumping && jumpHoldTime < MAX_HOLD_MS){
+  if(typeof activeMode.updateRunner === 'function'){
+    activeMode.updateRunner(dt);
+  }
+
+  if(jumpKeyDown && player.jumping && jumpHoldTime < activeMode.maxHoldMs){
     jumpHoldTime += dt*1000;
   }
-  player.vy += GRAVITY;
+  player.vy += activeMode.gravity;
   player.y += player.vy;
 
   let overPit = false;
@@ -390,11 +521,11 @@ function update(dt){
   }
 
   if(overPit && player.y > groundY - player.h*0.2){
-    endGame();
+    endGame('pit');
     return;
   }
   if(player.y > logicalH() + 100){
-    endGame();
+    endGame('pit');
     return;
   }
 
@@ -423,10 +554,10 @@ function update(dt){
         e.alive = false;
         sfxSquash();
         score += 100;
-        if(score > sessionHighScore) sessionHighScore = score;
+        if(!activeMode.lowerIsBetter) updateSessionBest(score);
         player.vy = -9;
       } else {
-        endGame();
+        endGame('enemy');
         return;
       }
     }
@@ -467,15 +598,19 @@ function update(dt){
   const barrelSpikeRightEdge = barrelCenterX + spikeTipRadius; // rightmost pixel any spike can reach
   const playerLeftEdge = player.x; // leftmost pixel of the player
   if(player.stuck && barrelSpikeRightEdge >= playerLeftEdge){
-    endGame();
+    endGame('barrel');
     return;
   }
 }
 
-function endGame(){
+function endGame(cause){
   gameState = 'over';
+  updateSessionBest(score);
   sfxGameOver();
-  document.getElementById('finalScore').textContent = 'Score: ' + String(Math.floor(score)).padStart(5,'0') + '  |  High Score: ' + String(Math.floor(sessionHighScore)).padStart(5,'0');
+  const bestVal = getActiveBestValue();
+  const bestStr = Number.isFinite(bestVal) ? String(Math.floor(bestVal)).padStart(5,'0') : '-----';
+  document.getElementById('gameOverTitle').textContent = activeMode.endTitle;
+  document.getElementById('finalScore').textContent = activeMode.endScoreLabel + ': ' + String(Math.floor(score)).padStart(5,'0') + '  |  ' + activeMode.endBestLabel + ': ' + bestStr;
   document.getElementById('gameOverScreen').style.display='flex';
 }
 
@@ -671,9 +806,11 @@ function drawBarrel(){
 }
 
 function drawHUD(){
-  document.getElementById('hud').textContent = String(Math.floor(score)).padStart(5,'0');
+  const bestVal = getActiveBestValue();
+  const bestStr = Number.isFinite(bestVal) ? String(Math.floor(bestVal)).padStart(5,'0') : '-----';
+  document.getElementById('hud').textContent = activeMode.scoreLabel + String(Math.floor(score)).padStart(5,'0');
   document.getElementById('speedTag').textContent = 'SPEED x' + speedMult.toFixed(2);
-  document.getElementById('highScoreTag').textContent = 'HIGH SCORE: ' + String(Math.floor(sessionHighScore)).padStart(5,'0');
+  document.getElementById('highScoreTag').textContent = activeMode.bestLabel + ': ' + bestStr;
 }
 
 function loop(){
@@ -703,17 +840,17 @@ function startJump(){
     jumpHoldTime = 0;
     player.jumping = true;
     player.onGround = false;
-    player.vy = MIN_JUMP_V;
+    player.vy = activeMode.minJumpV;
     if(player.stuck){ player.stuck=false; }
   }
 }
 function endJump(){
   if(gameState!=='playing') return;
   if(jumpKeyDown){
-    const holdRatio = Math.min(1, jumpHoldTime/MAX_HOLD_MS);
-    const extra = (MAX_JUMP_V - MIN_JUMP_V)*holdRatio;
+    const holdRatio = Math.min(1, jumpHoldTime/activeMode.maxHoldMs);
+    const extra = (activeMode.maxJumpV - activeMode.minJumpV)*holdRatio;
     if(player.vy < 0){
-      player.vy = MIN_JUMP_V + extra;
+      player.vy = activeMode.minJumpV + extra;
     }
   }
   jumpKeyDown = false;
@@ -729,17 +866,31 @@ canvas.addEventListener('pointerdown', e=>{ startJump(); });
 canvas.addEventListener('pointerup', e=>{ endJump(); });
 canvas.addEventListener('pointercancel', e=>{ endJump(); });
 
-document.getElementById('startBtn').addEventListener('click', ()=>{
+function startGame(modeKey){
+  currentModeKey = MODES[modeKey] ? modeKey : 'villain';
+  activeMode = { ...BASE_MODE, ...MODES[currentModeKey] };
   primeAudio();
+  loreCard.style.display = 'none';
   document.getElementById('startScreen').style.display='none';
-  resetGame();
-  gameState='playing';
-});
-document.getElementById('restartBtn').addEventListener('click', ()=>{
-  primeAudio();
   document.getElementById('gameOverScreen').style.display='none';
   resetGame();
+  drawHUD();
   gameState='playing';
+}
+
+document.getElementById('playVillainBtn').addEventListener('click', ()=>{
+  startGame('villain');
+});
+document.getElementById('playHeroBtn').addEventListener('click', ()=>{
+  startGame('hero');
+});
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  startGame(currentModeKey);
+});
+document.getElementById('changeModeBtn').addEventListener('click', ()=>{
+  gameState = 'start';
+  document.getElementById('gameOverScreen').style.display='none';
+  document.getElementById('startScreen').style.display='flex';
 });
 
 groundY = logicalH()*GROUND_Y_RATIO;
