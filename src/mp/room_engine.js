@@ -50,6 +50,9 @@
     let pairingStartedAtMs = null;
     let hardDeadlineMs = null;
     let phaseEndsAtMs = null;
+    let pausedPhase = null;
+    let freezeStartedAtMs = null;
+    let lastGraceChargeMs = null;
     let roundId = 0;
     let activeSim = null;
     let pendingInputs = [];
@@ -129,6 +132,19 @@
         return state;
       }
 
+      // Charge cumulative 15s reconnect grace during freeze (M08/M09/M10)
+      if (state === 'reconnecting') {
+        const prevT = lastGraceChargeMs !== null ? lastGraceChargeMs : nowMs;
+        const delta = Math.max(0, nowMs - prevT);
+        lastGraceChargeMs = nowMs;
+        if (seats.seatA && !seats.seatA.connected) {
+          seats.seatA.reconnectGraceRemainingMs = Math.max(0, Number((seats.seatA.reconnectGraceRemainingMs - delta).toFixed(3)));
+        }
+        if (seats.seatB && !seats.seatB.connected) {
+          seats.seatB.reconnectGraceRemainingMs = Math.max(0, Number((seats.seatB.reconnectGraceRemainingMs - delta).toFixed(3)));
+        }
+      }
+
       // Hard 5-minute pairing-to-result session deadline (Doc 13 §2)
       if (hardDeadlineMs !== null && nowMs >= hardDeadlineMs) {
         const sATicks = round1Result && round1Result.villainSeatId === 'seatA'
@@ -144,6 +160,30 @@
           seatBVillainTicks: sBTicks,
           terminalOverride: { type: 'no_contest', reason: 'session_deadline_exceeded' }
         }), nowMs);
+        return state;
+      }
+
+      if (state === 'reconnecting') {
+        const aOff = seats.seatA && !seats.seatA.connected;
+        const bOff = seats.seatB && !seats.seatB.connected;
+        const aOut = aOff && seats.seatA.reconnectGraceRemainingMs <= 0;
+        const bOut = bOff && seats.seatB.reconnectGraceRemainingMs <= 0;
+        if (aOff && bOff && (aOut || bOut)) {
+          commitOutcome(Mp.resolveMatchOutcome({
+            seatA: 'seatA', seatB: 'seatB', seatAVillainTicks: 0, seatBVillainTicks: 0,
+            terminalOverride: { type: 'no_contest', reason: 'both_disconnected_grace_exhausted' }
+          }), nowMs);
+        } else if (aOut) {
+          commitOutcome(Mp.resolveMatchOutcome({
+            seatA: 'seatA', seatB: 'seatB', seatAVillainTicks: 0, seatBVillainTicks: 0,
+            terminalOverride: { type: 'forfeit', winnerSeatId: 'seatB', reason: 'reconnect_grace_exhausted' }
+          }), nowMs);
+        } else if (bOut) {
+          commitOutcome(Mp.resolveMatchOutcome({
+            seatA: 'seatA', seatB: 'seatB', seatAVillainTicks: 0, seatBVillainTicks: 0,
+            terminalOverride: { type: 'forfeit', winnerSeatId: 'seatA', reason: 'reconnect_grace_exhausted' }
+          }), nowMs);
+        }
       }
       return state;
     }
@@ -192,7 +232,10 @@
         connectionEpoch: 1,
         lastSequence: 0,
         ready: false,
-        role: 'lobby'
+        role: 'lobby',
+        connected: true,
+        reconnectGraceRemainingMs: policy.reconnectGraceTotalMs,
+        disconnectedAtMs: null
       };
 
       lastMeaningfulActionMs = nowMs;
@@ -356,6 +399,103 @@
       return Object.freeze({ ok: true, state, outcome });
     }
 
+
+    function disconnectSeat(params) {
+      const p = params && typeof params === 'object' ? params : {};
+      const nowMs = Number.isFinite(p.nowMs) ? p.nowMs : createdAtMs;
+      const seat = (p.seatId === 'seatA' || p.seatId === 'seatB') ? seats[p.seatId] : null;
+      if (!seat) return Object.freeze({ ok: false, code: 'INVALID_SEAT', reason: 'Unknown seatId' });
+      if (isTerminal()) return Object.freeze({ ok: true, state, idempotent: true });
+
+      if (state === 'waiting' || state === 'ready_check') {
+        logEvent('seat_disconnected_lobby', nowMs, { seatId: seat.seatId });
+        abortRoom('player_disconnected_lobby', nowMs);
+        return Object.freeze({ ok: true, state });
+      }
+
+      checkDeadlines(nowMs);
+      if (isTerminal()) return Object.freeze({ ok: true, state, idempotent: true });
+      if (!seat.connected) return Object.freeze({ ok: true, state, idempotent: true, graceRemainingMs: seat.reconnectGraceRemainingMs });
+
+      seat.connected = false;
+      seat.disconnectedAtMs = nowMs;
+
+      if (state !== 'reconnecting') {
+        pausedPhase = state;
+        freezeStartedAtMs = nowMs;
+        lastGraceChargeMs = nowMs;
+        // Clear held jump on disconnect boundary without applying boost (M09 / MP-05)
+        if (activeSim && activeSim.state && activeSim.state.player) {
+          activeSim.state.player.jumpKeyDown = false;
+          activeSim.state.player.jumpHoldMs = 0;
+        }
+        pendingInputs = [];
+        state = 'reconnecting';
+      }
+
+      logEvent('seat_disconnected', nowMs, {
+        seatId: seat.seatId,
+        graceRemainingMs: seat.reconnectGraceRemainingMs
+      });
+      checkDeadlines(nowMs);
+      return Object.freeze({ ok: true, state, graceRemainingMs: seat.reconnectGraceRemainingMs });
+    }
+
+    function reconnectSeat(params) {
+      const p = params && typeof params === 'object' ? params : {};
+      const nowMs = Number.isFinite(p.nowMs) ? p.nowMs : createdAtMs;
+      checkDeadlines(nowMs);
+      if (isTerminal()) {
+        return Object.freeze({ ok: false, code: 'MATCH_TERMINATED', reason: 'Match already ended' });
+      }
+      const seat = authenticateSeat(p.seatId, p.seatToken);
+      if (!seat) {
+        return Object.freeze({ ok: false, code: 'UNAUTHORIZED', reason: 'Invalid seatId or seatToken' });
+      }
+
+      seat.seatToken = generateSecureHex(16, prng);
+      seat.connectionEpoch += 1;
+      seat.connected = true;
+      seat.disconnectedAtMs = null;
+
+      logEvent('seat_reconnected', nowMs, {
+        seatId: seat.seatId,
+        connectionEpoch: seat.connectionEpoch,
+        graceRemainingMs: seat.reconnectGraceRemainingMs
+      });
+
+      if (state === 'reconnecting' && seats.seatA && seats.seatB && seats.seatA.connected && seats.seatB.connected) {
+        const frozenMs = freezeStartedAtMs !== null ? Math.max(0, nowMs - freezeStartedAtMs) : 0;
+        if (phaseEndsAtMs !== null) {
+          phaseEndsAtMs += frozenMs;
+        }
+        state = pausedPhase;
+        pausedPhase = null;
+        freezeStartedAtMs = null;
+        lastGraceChargeMs = null;
+        logEvent('match_resumed', nowMs, { resumedState: state, frozenMs });
+      }
+
+      return Object.freeze({
+        ok: true,
+        seatId: seat.seatId,
+        seatToken: seat.seatToken,
+        connectionEpoch: seat.connectionEpoch,
+        graceRemainingMs: seat.reconnectGraceRemainingMs,
+        state,
+        snapshot: getPublicSnapshot()
+      });
+    }
+
+    function abortServerError(reason, nowMs) {
+      const t = Number.isFinite(nowMs) ? nowMs : createdAtMs;
+      if (isTerminal()) return outcome;
+      return commitOutcome(Mp.resolveMatchOutcome({
+        seatA: 'seatA', seatB: 'seatB', seatAVillainTicks: 0, seatBVillainTicks: 0,
+        terminalOverride: { type: 'no_contest', reason: 'server_error:' + (reason || 'internal') }
+      }), t);
+    }
+
     function stepTick(nowMs) {
       checkDeadlines(nowMs);
       if (isTerminal()) {
@@ -476,7 +616,9 @@
         displayName: s.displayName,
         ready: s.ready,
         role: s.role,
-        connectionEpoch: s.connectionEpoch
+        connectionEpoch: s.connectionEpoch,
+        connected: s.connected,
+        reconnectGraceRemainingMs: s.reconnectGraceRemainingMs
       }) : null;
 
       return Object.freeze({
@@ -538,6 +680,9 @@
       recordHeartbeat,
       submitInput,
       leaveSeat,
+      disconnectSeat,
+      reconnectSeat,
+      abortServerError,
       stepTick,
       checkDeadlines,
       getPublicSnapshot,

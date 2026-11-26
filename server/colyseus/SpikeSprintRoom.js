@@ -58,6 +58,25 @@ function createSpikeSprintRoomClass(BaseRoom) {
         if (!res.ok) client.send('input_rejected', res);
       });
 
+      this.onMessage('reconnect', (client, payload) => {
+        const p = payload && typeof payload === 'object' ? payload : {};
+        const res = this.engine.reconnectSeat({
+          seatId: p.seatId,
+          seatToken: p.seatToken,
+          nowMs: performance.now()
+        });
+        if (!res.ok) return client.send('error', res);
+        this.sessionToSeat.set(client.sessionId, { seatId: res.seatId, seatToken: res.seatToken });
+        client.send('reconnected', {
+          seatId: res.seatId,
+          seatToken: res.seatToken,
+          connectionEpoch: res.connectionEpoch,
+          graceRemainingMs: res.graceRemainingMs,
+          snapshot: res.snapshot
+        });
+        this.broadcast('state', this.engine.getPublicSnapshot());
+      });
+
       this.onMessage('leave', (client) => {
         const seat = this.sessionToSeat.get(client.sessionId);
         if (!seat) return;
@@ -105,15 +124,19 @@ function createSpikeSprintRoomClass(BaseRoom) {
       this.broadcast('state', this.engine.getPublicSnapshot());
     }
 
-    onLeave(client) {
+    onLeave(client, consented) {
       const seat = this.sessionToSeat.get(client.sessionId);
       if (seat) {
-        this.engine.leaveSeat({
-          seatId: seat.seatId,
-          seatToken: seat.seatToken,
-          nowMs: performance.now()
-        });
-        this.sessionToSeat.delete(client.sessionId);
+        if (consented === false) {
+          this.engine.disconnectSeat({ seatId: seat.seatId, nowMs: performance.now() });
+        } else {
+          this.engine.leaveSeat({
+            seatId: seat.seatId,
+            seatToken: seat.seatToken,
+            nowMs: performance.now()
+          });
+          this.sessionToSeat.delete(client.sessionId);
+        }
         this.broadcast('state', this.engine.getPublicSnapshot());
       }
     }

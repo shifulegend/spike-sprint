@@ -17,6 +17,7 @@ function createWsPrivateServer(options) {
   const policyOverrides = opts.policyOverrides || {};
 
   const rooms = new Map(); // inviteCode -> { engine, clients: Map<seatId, ws>, timer }
+  const wsMeta = new WeakMap();
   let server = null;
   let wss = null;
   let actualPort = null;
@@ -86,6 +87,7 @@ function createWsPrivateServer(options) {
         return safeSend(ws, { type: 'error', code: joinRes.code, reason: joinRes.reason });
       }
       const roomRec = { engine, clients: new Map([[joinRes.seatId, ws]]), timer: null };
+      wsMeta.set(ws, { inviteCode: engine.inviteCode, seatId: joinRes.seatId });
       rooms.set(engine.inviteCode, roomRec);
       startRoomTicker(roomRec);
       return safeSend(ws, {
@@ -114,6 +116,7 @@ function createWsPrivateServer(options) {
         return safeSend(ws, { type: 'error', code: joinRes.code, reason: joinRes.reason });
       }
       roomRec.clients.set(joinRes.seatId, ws);
+      wsMeta.set(ws, { inviteCode: roomRec.engine.inviteCode, seatId: joinRes.seatId });
       safeSend(ws, {
         type: 'room_joined',
         inviteCode: roomRec.engine.inviteCode,
@@ -154,6 +157,33 @@ function createWsPrivateServer(options) {
       return;
     }
 
+    if (msg.type === 'reconnect') {
+      const res = roomRec.engine.reconnectSeat({
+        seatId: msg.seatId,
+        seatToken: msg.seatToken,
+        nowMs: nowMs()
+      });
+      if (!res.ok) {
+        return safeSend(ws, { type: 'error', code: res.code, reason: res.reason });
+      }
+      const oldWs = roomRec.clients.get(msg.seatId);
+      roomRec.clients.set(msg.seatId, ws);
+      wsMeta.set(ws, { inviteCode: roomRec.engine.inviteCode, seatId: msg.seatId });
+      if (oldWs && oldWs !== ws) {
+        try { oldWs.close(4001, 'seat_reconnected'); } catch (_) {}
+      }
+      safeSend(ws, {
+        type: 'reconnected',
+        seatId: res.seatId,
+        seatToken: res.seatToken,
+        connectionEpoch: res.connectionEpoch,
+        graceRemainingMs: res.graceRemainingMs,
+        snapshot: res.snapshot
+      });
+      broadcastState(roomRec);
+      return;
+    }
+
     if (msg.type === 'leave') {
       const res = roomRec.engine.leaveSeat({
         seatId: msg.seatId,
@@ -176,6 +206,15 @@ function createWsPrivateServer(options) {
       wss = new WebSocketServer({ server });
       wss.on('connection', (ws) => {
         ws.on('message', (data) => handleMessage(ws, data));
+        ws.on('close', () => {
+          const meta = wsMeta.get(ws);
+          if (!meta) return;
+          const roomRec = rooms.get(meta.inviteCode);
+          if (!roomRec) return;
+          if (roomRec.clients.get(meta.seatId) !== ws) return; // Already replaced by reconnected socket
+          roomRec.engine.disconnectSeat({ seatId: meta.seatId, nowMs: nowMs() });
+          broadcastState(roomRec);
+        });
       });
       server.once('error', reject);
       server.listen(port, '127.0.0.1', () => {
