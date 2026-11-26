@@ -542,7 +542,10 @@ function rlBotUpdate(dt){
     const q = rlForward(buildRlObservation());
     let bestAct = 0;
     for(let a=1;a<q.length;a++) if(q[a] > q[bestAct]) bestAct = a;
-    if(bestAct > 0 && !jumpKeyDown){
+    if(bestAct === 0 && jumpKeyDown){
+      rlHoldRemainingMs = 0;
+      endJump();
+    } else if(bestAct > 0 && !jumpKeyDown){
       startJump();
       if(jumpKeyDown){
         rlHoldRemainingMs = RL_ACTION_HOLD_MS[bestAct];
