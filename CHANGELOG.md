@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.0] - 2026-11-24
+### Added
+- **In-Game Exit Button (Both Modes):** Top-left `EXIT` button pauses the run (preserving elapsed time on Resume) and warns that exiting will not score the run before returning cleanly to `#startScreen`.
+- **Top 10 Leaderboard Screen (`TOP 10 SCORES`):** 5 separate tabs (`VILLAIN`, `HERO · EASY`, `HERO · NORMAL`, `HERO · HARD`, `HERO · INSANE`) with dual Top-10 views: **Top Scores / Longest Runs** (Villain) and **Lowest Havoc / Fastest Takedowns** (Hero), displaying **Time Survived** / **Takedown Time**.
+- **Safe Persistence:** Persists Top 10 scores to `localStorage` wrapped in `try/catch` with automatic in-memory fallback for restricted iOS Safari `data:` URLs.
+
 ## [2.3.0] - 2026-11-24
 ### Added
 - **Four Hero Difficulty Tiers (`HERO_DIFFICULTIES`):** Easy (`0.55x`), Normal (`0.65x`, default), Hard (`0.75x`), and Insane (`0.90x`) with independent per-tier `MIN HAVOC` tracking.

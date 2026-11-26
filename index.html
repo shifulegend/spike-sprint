@@ -141,6 +141,56 @@
   .hero-spawn-btn.ready-flash{
     animation:readyFlash 0.24s ease-out;
   }
+
+  /* In-Game Exit Button */
+  #exitBtn{
+    display:none;
+    position:absolute;top:10px;left:64px;
+    height:42px;padding:0 12px;margin-top:0;
+    background:#1a1f4a;border:3px solid #ff6b6b;border-radius:4px;
+    color:#ff9999;font-size:13px;font-weight:bold;letter-spacing:0.6px;
+    cursor:pointer;z-index:20;box-shadow:3px 3px 0 #4d1414;outline:none;
+    align-items:center;justify-content:center;gap:4px;
+  }
+  #exitBtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #4d1414;}
+
+  /* Scores & Exit Modals */
+  .overlay-modal{
+    display:none;position:absolute;top:0;left:0;width:100%;height:100%;
+    background:rgba(5,8,26,0.82);z-index:30;
+    align-items:center;justify-content:center;padding:16px;box-sizing:border-box;
+  }
+  .modal-box{
+    background:#101538;border:3px solid #ffcc00;border-radius:8px;
+    padding:18px 20px;color:#fff;max-width:480px;width:100%;
+    box-shadow:5px 5px 0 rgba(0,0,0,0.65);text-align:center;
+    max-height:88vh;display:flex;flex-direction:column;box-sizing:border-box;
+  }
+  .modal-box h2{margin:0 0 8px;font-size:20px;color:#ffcc00;letter-spacing:1px;}
+  .modal-warn{font-size:13px;color:#ffd0d0;line-height:1.5;margin:0 0 14px;}
+  .modal-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  #confirmExitBtn{background:#e0432b;border-color:#5b1a1a;color:#fff;margin-top:0;padding:8px 18px;font-size:15px;}
+  #resumeRunBtn{background:#7fc453;border-color:#245c18;color:#0e2908;margin-top:0;padding:8px 18px;font-size:15px;}
+
+  #openScoresStartBtn,#openScoresEndBtn{
+    background:#1a1f4a;border:3px solid #ffcc00;color:#ffcc00;
+    padding:8px 18px;font-size:14px;box-shadow:3px 3px 0 #664400;
+  }
+  #openScoresStartBtn{margin-top:14px;}
+  .score-tabs,.score-sort-bar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
+  .score-tab,.score-sort-btn{
+    margin-top:0;padding:5px 9px;font-size:11px;font-weight:bold;
+    background:#1a1f4a;color:#cfd6f0;border:2px solid #3c4678;border-radius:4px;cursor:pointer;
+  }
+  .score-tab.active{background:#ffcc00;color:#111;border-color:#fff;}
+  .score-tab.hero-tab.active{background:#7fc453;color:#0e2908;border-color:#ffcc00;}
+  .score-sort-btn.active{background:#2d3b7a;color:#ffcc00;border-color:#ffcc00;}
+  .score-table-wrap{overflow-y:auto;flex:1;margin:4px 0 12px;border:1px solid rgba(255,204,0,0.25);border-radius:4px;}
+  .score-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .score-table th{background:rgba(255,204,0,0.14);color:#ffcc00;padding:7px 8px;text-align:left;border-bottom:1px solid rgba(255,204,0,0.3);}
+  .score-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:left;}
+  .score-empty{padding:22px 10px;color:#9aa3c7;font-size:12px;font-style:italic;}
+  #closeScoresBtn{margin-top:0;padding:8px 20px;font-size:14px;align-self:center;}
 </style>
 </head>
 <body>
@@ -165,6 +215,7 @@
     <line x1="22" y1="8" x2="17" y2="16" stroke="#888" stroke-width="2" stroke-linecap="round"/>
   </svg>
 </button>
+<button id="exitBtn" title="Exit Run" aria-label="Exit Run">&#10005; EXIT</button>
 
 <div id="heroControls" aria-label="Hero Obstacle Controls">
   <button id="spawnPitBtn" class="hero-spawn-btn" title="Spawn Pit (Key 1)" aria-label="Spawn Pit">
@@ -247,6 +298,7 @@
       </div>
     </div>
   </div>
+  <button type="button" id="openScoresStartBtn">TOP 10 SCORES</button>
 </div>
 
 <div id="gameOverScreen">
@@ -256,6 +308,37 @@
   <div class="end-buttons">
     <button id="restartBtn">RESTART</button>
     <button id="changeModeBtn">CHANGE MODE</button>
+    <button id="openScoresEndBtn">SCORES</button>
+  </div>
+</div>
+
+<div id="exitModal" class="overlay-modal" role="dialog" aria-label="Exit Run Confirmation">
+  <div class="modal-box" style="max-width:360px;">
+    <h2>EXIT THIS RUN?</h2>
+    <p class="modal-warn">Leaving now will end your current run and it will <strong>not</strong> be scored or saved to the leaderboard.</p>
+    <div class="modal-actions">
+      <button type="button" id="resumeRunBtn">RESUME</button>
+      <button type="button" id="confirmExitBtn">EXIT TO MENU</button>
+    </div>
+  </div>
+</div>
+
+<div id="scoresModal" class="overlay-modal" role="dialog" aria-label="Top 10 Leaderboard">
+  <div class="modal-box">
+    <h2>TOP 10 LEADERBOARD</h2>
+    <div class="score-tabs" role="tablist">
+      <button type="button" class="score-tab active" data-bucket="villain">VILLAIN</button>
+      <button type="button" class="score-tab hero-tab" data-bucket="hero_easy">HERO &middot; EASY</button>
+      <button type="button" class="score-tab hero-tab" data-bucket="hero_normal">HERO &middot; NORMAL</button>
+      <button type="button" class="score-tab hero-tab" data-bucket="hero_hard">HERO &middot; HARD</button>
+      <button type="button" class="score-tab hero-tab" data-bucket="hero_insane">HERO &middot; INSANE</button>
+    </div>
+    <div class="score-sort-bar">
+      <button type="button" id="sortByScoreBtn" class="score-sort-btn active">TOP SCORES</button>
+      <button type="button" id="sortByTimeBtn" class="score-sort-btn">LONGEST RUNS</button>
+    </div>
+    <div id="scoreTableWrap" class="score-table-wrap"></div>
+    <button type="button" id="closeScoresBtn">CLOSE</button>
   </div>
 </div>
 
@@ -945,10 +1028,126 @@ function update(dt){
   }
 }
 
+
+// ── Top 10 Leaderboard (localStorage with safe in-memory fallback) ──────────
+const SCORE_STORAGE_KEY = 'spike_sprint_scores_v1';
+const SCORE_BUCKETS = ['villain', 'hero_easy', 'hero_normal', 'hero_hard', 'hero_insane'];
+let _memoryScores = null;
+
+function createEmptyScoreStore(){
+  const store = {};
+  for(const k of SCORE_BUCKETS) store[k] = { byScore: [], byTime: [] };
+  return store;
+}
+
+function loadScores(){
+  if(_memoryScores) return _memoryScores;
+  const fresh = createEmptyScoreStore();
+  try {
+    const raw = window.localStorage && window.localStorage.getItem(SCORE_STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      for(const k of SCORE_BUCKETS){
+        if(parsed && parsed[k]){
+          fresh[k].byScore = Array.isArray(parsed[k].byScore) ? parsed[k].byScore.slice(0, 10) : [];
+          fresh[k].byTime  = Array.isArray(parsed[k].byTime)  ? parsed[k].byTime.slice(0, 10)  : [];
+        }
+      }
+    }
+  } catch(e){}
+  _memoryScores = fresh;
+  return _memoryScores;
+}
+
+function saveScores(store){
+  _memoryScores = store;
+  try {
+    if(window.localStorage){
+      window.localStorage.setItem(SCORE_STORAGE_KEY, JSON.stringify(store));
+    }
+  } catch(e){}
+}
+
+function getCurrentScoreBucket(){
+  return currentModeKey === 'hero' ? ('hero_' + currentHeroDiff) : 'villain';
+}
+
+function recordCompletedRun(finalScoreVal, finalTimeSec){
+  const store = loadScores();
+  const bucketKey = getCurrentScoreBucket();
+  const bucket = store[bucketKey];
+  if(!bucket) return;
+  const entry = { score: Math.floor(finalScoreVal), time: Math.max(0, Number(finalTimeSec.toFixed(1))) };
+  const lowerBetter = activeMode.lowerIsBetter;
+
+  bucket.byScore.push(entry);
+  bucket.byScore.sort((a, b) => lowerBetter
+    ? (a.score - b.score || a.time - b.time)
+    : (b.score - a.score || b.time - a.time));
+  bucket.byScore = bucket.byScore.slice(0, 10);
+
+  bucket.byTime.push(entry);
+  bucket.byTime.sort((a, b) => lowerBetter
+    ? (a.time - b.time || a.score - b.score)
+    : (b.time - a.time || b.score - a.score));
+  bucket.byTime = bucket.byTime.slice(0, 10);
+
+  saveScores(store);
+}
+
+let activeScoreBucket = 'villain';
+let activeScoreSort = 'byScore';
+
+function renderScoresModal(){
+  const store = loadScores();
+  const isHeroBucket = activeScoreBucket.startsWith('hero_');
+  const sortScoreBtn = document.getElementById('sortByScoreBtn');
+  const sortTimeBtn  = document.getElementById('sortByTimeBtn');
+  sortScoreBtn.textContent = isHeroBucket ? 'LOWEST HAVOC' : 'TOP SCORES';
+  sortTimeBtn.textContent  = isHeroBucket ? 'FASTEST TAKEDOWNS' : 'LONGEST RUNS';
+  sortScoreBtn.classList.toggle('active', activeScoreSort === 'byScore');
+  sortTimeBtn.classList.toggle('active', activeScoreSort === 'byTime');
+
+  document.querySelectorAll('.score-tab').forEach(btn=>{
+    btn.classList.toggle('active', btn.getAttribute('data-bucket') === activeScoreBucket);
+  });
+
+  const rows = (store[activeScoreBucket] && store[activeScoreBucket][activeScoreSort]) || [];
+  const wrap = document.getElementById('scoreTableWrap');
+  if(!rows.length){
+    wrap.innerHTML = '<div class="score-empty">No completed runs recorded for this mode yet.</div>';
+    return;
+  }
+  const metricCol = isHeroBucket ? 'Havoc' : 'Score';
+  const timeCol   = isHeroBucket ? 'Takedown Time' : 'Time Survived';
+  const firstHead = activeScoreSort === 'byScore' ? metricCol : timeCol;
+  const secondHead = activeScoreSort === 'byScore' ? timeCol : metricCol;
+
+  let htmlRows = '<table class="score-table"><thead><tr><th>#</th><th>' + firstHead + '</th><th>' + secondHead + '</th></tr></thead><tbody>';
+  rows.forEach((r, idx)=>{
+    const scoreStr = String(r.score).padStart(5, '0');
+    const timeStr  = formatDuration(r.time);
+    const firstVal = activeScoreSort === 'byScore' ? scoreStr : timeStr;
+    const secondVal = activeScoreSort === 'byScore' ? timeStr : scoreStr;
+    htmlRows += '<tr><td>' + (idx + 1) + '</td><td><strong>' + firstVal + '</strong></td><td>' + secondVal + '</td></tr>';
+  });
+  htmlRows += '</tbody></table>';
+  wrap.innerHTML = htmlRows;
+}
+
+function openScoresModal(defaultBucket){
+  if(defaultBucket && SCORE_BUCKETS.includes(defaultBucket)) activeScoreBucket = defaultBucket;
+  renderScoresModal();
+  document.getElementById('scoresModal').style.display = 'flex';
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 function endGame(cause){
   gameState = 'over';
   heroControlsEl.style.display = 'none';
+  exitBtn.style.display = 'none';
   updateSessionBest(score);
+  recordCompletedRun(score, elapsed);
   sfxGameOver();
   const bestVal = getActiveBestValue();
   const bestStr = Number.isFinite(bestVal) ? String(Math.floor(bestVal)).padStart(5,'0') : '-----';
@@ -1260,6 +1459,69 @@ function setHeroDifficulty(diffKey){
   }
 });
 
+const exitBtn = document.getElementById('exitBtn');
+const exitModal = document.getElementById('exitModal');
+const scoresModal = document.getElementById('scoresModal');
+let pausedAt = 0;
+
+exitBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  if(gameState !== 'playing') return;
+  gameState = 'paused';
+  pausedAt = performance.now();
+  exitModal.style.display = 'flex';
+});
+document.getElementById('resumeRunBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  if(gameState === 'paused'){
+    startTime += (performance.now() - pausedAt);
+    gameState = 'playing';
+  }
+  exitModal.style.display = 'none';
+});
+document.getElementById('confirmExitBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  exitModal.style.display = 'none';
+  exitBtn.style.display = 'none';
+  heroControlsEl.style.display = 'none';
+  gameState = 'start';
+  document.getElementById('startScreen').style.display = 'flex';
+});
+
+document.getElementById('openScoresStartBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  openScoresModal(getCurrentScoreBucket());
+});
+document.getElementById('openScoresEndBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  openScoresModal(getCurrentScoreBucket());
+});
+document.getElementById('closeScoresBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  scoresModal.style.display = 'none';
+});
+document.getElementById('sortByScoreBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  activeScoreSort = 'byScore';
+  renderScoresModal();
+});
+document.getElementById('sortByTimeBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  activeScoreSort = 'byTime';
+  renderScoresModal();
+});
+document.querySelectorAll('.score-tab').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    e.stopPropagation();
+    activeScoreBucket = btn.getAttribute('data-bucket');
+    renderScoresModal();
+  });
+});
+[exitBtn, exitModal, scoresModal].forEach(el=>{
+  el.addEventListener('pointerdown', e=>e.stopPropagation());
+  el.addEventListener('pointerup',   e=>e.stopPropagation());
+});
+
 function startGame(modeKey){
   currentModeKey = MODES[modeKey] ? modeKey : 'villain';
   const diffCfg = currentModeKey === 'hero' ? HERO_DIFFICULTIES[currentHeroDiff] : null;
@@ -1277,6 +1539,7 @@ function startGame(modeKey){
   document.getElementById('startScreen').style.display='none';
   document.getElementById('gameOverScreen').style.display='none';
   heroControlsEl.style.display = activeMode.showSpawnControls ? 'flex' : 'none';
+  exitBtn.style.display = 'flex';
   resetGame();
   drawHUD();
   gameState='playing';
@@ -1294,6 +1557,7 @@ document.getElementById('restartBtn').addEventListener('click', ()=>{
 document.getElementById('changeModeBtn').addEventListener('click', ()=>{
   gameState = 'start';
   heroControlsEl.style.display = 'none';
+  exitBtn.style.display = 'none';
   document.getElementById('gameOverScreen').style.display='none';
   document.getElementById('startScreen').style.display='flex';
 });
