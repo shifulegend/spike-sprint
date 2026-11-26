@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.5.0] - 2026-11-25
+### Added
+- **6-Character Arcade Player Name:** Auto-assigns a random name from 48 Spike Sprint themed defaults on first launch and persists it via `localStorage` (with safe in-memory fallback).
+- **Start & End Screen Editing:** Editable `A-Z` / `0-9` uppercase 1–6 char input (with `RND` roller and blank-input revert) on both `#startScreen` and `#gameOverScreen`; editing on the end screen updates the just-finished run AND all future runs while preserving older leaderboard entries' original names.
+- **Player Column in Leaderboard:** Top 10 tables now show `# | Player | Score/Havoc | Time Survived/Takedown Time` across all 5 tabs.
+
 ## [2.4.0] - 2026-11-24
 ### Added
 - **In-Game Exit Button (Both Modes):** Top-left `EXIT` button pauses the run (preserving elapsed time on Resume) and warns that exiting will not score the run before returning cleanly to `#startScreen`.

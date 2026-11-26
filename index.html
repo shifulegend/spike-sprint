@@ -191,6 +191,20 @@
   .score-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:left;}
   .score-empty{padding:22px 10px;color:#9aa3c7;font-size:12px;font-style:italic;}
   #closeScoresBtn{margin-top:0;padding:8px 20px;font-size:14px;align-self:center;}
+
+  /* Player 6-char Name Bar */
+  .name-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 6px;flex-wrap:wrap;}
+  .name-bar label{font-size:12px;font-weight:bold;color:#ffe680;letter-spacing:1px;}
+  .name-input{
+    width:96px;padding:5px 8px;font-family:'Courier New',monospace;font-size:15px;font-weight:bold;
+    letter-spacing:2px;text-transform:uppercase;text-align:center;
+    background:#101538;color:#ffcc00;border:2px solid #ffcc00;border-radius:4px;outline:none;
+  }
+  .name-input:focus{border-color:#fff;box-shadow:0 0 0 2px rgba(255,204,0,0.35);}
+  .name-rand-btn{
+    margin-top:0;padding:5px 8px;font-size:11px;font-weight:bold;
+    background:#1a1f4a;color:#ffcc00;border:2px solid #664400;border-radius:4px;cursor:pointer;
+  }
 </style>
 </head>
 <body>
@@ -277,6 +291,11 @@
   <div id="brandTagline">A poorly coded pixel runner</div>
   <p id="storyHook">A rogue trespasser is tearing through the village.<br>Outrun the spiked barrel &mdash; or deploy traps to stop him.</p>
   <p id="startHint">Tap / Click / Space = Jump</p>
+  <div class="name-bar">
+    <label for="startNameInput">PLAYER:</label>
+    <input id="startNameInput" class="name-input" type="text" maxlength="6" autocomplete="off" spellcheck="false" aria-label="Player Name (max 6 characters)">
+    <button type="button" id="randNameStartBtn" class="name-rand-btn" title="Random Name">RND</button>
+  </div>
   <div class="mode-buttons">
     <div class="mode-card villain-card">
       <button id="playVillainBtn" class="mode-btn">
@@ -305,6 +324,11 @@
   <h1 id="gameOverTitle">GAME OVER</h1>
   <p id="endFlavor"></p>
   <p id="finalScore"></p>
+  <div class="name-bar">
+    <label for="endNameInput">PLAYER:</label>
+    <input id="endNameInput" class="name-input" type="text" maxlength="6" autocomplete="off" spellcheck="false" aria-label="Edit Player Name">
+    <button type="button" id="randNameEndBtn" class="name-rand-btn" title="Random Name">RND</button>
+  </div>
   <div class="end-buttons">
     <button id="restartBtn">RESTART</button>
     <button id="changeModeBtn">CHANGE MODE</button>
@@ -1029,6 +1053,82 @@ function update(dt){
 }
 
 
+
+// ── Player Name (6-char A-Z0-9, 48 Spike Sprint defaults, safe persistence) ─
+const PLAYER_NAME_STORAGE_KEY = 'spike_sprint_player_name_v1';
+const DEFAULT_PLAYER_NAMES = [
+  'SPIKE','SPRINT','BARREL','ROGUE','BANDIT','GUARD','KNIGHT','SCOUT',
+  'BUSH','PITMAN','JUMPER','DASH','BLITZ','PIXEL','CHOMP','STOMP',
+  'RUNNER','TRAPPR','WARDEN','VILLGR','RAIDER','OUTLAW','HERO','SHADOW',
+  'VIPER','GOBLIN','IMP','TITAN','SPARK','FLASH','TURBO','SWIFT',
+  'BOUNCE','LEAPER','VAULT','DODGER','PROWLR','RANGER','SENTRY','SHIELD',
+  'FLINT','BRAMBL','THORN','CLAW','FANG','BOLT','ACE','REX'
+];
+let _memoryPlayerName = null;
+let lastRunId = null;
+let lastRunBucket = null;
+
+function sanitizePlayerName(raw){
+  return String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+}
+
+function pickRandomDefaultName(){
+  return DEFAULT_PLAYER_NAMES[Math.floor(Math.random() * DEFAULT_PLAYER_NAMES.length)];
+}
+
+function savePlayerName(name){
+  const clean = sanitizePlayerName(name);
+  if(!clean) return _memoryPlayerName || pickRandomDefaultName();
+  _memoryPlayerName = clean;
+  try {
+    if(window.localStorage){
+      window.localStorage.setItem(PLAYER_NAME_STORAGE_KEY, clean);
+    }
+  } catch(e){}
+  syncNameInputs();
+  return clean;
+}
+
+function loadPlayerName(){
+  if(_memoryPlayerName) return _memoryPlayerName;
+  let stored = '';
+  try {
+    stored = (window.localStorage && window.localStorage.getItem(PLAYER_NAME_STORAGE_KEY)) || '';
+  } catch(e){}
+  const clean = sanitizePlayerName(stored);
+  if(clean){
+    _memoryPlayerName = clean;
+    return clean;
+  }
+  return savePlayerName(pickRandomDefaultName());
+}
+
+function syncNameInputs(){
+  const name = _memoryPlayerName || loadPlayerName();
+  const sEl = document.getElementById('startNameInput');
+  const eEl = document.getElementById('endNameInput');
+  if(sEl && sEl.value !== name) sEl.value = name;
+  if(eEl && eEl.value !== name) eEl.value = name;
+}
+
+function updateLastRunName(newName){
+  if(!lastRunId || !lastRunBucket) return;
+  const store = loadScores();
+  const bucket = store[lastRunBucket];
+  if(!bucket) return;
+  let changed = false;
+  for(const list of [bucket.byScore, bucket.byTime]){
+    for(const row of list){
+      if(row.runId === lastRunId){
+        row.name = newName;
+        changed = true;
+      }
+    }
+  }
+  if(changed) saveScores(store);
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 // ── Top 10 Leaderboard (localStorage with safe in-memory fallback) ──────────
 const SCORE_STORAGE_KEY = 'spike_sprint_scores_v1';
 const SCORE_BUCKETS = ['villain', 'hero_easy', 'hero_normal', 'hero_hard', 'hero_insane'];
@@ -1077,7 +1177,15 @@ function recordCompletedRun(finalScoreVal, finalTimeSec){
   const bucketKey = getCurrentScoreBucket();
   const bucket = store[bucketKey];
   if(!bucket) return;
-  const entry = { score: Math.floor(finalScoreVal), time: Math.max(0, Number(finalTimeSec.toFixed(1))) };
+  const runId = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+  lastRunId = runId;
+  lastRunBucket = bucketKey;
+  const entry = {
+    runId,
+    name: loadPlayerName(),
+    score: Math.floor(finalScoreVal),
+    time: Math.max(0, Number(finalTimeSec.toFixed(1)))
+  };
   const lowerBetter = activeMode.lowerIsBetter;
 
   bucket.byScore.push(entry);
@@ -1123,13 +1231,14 @@ function renderScoresModal(){
   const firstHead = activeScoreSort === 'byScore' ? metricCol : timeCol;
   const secondHead = activeScoreSort === 'byScore' ? timeCol : metricCol;
 
-  let htmlRows = '<table class="score-table"><thead><tr><th>#</th><th>' + firstHead + '</th><th>' + secondHead + '</th></tr></thead><tbody>';
+  let htmlRows = '<table class="score-table"><thead><tr><th>#</th><th>Player</th><th>' + firstHead + '</th><th>' + secondHead + '</th></tr></thead><tbody>';
   rows.forEach((r, idx)=>{
+    const nameStr  = sanitizePlayerName(r.name) || '------';
     const scoreStr = String(r.score).padStart(5, '0');
     const timeStr  = formatDuration(r.time);
     const firstVal = activeScoreSort === 'byScore' ? scoreStr : timeStr;
     const secondVal = activeScoreSort === 'byScore' ? timeStr : scoreStr;
-    htmlRows += '<tr><td>' + (idx + 1) + '</td><td><strong>' + firstVal + '</strong></td><td>' + secondVal + '</td></tr>';
+    htmlRows += '<tr><td>' + (idx + 1) + '</td><td><strong>' + nameStr + '</strong></td><td><strong>' + firstVal + '</strong></td><td>' + secondVal + '</td></tr>';
   });
   htmlRows += '</tbody></table>';
   wrap.innerHTML = htmlRows;
@@ -1162,6 +1271,7 @@ function endGame(cause){
     flavorEl.style.display = 'none';
   }
   document.getElementById('finalScore').textContent = activeMode.endScoreLabel + ': ' + String(Math.floor(score)).padStart(5,'0') + '  |  ' + activeMode.endBestLabel + ': ' + bestStr + '  |  Time: ' + formatDuration(elapsed);
+  syncNameInputs();
   document.getElementById('gameOverScreen').style.display='flex';
 }
 
@@ -1416,6 +1526,7 @@ function endJump(){
 }
 
 window.addEventListener('keydown', e=>{
+  if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
   if(e.code==='Space'){ e.preventDefault(); if(activeMode.allowHumanJump) startJump(); }
   if(activeMode.showSpawnControls && gameState==='playing'){
     if(e.key==='1'){ e.preventDefault(); triggerHeroSpawn(spawnPit); }
@@ -1561,6 +1672,45 @@ document.getElementById('changeModeBtn').addEventListener('click', ()=>{
   document.getElementById('gameOverScreen').style.display='none';
   document.getElementById('startScreen').style.display='flex';
 });
+
+
+function bindNameInput(inputEl, randBtnEl, isEndScreen){
+  if(inputEl){
+    inputEl.addEventListener('input', ()=>{
+      const clean = sanitizePlayerName(inputEl.value);
+      if(inputEl.value !== clean) inputEl.value = clean;
+      if(clean){
+        savePlayerName(clean);
+        if(isEndScreen) updateLastRunName(clean);
+      }
+    });
+    inputEl.addEventListener('blur', ()=>{
+      const clean = sanitizePlayerName(inputEl.value);
+      if(!clean){
+        inputEl.value = loadPlayerName();
+      } else {
+        savePlayerName(clean);
+        if(isEndScreen) updateLastRunName(clean);
+      }
+    });
+    inputEl.addEventListener('keydown', e=>e.stopPropagation());
+    inputEl.addEventListener('pointerdown', e=>e.stopPropagation());
+    inputEl.addEventListener('pointerup', e=>e.stopPropagation());
+  }
+  if(randBtnEl){
+    randBtnEl.addEventListener('click', e=>{
+      e.stopPropagation();
+      const next = savePlayerName(pickRandomDefaultName());
+      if(isEndScreen) updateLastRunName(next);
+    });
+    randBtnEl.addEventListener('pointerdown', e=>e.stopPropagation());
+    randBtnEl.addEventListener('pointerup', e=>e.stopPropagation());
+  }
+}
+bindNameInput(document.getElementById('startNameInput'), document.getElementById('randNameStartBtn'), false);
+bindNameInput(document.getElementById('endNameInput'), document.getElementById('randNameEndBtn'), true);
+loadPlayerName();
+syncNameInputs();
 
 groundY = logicalH()*GROUND_Y_RATIO;
 player.y = groundY - player.h;
