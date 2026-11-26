@@ -814,22 +814,35 @@ function updateSessionBest(val){
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const GROUND_Y_RATIO = 0.78;
-const BASE_ZOOM = 2;
-const RESPONSIVE_ZOOM_ENABLED = true; // Flip to false to revert to legacy fixed ZOOM = 2
-const MIN_LOGICAL_W = 490;
-let ZOOM = BASE_ZOOM;
-function logicalW(){ return canvas.width/ZOOM; }
-function logicalH(){ return canvas.height/ZOOM; }
-let groundY = 0;
+const WORLD_W = 490;
+const WORLD_H = 720;
+const GROUND_Y = WORLD_H * GROUND_Y_RATIO;
+const groundY = GROUND_Y;
+function logicalW(){ return WORLD_W; }
+function logicalH(){ return WORLD_H; }
+
+// Render-only viewport transform state (never read by simulation logic)
+let renderDpr = 1;
+let renderScale = 1;
+let renderOffsetX = 0;
+let renderOffsetY = 0;
+let extraSkyLogical = 0;
+let ZOOM = 1;
 let _sceneReady = false;
+
 function resize(){
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  ZOOM = RESPONSIVE_ZOOM_ENABLED ? Math.min(BASE_ZOOM, canvas.width / MIN_LOGICAL_W) : BASE_ZOOM;
-  groundY = logicalH() * GROUND_Y_RATIO;
-  if(_sceneReady && gameState === 'start'){
-    player.y = groundY - player.h;
-  }
+  const cssW = Math.max(1, Number(window.innerWidth) || WORLD_W);
+  const cssH = Math.max(1, Number(window.innerHeight) || WORLD_H);
+  renderDpr = Math.min(2, Math.max(1, Number(window.devicePixelRatio) || 1));
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width = Math.round(cssW * renderDpr);
+  canvas.height = Math.round(cssH * renderDpr);
+  renderScale = Math.min(cssW / WORLD_W, cssH / WORLD_H);
+  renderOffsetX = (cssW - WORLD_W * renderScale) * 0.5;
+  renderOffsetY = cssH - WORLD_H * renderScale;
+  extraSkyLogical = Math.max(0, renderOffsetY / renderScale);
+  ZOOM = renderScale;
 }
 resize();
 window.addEventListener('resize', resize);
@@ -1398,7 +1411,7 @@ function endGame(cause){
 
 function drawBackground(){
   ctx.fillStyle = '#bfe6ff';
-  ctx.fillRect(0,0,logicalW(), groundY);
+  ctx.fillRect(0, -extraSkyLogical, logicalW(), groundY + extraSkyLogical);
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   for(let i=0;i<4;i++){
     const cx = ((i*260 + (groundScroll*0.2)) % (logicalW()+200)) - 100;
@@ -1583,7 +1596,7 @@ function drawBarrel(){
   ctx.restore();
   if(barrelCatchUp>0.05){
     ctx.fillStyle = `rgba(255,0,0,${Math.min(0.35,barrelCatchUp*0.4)})`;
-    ctx.fillRect(0,0,logicalW(),logicalH());
+    ctx.fillRect(0, -extraSkyLogical, logicalW(), logicalH() + extraSkyLogical);
   }
 }
 
@@ -1625,8 +1638,15 @@ function loop(now){
     accumulatorMs = 0;
   }
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#0b0f2e';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.save();
-  ctx.scale(ZOOM, ZOOM);
+  ctx.scale(renderDpr, renderDpr);
+  ctx.translate(renderOffsetX, renderOffsetY);
+  ctx.scale(renderScale, renderScale);
+  ctx.beginPath();
+  ctx.rect(0, -extraSkyLogical, WORLD_W, WORLD_H + extraSkyLogical);
+  ctx.clip();
   drawBackground();
   drawGround();
   for(const p of pipes) drawPipe(p);
@@ -1958,7 +1978,6 @@ bindNameInput(document.getElementById('endNameInput'), document.getElementById('
 loadPlayerName();
 syncNameInputs();
 
-groundY = logicalH()*GROUND_Y_RATIO;
 player.y = groundY - player.h;
 _sceneReady = true;
 requestAnimationFrame(loop);
