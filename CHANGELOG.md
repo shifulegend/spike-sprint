@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.5.0] - 2026-11-25
+### Added
+- **6-Character Arcade Player Name:** Auto-assigns a random name from 48 Spike Sprint themed defaults on first launch and persists it via `localStorage` (with safe in-memory fallback).
+- **Start & End Screen Editing:** Editable `A-Z` / `0-9` uppercase 1–6 char input (with `RND` roller and blank-input revert) on both `#startScreen` and `#gameOverScreen`; editing on the end screen updates the just-finished run AND all future runs while preserving older leaderboard entries' original names.
+- **Player Column in Leaderboard:** Top 10 tables now show `# | Player | Score/Havoc | Time Survived/Takedown Time` across all 5 tabs.
+
+## [2.4.0] - 2026-11-24
+### Added
+- **In-Game Exit Button (Both Modes):** Top-left `EXIT` button pauses the run (preserving elapsed time on Resume) and warns that exiting will not score the run before returning cleanly to `#startScreen`.
+- **Top 10 Leaderboard Screen (`TOP 10 SCORES`):** 5 separate tabs (`VILLAIN`, `HERO · EASY`, `HERO · NORMAL`, `HERO · HARD`, `HERO · INSANE`) with dual Top-10 views: **Top Scores / Longest Runs** (Villain) and **Lowest Havoc / Fastest Takedowns** (Hero), displaying **Time Survived** / **Takedown Time**.
+- **Safe Persistence:** Persists Top 10 scores to `localStorage` wrapped in `try/catch` with automatic in-memory fallback for restricted iOS Safari `data:` URLs.
+
+## [2.3.0] - 2026-11-24
+### Added
+- **Four Hero Difficulty Tiers (`HERO_DIFFICULTIES`):** Easy (`0.55x`), Normal (`0.65x`, default), Hard (`0.75x`), and Insane (`0.90x`) with independent per-tier `MIN HAVOC` tracking.
+- **Explicit Hero-Only Difficulty Card UX:** Grouped **PLAY AS HERO**, the `HERO DIFFICULTY` label, and the 4 difficulty pills inside a dedicated green-bordered card with dynamic button text (`PLAY AS HERO · NORMAL`), visually separated from **PLAY AS VILLAIN**.
+- **Live Run Duration (`TIME MM:SS`):** Added live elapsed timer in the top-right HUD and on the end screen for both Villain and Hero modes.
+
+## [2.0.0] - 2026-11-24
+### Added
+- **Two-Mode Architecture (`BASE_MODE` / `MODES`):** Replaced single `START GAME` button with **Play as Villain** (legacy runner) and **Play as Hero** (village defense) plus **Change Mode** on the end screen, powered by one shared core engine with zero duplicated game loop.
+- **Hero Mode Controls & Cooldown:** Added 3 procedural inline-SVG obstacle buttons (**Pit**, **Bush**, **Purple Hero**, keys `1`/`2`/`3`) with a shared deterministic cooldown (`getBaseSpawnInterval(speedMult) * MODES.hero.cooldownScale`, default `0.75` for combo play) and synchronized refill-wipe + gold ready-flash animation.
+- **Havoc Scoring & Story UX:** Added **HAVOC / MIN HAVOC** (lowest wins, isolated from Villain's `HIGH SCORE`), **`VILLAGE SAVED!`** victory screen with dynamic stop-cause flavor, 2-line `#startScreen` story hook, and opt-in `?` lore card.
+- **Embedded Single-File DQN RL Bot:** Packed the trained `[21, 64, 64, 5]` ReLU MLP (`Sprint_web_DQN.rlbot.json`, 5,893 weights) as a ~31.4 KB Base64 `Float32Array` with zero external libraries and step-level key-release parity (11/11 pit clearance).
+- **Reversible Responsive Zoom Floor:** Added `RESPONSIVE_ZOOM_ENABLED = true` (`MIN_LOGICAL_W = 490`) so narrow mobile WebViews match desktop/iOS Safari framing while keeping exact `ZOOM = 2` on `>= 980px` viewports.
+
 All notable changes to Spike Sprint are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning follows [Semantic Versioning](https://semver.org/).
@@ -8,7 +34,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), version
 
 ## [Unreleased]
 
-> Changes staged for the next release go here.
+### Fixed
+- Enforce WebSocket `maxPayload`, `maxRooms` (`SERVER_BUSY`), and terminal room eviction in `server/ws_private_server.js` (#8).
+- Fix `tests/run_m4_s3_bridge_contract.js` VM hostile-getter definition and update `tests/run_m3_s1_pure_sim.js` for post-M4-S2 deduplication & warning-first budget (#7).
+- Allow vertical scrolling (`overflow-y: auto`) and compact spacing on short/small viewports (`#startScreen`, `#gameOverScreen`) so `#openScoresStartBtn` and controls remain reachable (#6).
+- Show death cause flavor text (`#endFlavor`) on Villain mode Game Over and replay completion screens (#4).
+- Allow native `Space` button activation inside open modals (`#loreCard`, `#exitModal`, `#scoresModal`) and non-playing screens (#3).
+- Preserve originating screen (`#startScreen` vs `#gameOverScreen`) and opener button focus when exiting a replay back to Scores and closing `#scoresModal` (#5).
 
 ---
 
